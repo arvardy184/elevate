@@ -11,15 +11,21 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -31,10 +37,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.googlefonts.Font
+import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -42,97 +54,132 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.application.elevate.R
+import com.application.elevate.ui.dropShadow
 import com.application.elevate.ui.theme.ReplyTheme
+
+
+val provider = GoogleFont.Provider(
+    providerAuthority = "com.google.android.gms.fonts",
+    providerPackage = "com.google.android.gms",
+    certificates = R.array.com_google_android_gms_fonts_certs
+)
+
+val poppinsFontFamily = FontFamily(
+    Font(
+        googleFont = GoogleFont("Poppins"),
+        fontProvider = provider
+    )
+)
+
+val oswaldFontFamily = FontFamily(
+    Font(
+        googleFont = GoogleFont("Lobster Two"),
+        fontProvider = provider
+    )
+)
+
 
 
 @Preview(showBackground = true)
 @Composable
-fun LoginPage(backgroundColor: Color = MaterialTheme.colorScheme.background) {
+fun LoginPage(backgroundColor: Color = MaterialTheme.colorScheme.background, onBackClick: () -> Unit = {} ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+    var isEmailFocused by remember { mutableStateOf(false) }
+    var isPasswordFocused by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(top = 80.dp, start = 20.dp, end = 20.dp, bottom = 40.dp ),
+            .padding(top = 55.dp, start = 29.dp, end = 29.dp, bottom = 40.dp ),
 
         verticalArrangement = Arrangement.Top
     ) {
 
-        Text(
-            text = "ELEVATE",
-            style = MaterialTheme.typography.headlineSmall.copy(
-                fontFamily = FontFamily.SansSerif,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 22.sp,
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.primary
-            ),
-            modifier = Modifier.fillMaxWidth()
-        )
+        IconButton(
+            onClick = { onBackClick() }, // Fungsi kembali
+            modifier = Modifier.align(Alignment.Start).padding(0.dp)
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Back",
+                tint = Color.Black,
+                modifier = Modifier.padding(end = 16.dp)
+            )
+        }
+
+
+
 
         Spacer(modifier = Modifier.height(50.dp))
 
         Text(
-            text = "Login",
+            text = "Hello There!",
             style = MaterialTheme.typography.headlineSmall.copy(
-                fontFamily = FontFamily.SansSerif,
+                fontFamily = poppinsFontFamily,
                 fontWeight = FontWeight.ExtraBold,
-                fontSize = 30.sp,
+                fontSize = 40.sp,
                 textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.onPrimary
             ),
-            modifier = Modifier.padding(bottom = 14.dp)
+            modifier = Modifier.padding(bottom = 9.dp)
 
         )
 
         Text(
             text = "Glad to see you back",
             style = MaterialTheme.typography.headlineSmall.copy(
-                fontFamily = FontFamily.SansSerif,
+                fontFamily = poppinsFontFamily,
                 fontWeight = FontWeight.Normal,
-                fontSize = 17.sp,
+                fontSize = 16.sp,
                 textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.onPrimary
             ),
-            modifier = Modifier.padding(bottom = 16.dp)
+            modifier = Modifier.padding(bottom = 35.dp)
         )
 
         // Email TextField
         OutlinedTextField(
+
             value = email,
             onValueChange = { email = it },
-            label = { Text("Email", fontFamily = FontFamily.SansSerif) },
-            leadingIcon = {
-                Icon(Icons.Filled.Email, contentDescription = "Email Icon", tint = MaterialTheme.colorScheme.primary)
-            },
+            label = { Text("Email", fontFamily = poppinsFontFamily) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+                .background(MaterialTheme.colorScheme.background)
+                .shadow(
+                    elevation = if (isEmailFocused) 0.dp else 3.dp,  // Hilangkan shadow saat fokus
+                    shape = RoundedCornerShape(15.dp),
+                )
+                .onFocusChanged { focusState ->
+                    isEmailFocused = focusState.isFocused  // Update status fokus
+                },
             colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color.Transparent,  // Agar background tetap transparan
-                unfocusedContainerColor = Color.Transparent,
+                focusedContainerColor = MaterialTheme.colorScheme.background,  // Agar background tetap transparan
+                unfocusedContainerColor = MaterialTheme.colorScheme.background,
                 cursorColor = MaterialTheme.colorScheme.primary,
                 focusedIndicatorColor = MaterialTheme.colorScheme.primary,  // Border warna fokus
-                unfocusedIndicatorColor = Color.Gray,  // Border saat tidak fokus
+                unfocusedIndicatorColor = Color.Transparent,  // Border saat tidak fokus
                 focusedLabelColor = MaterialTheme.colorScheme.primary,
-                unfocusedLabelColor = Color.Gray
+                unfocusedLabelColor = Color.Black
             ),
-            shape = RoundedCornerShape(10.dp),
+
+            shape = RoundedCornerShape(15.dp),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            modifier = Modifier.fillMaxWidth()
 
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(9.dp))
 
         // Password TextField
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Password", fontFamily = FontFamily.SansSerif) },
-            leadingIcon = {
-                Icon(Icons.Filled.Lock, contentDescription = "Password Icon", tint = MaterialTheme.colorScheme.primary)
-            },
+            label = { Text("Password", fontFamily = poppinsFontFamily) },
             trailingIcon = {
                 val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
@@ -140,48 +187,196 @@ fun LoginPage(backgroundColor: Color = MaterialTheme.colorScheme.background) {
                 }
             },
             colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color.Transparent,  // Agar background tetap transparan
-                unfocusedContainerColor = Color.Transparent,
+                focusedContainerColor = MaterialTheme.colorScheme.background,  // Agar background tetap transparan
+                unfocusedContainerColor = MaterialTheme.colorScheme.background,
                 cursorColor = MaterialTheme.colorScheme.primary,
                 focusedIndicatorColor = MaterialTheme.colorScheme.primary,  // Border warna fokus
-                unfocusedIndicatorColor = Color.Gray,  // Border saat tidak fokus
+                unfocusedIndicatorColor = Color.Transparent,  // Border saat tidak fokus
                 focusedLabelColor = MaterialTheme.colorScheme.primary,
-                unfocusedLabelColor = Color.Gray
+                unfocusedLabelColor = Color.Black
             ),
-            shape = RoundedCornerShape(10.dp),
+            shape = RoundedCornerShape(15.dp),
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+                .background(MaterialTheme.colorScheme.background)
+                .shadow(
+                    elevation = if (isEmailFocused) 0.dp else 3.dp,  // Hilangkan shadow saat fokus
+                    shape = RoundedCornerShape(15.dp),
+                )
+                .onFocusChanged { focusState ->
+                    isEmailFocused = focusState.isFocused  // Update status fokus
+                },
         )
 
-       Spacer(modifier = Modifier.weight(1f))
+       Spacer(modifier = Modifier.height(28.dp))
 
         // Submit Button
         Button(
             onClick = { /* Handle login logic */ },
-            modifier = Modifier.fillMaxWidth().height(50.dp),
-            shape = RoundedCornerShape(12.dp),
+            shape = RoundedCornerShape(15.dp),
             elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary, // Background color
                 contentColor = MaterialTheme.colorScheme.background // Text color
-            )
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+                .shadow(
+                    elevation = 4.dp,  // Sesuai dengan offset Y = 64 dari Figma
+                    shape = RoundedCornerShape(15.dp),
+                    spotColor = Color(0x01000000)  // Warna hitam transparan (0% opacity)
+                )
+                .shadow(
+                    elevation = 2.dp,  //
+                    shape = RoundedCornerShape(15.dp),
+                    spotColor = Color(0x03000000)
+                )
+                .shadow(
+                    elevation = 3.dp,  //
+                    spotColor = Color(0x04000000)
+                )
+
         ) {
-            Text(text = "Login", fontFamily = FontFamily.SansSerif, fontSize = 16.dp.value.sp)
+            Text(text = "Login", fontFamily = poppinsFontFamily, fontSize = 16.dp.value.sp)
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 12.dp),  // Beri sedikit jarak dari button
+            horizontalArrangement = Arrangement.SpaceBetween,  // Sejajarkan elemen dengan spasi penuh
+            verticalAlignment = Alignment.CenterVertically  // Vertikal center alignment
+        ) {
+            // Remember me dengan Checkbox
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                var isChecked by remember { mutableStateOf(false) }
+                Checkbox(
+                    checked = isChecked,
+                    onCheckedChange = { isChecked = it },
+                    modifier = Modifier.size(24.dp),
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = MaterialTheme.colorScheme.primary,
+                        uncheckedColor = Color.Gray
+                    )
+                )
+                Text(text = "Remember me", fontFamily = poppinsFontFamily, fontSize = 11.dp.value.sp, modifier = Modifier.padding(start = 5.dp))
+            }
+
+            // Forgot Password Text (Clickable)
+            Text(
+                text = "Forgot Password?",
+                color = MaterialTheme.colorScheme.primary,
+                fontFamily = poppinsFontFamily,
+                fontSize = 11.dp.value.sp,
+                fontWeight = FontWeight.ExtraBold,
+                modifier = Modifier.clickable { /* Handle forgot password navigation */ }
+            )
+        }
+
+        Spacer(modifier = Modifier.height(60.dp))
+
+        Text(
+            text = "- Or sign up with -",
+            style = MaterialTheme.typography.headlineSmall.copy(
+                fontFamily = poppinsFontFamily,
+                fontWeight = FontWeight.Normal,
+                fontSize = 11.sp,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onPrimary
+            ),
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            IconButton(
+                onClick = { /* Handle Google login */ },
+                modifier = Modifier
+                    .shadow(
+                        shape = RoundedCornerShape(50.dp), elevation = 8.dp, spotColor = Color(0x26000000)
+
+
+
+                    )
+                    .background(MaterialTheme.colorScheme.background, shape = RoundedCornerShape(50.dp))
+                    .size(56.dp)
+
+            ) {
+                Icon(
+                    painterResource(id = R.drawable.devicon_apple), // Replace with actual Google icon
+                    contentDescription = "Google",
+                    tint = Color.Unspecified
+                )
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            IconButton(
+                onClick = { /* Handle Facebook login */ },
+                modifier = Modifier
+                    .shadow(
+                        shape = RoundedCornerShape(50.dp), elevation = 8.dp, spotColor = Color(0x26000000)
+
+
+
+                    )
+                    .background(MaterialTheme.colorScheme.background, shape = RoundedCornerShape(50.dp))
+                    .size(56.dp)
+            ) {
+                Icon(
+                    painterResource(id = R.drawable.devicon_google), // Replace with actual Facebook icon
+                    contentDescription = "Facebook",
+                    tint = Color.Unspecified
+                )
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            IconButton(
+                onClick = { /* Handle Twitter login */ },
+                modifier = Modifier
+                    .shadow(
+                        shape = RoundedCornerShape(50.dp), elevation = 8.dp, spotColor = Color(0x26000000)
+
+
+
+                    )
+                    .background(MaterialTheme.colorScheme.background, shape = RoundedCornerShape(50.dp))
+                    .size(56.dp)
+            ) {
+                Icon(
+                    painterResource(id = R.drawable.devicon_facebook), // Replace with actual Twitter icon
+                    contentDescription = "Twitter",
+                    tint = Color.Unspecified
+                )
+            }
+        }
+
+
+
+
+
+        Spacer(modifier = Modifier.weight(1f))
 
         // Clickable Text
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
         ) {
-            Text(text = "Don't have an account? ", fontFamily = FontFamily.SansSerif)
+            Text(text = "Don't have an account? ", fontFamily = poppinsFontFamily, fontSize = 11.dp.value.sp)
             Text(
                 text = "Register Now",
                 color = MaterialTheme.colorScheme.primary,
-                fontFamily = FontFamily.SansSerif,
+                fontFamily = poppinsFontFamily,
+                fontSize = 11.dp.value.sp,
                 modifier = Modifier.clickable { /* Navigate to Register screen */ }
             )
         }
