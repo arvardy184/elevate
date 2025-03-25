@@ -71,16 +71,6 @@ val poppinsFontFamily = FontFamily(
         fontProvider = provider
     )
 )
-
-val oswaldFontFamily = FontFamily(
-    Font(
-        googleFont = GoogleFont("Lobster Two"),
-        fontProvider = provider
-    )
-)
-
-
-
 @Preview(showBackground = true)
 @Composable
 fun LoginPage(backgroundColor: Color = MaterialTheme.colorScheme.background, onBackClick: () -> Unit = {} ) {
@@ -203,11 +193,11 @@ fun LoginPage(backgroundColor: Color = MaterialTheme.colorScheme.background, onB
                 .height(56.dp)
                 .background(MaterialTheme.colorScheme.background)
                 .shadow(
-                    elevation = if (isEmailFocused) 0.dp else 3.dp,  // Hilangkan shadow saat fokus
+                    elevation = if (isPasswordFocused) 0.dp else 3.dp,  // Hilangkan shadow saat fokus
                     shape = RoundedCornerShape(15.dp),
                 )
                 .onFocusChanged { focusState ->
-                    isEmailFocused = focusState.isFocused  // Update status fokus
+                    isPasswordFocused = focusState.isFocused  // Update status fokus
                 },
         )
 
@@ -226,9 +216,9 @@ fun LoginPage(backgroundColor: Color = MaterialTheme.colorScheme.background, onB
                 .fillMaxWidth()
                 .height(56.dp)
                 .shadow(
-                    elevation = 4.dp,  // Sesuai dengan offset Y = 64 dari Figma
+                    elevation = 4.dp,
                     shape = RoundedCornerShape(15.dp),
-                    spotColor = Color(0x01000000)  // Warna hitam transparan (0% opacity)
+                    spotColor = Color(0x01000000)
                 )
                 .shadow(
                     elevation = 2.dp,  //
@@ -247,9 +237,9 @@ fun LoginPage(backgroundColor: Color = MaterialTheme.colorScheme.background, onB
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 12.dp),  // Beri sedikit jarak dari button
-            horizontalArrangement = Arrangement.SpaceBetween,  // Sejajarkan elemen dengan spasi penuh
-            verticalAlignment = Alignment.CenterVertically  // Vertikal center alignment
+                .padding(top = 12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             // Remember me dengan Checkbox
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -266,7 +256,7 @@ fun LoginPage(backgroundColor: Color = MaterialTheme.colorScheme.background, onB
                 Text(text = "Remember me", fontFamily = poppinsFontFamily, fontSize = 11.dp.value.sp, modifier = Modifier.padding(start = 5.dp))
             }
 
-            // Forgot Password Text (Clickable)
+
             Text(
                 text = "Forgot Password?",
                 color = MaterialTheme.colorScheme.primary,
@@ -311,7 +301,7 @@ fun LoginPage(backgroundColor: Color = MaterialTheme.colorScheme.background, onB
 
             ) {
                 Icon(
-                    painterResource(id = R.drawable.devicon_apple), // Replace with actual Google icon
+                    painterResource(id = R.drawable.devicon_apple),
                     contentDescription = "Google",
                     tint = Color.Unspecified
                 )
@@ -332,7 +322,7 @@ fun LoginPage(backgroundColor: Color = MaterialTheme.colorScheme.background, onB
                     .size(56.dp)
             ) {
                 Icon(
-                    painterResource(id = R.drawable.devicon_google), // Replace with actual Facebook icon
+                    painterResource(id = R.drawable.devicon_google),
                     contentDescription = "Facebook",
                     tint = Color.Unspecified
                 )
@@ -353,7 +343,7 @@ fun LoginPage(backgroundColor: Color = MaterialTheme.colorScheme.background, onB
                     .size(56.dp)
             ) {
                 Icon(
-                    painterResource(id = R.drawable.devicon_facebook), // Replace with actual Twitter icon
+                    painterResource(id = R.drawable.devicon_facebook),
                     contentDescription = "Twitter",
                     tint = Color.Unspecified
                 )

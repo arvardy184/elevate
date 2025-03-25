@@ -270,7 +270,7 @@ fun SignUpPage(onBackClick: () -> Unit = {}) {
             Text(text = "Sign Up", fontFamily = poppinsFontFamily, fontSize = 16.sp)
         }
 
-        Spacer(modifier = Modifier.height(60.dp))
+        Spacer(modifier = Modifier.height(40.dp))
 
         Text(
             text = "- Or sign up with -",
@@ -356,18 +356,19 @@ fun SignUpPage(onBackClick: () -> Unit = {}) {
 
 
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.weight(1f))
 
         // Clickable Text (Navigate to Login Page)
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
         ) {
-            Text(text = "Already have an account? ", fontFamily = poppinsFontFamily)
+            Text(text = "Already have an account? ", fontFamily = poppinsFontFamily, fontSize = 11.dp.value.sp)
             Text(
                 text = "Login Now",
                 color = MaterialTheme.colorScheme.primary,
                 fontFamily = poppinsFontFamily,
+                fontSize = 11.dp.value.sp,
                 modifier = Modifier.clickable { /* Navigate to Login screen */ }
             )
         }
