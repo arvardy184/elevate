@@ -218,11 +218,11 @@ fun SignUpPage(onBackClick: () -> Unit = {}) {
                 .height(56.dp)
                 .background(MaterialTheme.colorScheme.background)
                 .shadow(
-                    elevation = if (isConfirmPasswordFocused) 0.dp else 3.dp,  // Hilangkan shadow saat fokus
+                    elevation = if (isConfirmPasswordFocused) 0.dp else 3.dp,
                     shape = RoundedCornerShape(15.dp),
                 )
                 .onFocusChanged { focusState ->
-                    isConfirmPasswordFocused = focusState.isFocused  // Update status fokus
+                    isConfirmPasswordFocused = focusState.isFocused  
                 },
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = MaterialTheme.colorScheme.background,  // Agar background tetap transparan
@@ -325,7 +325,7 @@ fun SignUpPage(onBackClick: () -> Unit = {}) {
                     .size(56.dp)
             ) {
                 Icon(
-                    painterResource(id = R.drawable.devicon_google), // Replace with actual Facebook icon
+                    painterResource(id = R.drawable.devicon_google),
                     contentDescription = "Facebook",
                     tint = Color.Unspecified
                 )
