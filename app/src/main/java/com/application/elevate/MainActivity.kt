@@ -10,6 +10,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.application.elevate.ui.login.LoginPage
 import com.application.elevate.ui.register.SignUpPage
 import com.application.elevate.ui.splashScreen.SplashScreen
@@ -26,27 +29,22 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    SplashScreen()
+                    AppNavigation()
                 }
             }
         }
     }
 }
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        color = MaterialTheme.colorScheme.tertiary,
-        modifier = modifier
-
-    )
-}
-
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
-    ReplyTheme {
-        SignUpPage()
+fun AppNavigation() {
+    val navController = rememberNavController()
+    NavHost(
+        navController = navController,
+        startDestination = "login_page" // LoginPage akan tampil pertama kali
+    ) {
+        composable("login_page") { LoginPage(navController) }
+        composable("signup_page") { SignUpPage(navController) }
     }
 }

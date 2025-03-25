@@ -76,7 +76,7 @@ fun SplashScreen() {
             PaginationDots(currentPage = pagerState.currentPage, totalPages = 3)
             Spacer(modifier = Modifier.weight(1f))
 
-            if (pagerState.currentPage < 2) {
+            if (pagerState.currentPage < 3) {
                 NextButton {
                     // Animate slideright saat user click Next
                     coroutineScope.launch {
@@ -183,7 +183,7 @@ fun NextButton(onNextClick: () -> Unit) {
                         append("Master")
                     }
                     append(
-                        "in-demand skills and \n" +
+                        "\nin-demand skills and \n" +
                                 "stay ahead in your \n" +
                                 "career industries"
                     )
@@ -225,7 +225,7 @@ fun NextButton(onNextClick: () -> Unit) {
                                 "endless"
                     )
                     withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.secondary)) {
-                        append("possibilities")
+                        append(" possibilities")
                     }
                     append("\nstarts now!")
                 },

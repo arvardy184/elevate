@@ -54,6 +54,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.application.elevate.R
 import com.application.elevate.ui.dropShadow
 import com.application.elevate.ui.theme.ReplyTheme
@@ -71,9 +73,21 @@ val poppinsFontFamily = FontFamily(
         fontProvider = provider
     )
 )
+
 @Preview(showBackground = true)
 @Composable
-fun LoginPage(backgroundColor: Color = MaterialTheme.colorScheme.background, onBackClick: () -> Unit = {} ) {
+fun LoginPagePreview() {
+    // Gunakan theme aplikasi agar preview sesuai dengan style sebenarnya
+    ReplyTheme {
+        // Buat dummy NavController untuk keperluan preview
+        val navController = rememberNavController()
+        LoginPage(navController = navController)
+    }
+}
+
+
+@Composable
+fun LoginPage( navController: NavController) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
@@ -89,22 +103,8 @@ fun LoginPage(backgroundColor: Color = MaterialTheme.colorScheme.background, onB
         verticalArrangement = Arrangement.Top
     ) {
 
-        IconButton(
-            onClick = { onBackClick() }, // Fungsi kembali
-            modifier = Modifier.align(Alignment.Start).padding(0.dp)
-        ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Back",
-                tint = Color.Black,
-                modifier = Modifier.padding(end = 16.dp)
-            )
-        }
 
-
-
-
-        Spacer(modifier = Modifier.height(50.dp))
+        Spacer(modifier = Modifier.height(65.dp))
 
         Text(
             text = "Hello There!",
@@ -133,16 +133,14 @@ fun LoginPage(backgroundColor: Color = MaterialTheme.colorScheme.background, onB
 
         // Email TextField
         OutlinedTextField(
-
             value = email,
             onValueChange = { email = it },
-            label = { Text("Email", fontFamily = poppinsFontFamily) },
+            label = { Text("Email", fontFamily = poppinsFontFamily, fontSize = 13.dp.value.sp,  modifier = Modifier.padding(top = 2.dp, bottom = 0.dp)) },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp)
                 .background(MaterialTheme.colorScheme.background)
                 .shadow(
-                    elevation = if (isEmailFocused) 0.dp else 3.dp,  // Hilangkan shadow saat fokus
+                    elevation = if (isEmailFocused or email.isNotEmpty()) 0.dp else 4.dp,  // Hilangkan shadow saat fokus
                     shape = RoundedCornerShape(15.dp),
                 )
                 .onFocusChanged { focusState ->
@@ -153,13 +151,16 @@ fun LoginPage(backgroundColor: Color = MaterialTheme.colorScheme.background, onB
                 unfocusedContainerColor = MaterialTheme.colorScheme.background,
                 cursorColor = MaterialTheme.colorScheme.primary,
                 focusedIndicatorColor = MaterialTheme.colorScheme.primary,  // Border warna fokus
-                unfocusedIndicatorColor = Color.Transparent,  // Border saat tidak fokus
+                unfocusedIndicatorColor = if (email.isNotEmpty()) MaterialTheme.colorScheme.primary else Color.Transparent,  // Border saat tidak fokus
                 focusedLabelColor = MaterialTheme.colorScheme.primary,
                 unfocusedLabelColor = Color.Black
             ),
 
             shape = RoundedCornerShape(15.dp),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+
+
+
 
         )
 
@@ -169,7 +170,7 @@ fun LoginPage(backgroundColor: Color = MaterialTheme.colorScheme.background, onB
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Password", fontFamily = poppinsFontFamily) },
+            label = { Text("Password", fontFamily = poppinsFontFamily, fontSize = 13.dp.value.sp,  modifier = Modifier.padding(top = 2.dp, bottom = 0.dp)) },
             trailingIcon = {
                 val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
@@ -181,7 +182,7 @@ fun LoginPage(backgroundColor: Color = MaterialTheme.colorScheme.background, onB
                 unfocusedContainerColor = MaterialTheme.colorScheme.background,
                 cursorColor = MaterialTheme.colorScheme.primary,
                 focusedIndicatorColor = MaterialTheme.colorScheme.primary,  // Border warna fokus
-                unfocusedIndicatorColor = Color.Transparent,  // Border saat tidak fokus
+                unfocusedIndicatorColor = if (password.isNotEmpty()) MaterialTheme.colorScheme.primary else Color.Transparent,  // Border saat tidak fokus
                 focusedLabelColor = MaterialTheme.colorScheme.primary,
                 unfocusedLabelColor = Color.Black
             ),
@@ -190,10 +191,9 @@ fun LoginPage(backgroundColor: Color = MaterialTheme.colorScheme.background, onB
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp)
                 .background(MaterialTheme.colorScheme.background)
                 .shadow(
-                    elevation = if (isPasswordFocused) 0.dp else 3.dp,  // Hilangkan shadow saat fokus
+                    elevation = if (isPasswordFocused or password.isNotEmpty()) 0.dp else 4.dp,  // Hilangkan shadow saat fokus
                     shape = RoundedCornerShape(15.dp),
                 )
                 .onFocusChanged { focusState ->
@@ -367,7 +367,7 @@ fun LoginPage(backgroundColor: Color = MaterialTheme.colorScheme.background, onB
                 color = MaterialTheme.colorScheme.primary,
                 fontFamily = poppinsFontFamily,
                 fontSize = 11.dp.value.sp,
-                modifier = Modifier.clickable { /* Navigate to Register screen */ }
+                modifier = Modifier.clickable { navController.navigate("signup_page")  }
             )
         }
     }

@@ -29,18 +29,32 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.application.elevate.R
+import com.application.elevate.ui.login.LoginPage
 import com.application.elevate.ui.login.poppinsFontFamily
+import com.application.elevate.ui.theme.ReplyTheme
 
-@Preview(showBackground = true)
+@Preview
 @Composable
-fun SignUpPage(onBackClick: () -> Unit = {}) {
+fun LoginPagePreview() {
+    // Gunakan theme aplikasi agar preview sesuai dengan style sebenarnya
+    ReplyTheme {
+        // Buat dummy NavController untuk keperluan preview
+        val navController = rememberNavController()
+        SignUpPage(navController = navController)
+    }
+}
+
+@Composable
+fun SignUpPage(navController: NavController) {
     var phoneNumber by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
-
+    var confirmPasswordVisible by remember { mutableStateOf(false) }
     var isEmailFocused by remember { mutableStateOf(false) }
     var isPhoneFocused by remember { mutableStateOf(false) }
     var isPasswordFocused by remember { mutableStateOf(false) }
@@ -53,23 +67,23 @@ fun SignUpPage(onBackClick: () -> Unit = {}) {
             .padding(top = 55.dp, start = 29.dp, end = 29.dp, bottom = 40.dp ),
         verticalArrangement = Arrangement.Top
     ) {
+//
+//        IconButton(
+//            onClick = { onBackClick() }, // Fungsi kembali
+//            modifier = Modifier.align(Alignment.Start).padding(0.dp)
+//        ) {
+//            Icon(
+//                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+//                contentDescription = "Back",
+//                tint = Color.Black,
+//                modifier = Modifier.padding(end = 16.dp)
+//            )
+//        }
 
-        IconButton(
-            onClick = { onBackClick() }, // Fungsi kembali
-            modifier = Modifier.align(Alignment.Start).padding(0.dp)
-        ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Back",
-                tint = Color.Black,
-                modifier = Modifier.padding(end = 16.dp)
-            )
-        }
+5
 
 
-
-
-        Spacer(modifier = Modifier.height(35.dp))
+        Spacer(modifier = Modifier.height(65.dp))
 
         Text(
             text = "Get Started!",
@@ -101,13 +115,12 @@ fun SignUpPage(onBackClick: () -> Unit = {}) {
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
-            label = { Text("Email", fontFamily = poppinsFontFamily) },
+            label = { Text("Email", fontFamily = poppinsFontFamily, fontSize = 13.dp.value.sp) },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp)
                 .background(MaterialTheme.colorScheme.background)
                 .shadow(
-                    elevation = if (isEmailFocused) 0.dp else 3.dp,  // Hilangkan shadow saat fokus
+                    elevation = if (isEmailFocused or email.isNotEmpty()) 0.dp else 4.dp,  // Hilangkan shadow saat fokus
                     shape = RoundedCornerShape(15.dp),
                 )
                 .onFocusChanged { focusState ->
@@ -118,7 +131,7 @@ fun SignUpPage(onBackClick: () -> Unit = {}) {
                 unfocusedContainerColor = MaterialTheme.colorScheme.background,
                 cursorColor = MaterialTheme.colorScheme.primary,
                 focusedIndicatorColor = MaterialTheme.colorScheme.primary,  // Border warna fokus
-                unfocusedIndicatorColor = Color.Transparent,  // Border saat tidak fokus
+                unfocusedIndicatorColor = if (email.isNotEmpty()) MaterialTheme.colorScheme.primary else Color.Transparent,  // Border saat tidak fokus
                 focusedLabelColor = MaterialTheme.colorScheme.primary,
                 unfocusedLabelColor = Color.Black
             ),
@@ -134,13 +147,12 @@ fun SignUpPage(onBackClick: () -> Unit = {}) {
         OutlinedTextField(
             value = phoneNumber,
             onValueChange = { phoneNumber = it },
-            label = { Text("Phone Number", fontFamily = poppinsFontFamily) },
+            label = { Text("Phone Number", fontFamily = poppinsFontFamily, fontSize = 13.dp.value.sp) },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp)
                 .background(MaterialTheme.colorScheme.background)
                 .shadow(
-                    elevation = if (isPhoneFocused) 0.dp else 3.dp,  // Hilangkan shadow saat fokus
+                    elevation = if (isPhoneFocused or phoneNumber.isNotEmpty()) 0.dp else 4.dp,  // Hilangkan shadow saat fokus
                     shape = RoundedCornerShape(15.dp),
                 )
                 .onFocusChanged { focusState ->
@@ -151,7 +163,7 @@ fun SignUpPage(onBackClick: () -> Unit = {}) {
                 unfocusedContainerColor = MaterialTheme.colorScheme.background,
                 cursorColor = MaterialTheme.colorScheme.primary,
                 focusedIndicatorColor = MaterialTheme.colorScheme.primary,  // Border warna fokus
-                unfocusedIndicatorColor = Color.Transparent,  // Border saat tidak fokus
+                unfocusedIndicatorColor = if (phoneNumber.isNotEmpty()) MaterialTheme.colorScheme.primary else Color.Transparent,  // Border saat tidak fokus
                 focusedLabelColor = MaterialTheme.colorScheme.primary,
                 unfocusedLabelColor = Color.Black
             ),
@@ -167,36 +179,35 @@ fun SignUpPage(onBackClick: () -> Unit = {}) {
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Password", fontFamily = poppinsFontFamily) },
+            label = { Text("Password", fontFamily = poppinsFontFamily, fontSize = 13.dp.value.sp) },
             trailingIcon = {
                 val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
                     Icon(image, contentDescription = if (passwordVisible) "Hide password" else "Show password", tint = MaterialTheme.colorScheme.primary)
                 }
             },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp)
-                .background(MaterialTheme.colorScheme.background)
-                .shadow(
-                    elevation = if (isPasswordFocused) 0.dp else 3.dp,  // Hilangkan shadow saat fokus
-                    shape = RoundedCornerShape(15.dp),
-                )
-                .onFocusChanged { focusState ->
-                    isPasswordFocused = focusState.isFocused  // Update status fokus
-                },
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = MaterialTheme.colorScheme.background,  // Agar background tetap transparan
                 unfocusedContainerColor = MaterialTheme.colorScheme.background,
                 cursorColor = MaterialTheme.colorScheme.primary,
                 focusedIndicatorColor = MaterialTheme.colorScheme.primary,  // Border warna fokus
-                unfocusedIndicatorColor = Color.Transparent,  // Border saat tidak fokus
+                unfocusedIndicatorColor = if (password.isNotEmpty()) MaterialTheme.colorScheme.primary else Color.Transparent,  // Border saat tidak fokus
                 focusedLabelColor = MaterialTheme.colorScheme.primary,
                 unfocusedLabelColor = Color.Black
             ),
-
             shape = RoundedCornerShape(15.dp),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.background)
+                .shadow(
+                    elevation = if (isPasswordFocused or password.isNotEmpty()) 0.dp else 4.dp,  // Hilangkan shadow saat fokus
+                    shape = RoundedCornerShape(15.dp),
+                )
+                .onFocusChanged { focusState ->
+                    isPasswordFocused = focusState.isFocused  // Update status fokus
+                },
 
         )
 
@@ -206,19 +217,18 @@ fun SignUpPage(onBackClick: () -> Unit = {}) {
         OutlinedTextField(
             value = confirmPassword,
             onValueChange = { confirmPassword = it },
-            label = { Text("Confirm Password", fontFamily = poppinsFontFamily) },
+            label = { Text("Confirm Password", fontFamily = poppinsFontFamily, fontSize = 13.dp.value.sp) },
             trailingIcon = {
-                val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
-                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                val image = if (confirmPasswordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
                     Icon(image, contentDescription = "Toggle Password Visibility", tint = MaterialTheme.colorScheme.primary)
                 }
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp)
                 .background(MaterialTheme.colorScheme.background)
                 .shadow(
-                    elevation = if (isConfirmPasswordFocused) 0.dp else 3.dp,
+                    elevation = if (isConfirmPasswordFocused or confirmPassword.isNotEmpty()) 0.dp else 4.dp,
                     shape = RoundedCornerShape(15.dp),
                 )
                 .onFocusChanged { focusState ->
@@ -229,13 +239,14 @@ fun SignUpPage(onBackClick: () -> Unit = {}) {
                 unfocusedContainerColor = MaterialTheme.colorScheme.background,
                 cursorColor = MaterialTheme.colorScheme.primary,
                 focusedIndicatorColor = MaterialTheme.colorScheme.primary,  // Border warna fokus
-                unfocusedIndicatorColor = Color.Transparent,  // Border saat tidak fokus
+                unfocusedIndicatorColor = if (confirmPassword.isNotEmpty()) MaterialTheme.colorScheme.primary else Color.Transparent,  // Border saat tidak fokus
                 focusedLabelColor = MaterialTheme.colorScheme.primary,
                 unfocusedLabelColor = Color.Black
             ),
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
 
             shape = RoundedCornerShape(15.dp),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
 
         )
 
@@ -369,7 +380,7 @@ fun SignUpPage(onBackClick: () -> Unit = {}) {
                 color = MaterialTheme.colorScheme.primary,
                 fontFamily = poppinsFontFamily,
                 fontSize = 11.dp.value.sp,
-                modifier = Modifier.clickable { /* Navigate to Login screen */ }
+                modifier = Modifier.clickable { navController.navigate("login_page")}
             )
         }
     }

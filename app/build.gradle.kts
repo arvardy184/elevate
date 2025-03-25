@@ -64,6 +64,7 @@ dependencies {
     implementation ("androidx.compose.ui:ui-text-google-fonts:1.7.8")
     implementation ("com.google.accompanist:accompanist-pager:0.28.0")
     implementation ("androidx.compose.animation:animation:0.28.0")
+    implementation ("androidx.navigation:navigation-compose:2.6.0-alpha01")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
