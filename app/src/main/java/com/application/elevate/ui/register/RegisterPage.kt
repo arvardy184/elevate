@@ -222,7 +222,7 @@ fun SignUpPage(onBackClick: () -> Unit = {}) {
                     shape = RoundedCornerShape(15.dp),
                 )
                 .onFocusChanged { focusState ->
-                    isConfirmPasswordFocused = focusState.isFocused  
+                    isConfirmPasswordFocused = focusState.isFocused
                 },
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = MaterialTheme.colorScheme.background,  // Agar background tetap transparan
