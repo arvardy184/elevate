@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.application.elevate.ui.login.LoginPage
 import com.application.elevate.ui.register.SignUpPage
+import com.application.elevate.ui.splashScreen.SplashScreen
 
 import com.application.elevate.ui.theme.ReplyTheme
 
@@ -25,7 +26,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    SignUpPage()
+                    SplashScreen()
                 }
             }
         }
