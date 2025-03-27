@@ -42,9 +42,10 @@ fun AppNavigation() {
     val navController = rememberNavController()
     NavHost(
         navController = navController,
-        startDestination = "login_page" // LoginPage akan tampil pertama kali
+        startDestination = "splash_screen" // LoginPage akan tampil pertama kali
     ) {
         composable("login_page") { LoginPage(navController) }
         composable("signup_page") { SignUpPage(navController) }
+        composable("splash_screen") { SplashScreen(navController) }
     }
 }

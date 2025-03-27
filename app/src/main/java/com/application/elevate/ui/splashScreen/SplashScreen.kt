@@ -24,18 +24,19 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavController
 import com.application.elevate.R
 import com.application.elevate.ui.login.poppinsFontFamily
 import com.google.accompanist.pager.*
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPagerApi::class)
-@Preview(showBackground = true)
 @Composable
-fun SplashScreen() {
+fun SplashScreen(navController: NavController) {
     val pagerState = rememberPagerState(initialPage = 0) // Initial page
     val pageCount = 3
-    val coroutineScope = rememberCoroutineScope() // Menggunakan Coroutine Scope untuk suspend function
+    val coroutineScope =
+        rememberCoroutineScope() // Menggunakan Coroutine Scope untuk suspend function
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -78,15 +79,21 @@ fun SplashScreen() {
 
             if (pagerState.currentPage < 3) {
                 NextButton {
-                    // Animate slideright saat user click Next
                     coroutineScope.launch {
-                        pagerState.animateScrollToPage(pagerState.currentPage + 1) // Bungkus dengan launch
+                        if (pagerState.currentPage == 2) {
+                            // Jika di halaman ketiga, arahkan ke login_page
+                            navController.navigate("login_page")
+                        } else {
+                            // Jika belum di halaman ketiga, geser ke halaman berikutnya
+                            pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                        }
                     }
                 }
             }
         }
     }
 }
+
 
 // Pagination Dots Composable
 @Composable
@@ -242,7 +249,7 @@ fun NextButton(onNextClick: () -> Unit) {
 
 
             Image(
-                painter = painterResource(id = R.drawable.splashscreen_heroimage_2),
+                painter = painterResource(id = R.drawable.splashscreen_heroimage_3),
                 contentDescription = "Hero Image",
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
