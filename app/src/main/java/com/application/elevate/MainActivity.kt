@@ -10,37 +10,41 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.application.elevate.ui.theme.ElevateTheme
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.application.elevate.ui.login.LoginPage
+import com.application.elevate.ui.register.SignUpPage
+import com.application.elevate.ui.splashScreen.SplashScreen
+
+import com.application.elevate.ui.theme.ReplyTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            ElevateTheme {
+            ReplyTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting("Android")
+                    AppNavigation()
                 }
             }
         }
     }
 }
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
-    ElevateTheme {
-        Greeting("Android")
+fun AppNavigation() {
+    val navController = rememberNavController()
+    NavHost(
+        navController = navController,
+        startDestination = "login_page" // LoginPage akan tampil pertama kali
+    ) {
+        composable("login_page") { LoginPage(navController) }
+        composable("signup_page") { SignUpPage(navController) }
     }
 }

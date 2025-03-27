@@ -1,4 +1,387 @@
 package com.application.elevate.ui.register
 
-class RegisterPage {
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.application.elevate.R
+import com.application.elevate.ui.login.LoginPage
+import com.application.elevate.ui.login.poppinsFontFamily
+import com.application.elevate.ui.theme.ReplyTheme
+
+@Preview
+@Composable
+fun LoginPagePreview() {
+    // Gunakan theme aplikasi agar preview sesuai dengan style sebenarnya
+    ReplyTheme {
+        // Buat dummy NavController untuk keperluan preview
+        val navController = rememberNavController()
+        SignUpPage(navController = navController)
+    }
+}
+
+@Composable
+fun SignUpPage(navController: NavController) {
+    var phoneNumber by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
+    var confirmPasswordVisible by remember { mutableStateOf(false) }
+    var isEmailFocused by remember { mutableStateOf(false) }
+    var isPhoneFocused by remember { mutableStateOf(false) }
+    var isPasswordFocused by remember { mutableStateOf(false) }
+    var isConfirmPasswordFocused by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(top = 55.dp, start = 29.dp, end = 29.dp, bottom = 40.dp ),
+        verticalArrangement = Arrangement.Top
+    ) {
+//
+//        IconButton(
+//            onClick = { onBackClick() }, // Fungsi kembali
+//            modifier = Modifier.align(Alignment.Start).padding(0.dp)
+//        ) {
+//            Icon(
+//                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+//                contentDescription = "Back",
+//                tint = Color.Black,
+//                modifier = Modifier.padding(end = 16.dp)
+//            )
+//        }
+
+5
+
+
+        Spacer(modifier = Modifier.height(65.dp))
+
+        Text(
+            text = "Get Started!",
+            style = MaterialTheme.typography.headlineSmall.copy(
+                fontFamily = poppinsFontFamily,
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 40.sp,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onPrimary
+            ),
+            modifier = Modifier.padding(bottom = 9.dp)
+
+        )
+
+        Text(
+            text = "Create your Account",
+            style = MaterialTheme.typography.headlineSmall.copy(
+                fontFamily = poppinsFontFamily,
+                fontWeight = FontWeight.Normal,
+                fontSize = 16.sp,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onPrimary
+            ),
+            modifier = Modifier.padding(bottom = 35.dp)
+        )
+
+
+        // Username TextField
+        OutlinedTextField(
+            value = email,
+            onValueChange = { email = it },
+            label = { Text("Email", fontFamily = poppinsFontFamily, fontSize = 13.dp.value.sp) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.background)
+                .shadow(
+                    elevation = if (isEmailFocused or email.isNotEmpty()) 0.dp else 4.dp,  // Hilangkan shadow saat fokus
+                    shape = RoundedCornerShape(15.dp),
+                )
+                .onFocusChanged { focusState ->
+                    isEmailFocused = focusState.isFocused  // Update status fokus
+                },
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.background,  // Agar background tetap transparan
+                unfocusedContainerColor = MaterialTheme.colorScheme.background,
+                cursorColor = MaterialTheme.colorScheme.primary,
+                focusedIndicatorColor = MaterialTheme.colorScheme.primary,  // Border warna fokus
+                unfocusedIndicatorColor = if (email.isNotEmpty()) MaterialTheme.colorScheme.primary else Color.Transparent,  // Border saat tidak fokus
+                focusedLabelColor = MaterialTheme.colorScheme.primary,
+                unfocusedLabelColor = Color.Black
+            ),
+
+            shape = RoundedCornerShape(15.dp),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+
+        )
+
+        Spacer(modifier = Modifier.height(9.dp))
+
+        // Email TextField
+        OutlinedTextField(
+            value = phoneNumber,
+            onValueChange = { phoneNumber = it },
+            label = { Text("Phone Number", fontFamily = poppinsFontFamily, fontSize = 13.dp.value.sp) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.background)
+                .shadow(
+                    elevation = if (isPhoneFocused or phoneNumber.isNotEmpty()) 0.dp else 4.dp,  // Hilangkan shadow saat fokus
+                    shape = RoundedCornerShape(15.dp),
+                )
+                .onFocusChanged { focusState ->
+                    isPhoneFocused = focusState.isFocused  // Update status fokus
+                },
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.background,  // Agar background tetap transparan
+                unfocusedContainerColor = MaterialTheme.colorScheme.background,
+                cursorColor = MaterialTheme.colorScheme.primary,
+                focusedIndicatorColor = MaterialTheme.colorScheme.primary,  // Border warna fokus
+                unfocusedIndicatorColor = if (phoneNumber.isNotEmpty()) MaterialTheme.colorScheme.primary else Color.Transparent,  // Border saat tidak fokus
+                focusedLabelColor = MaterialTheme.colorScheme.primary,
+                unfocusedLabelColor = Color.Black
+            ),
+
+            shape = RoundedCornerShape(15.dp),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+
+        )
+
+        Spacer(modifier = Modifier.height(9.dp))
+
+        // Password TextField
+        OutlinedTextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Password", fontFamily = poppinsFontFamily, fontSize = 13.dp.value.sp) },
+            trailingIcon = {
+                val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    Icon(image, contentDescription = if (passwordVisible) "Hide password" else "Show password", tint = MaterialTheme.colorScheme.primary)
+                }
+            },
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.background,  // Agar background tetap transparan
+                unfocusedContainerColor = MaterialTheme.colorScheme.background,
+                cursorColor = MaterialTheme.colorScheme.primary,
+                focusedIndicatorColor = MaterialTheme.colorScheme.primary,  // Border warna fokus
+                unfocusedIndicatorColor = if (password.isNotEmpty()) MaterialTheme.colorScheme.primary else Color.Transparent,  // Border saat tidak fokus
+                focusedLabelColor = MaterialTheme.colorScheme.primary,
+                unfocusedLabelColor = Color.Black
+            ),
+            shape = RoundedCornerShape(15.dp),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.background)
+                .shadow(
+                    elevation = if (isPasswordFocused or password.isNotEmpty()) 0.dp else 4.dp,  // Hilangkan shadow saat fokus
+                    shape = RoundedCornerShape(15.dp),
+                )
+                .onFocusChanged { focusState ->
+                    isPasswordFocused = focusState.isFocused  // Update status fokus
+                },
+
+        )
+
+        Spacer(modifier = Modifier.height(9.dp))
+
+        // Re-enter Password TextField
+        OutlinedTextField(
+            value = confirmPassword,
+            onValueChange = { confirmPassword = it },
+            label = { Text("Confirm Password", fontFamily = poppinsFontFamily, fontSize = 13.dp.value.sp) },
+            trailingIcon = {
+                val image = if (confirmPasswordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
+                    Icon(image, contentDescription = "Toggle Password Visibility", tint = MaterialTheme.colorScheme.primary)
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.background)
+                .shadow(
+                    elevation = if (isConfirmPasswordFocused or confirmPassword.isNotEmpty()) 0.dp else 4.dp,
+                    shape = RoundedCornerShape(15.dp),
+                )
+                .onFocusChanged { focusState ->
+                    isConfirmPasswordFocused = focusState.isFocused
+                },
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.background,  // Agar background tetap transparan
+                unfocusedContainerColor = MaterialTheme.colorScheme.background,
+                cursorColor = MaterialTheme.colorScheme.primary,
+                focusedIndicatorColor = MaterialTheme.colorScheme.primary,  // Border warna fokus
+                unfocusedIndicatorColor = if (confirmPassword.isNotEmpty()) MaterialTheme.colorScheme.primary else Color.Transparent,  // Border saat tidak fokus
+                focusedLabelColor = MaterialTheme.colorScheme.primary,
+                unfocusedLabelColor = Color.Black
+            ),
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+
+            shape = RoundedCornerShape(15.dp),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+
+        )
+
+        Spacer(modifier = Modifier.height(28.dp))
+
+        // Submit Button
+        Button(
+            onClick = { /* Handle sign-up logic */ },
+            shape = RoundedCornerShape(15.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary, // Background color
+                contentColor = MaterialTheme.colorScheme.background // Text color
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+                .shadow(
+                    elevation = 4.dp,  // Sesuai dengan offset Y = 64 dari Figma
+                    shape = RoundedCornerShape(15.dp),
+                    spotColor = Color(0x01000000)  // Warna hitam transparan (0% opacity)
+                )
+                .shadow(
+                    elevation = 2.dp,  //
+                    shape = RoundedCornerShape(15.dp),
+                    spotColor = Color(0x03000000)
+                )
+                .shadow(
+                    elevation = 3.dp,  //
+                    spotColor = Color(0x04000000)
+                )
+        ) {
+            Text(text = "Sign Up", fontFamily = poppinsFontFamily, fontSize = 16.sp)
+        }
+
+        Spacer(modifier = Modifier.height(40.dp))
+
+        Text(
+            text = "- Or sign up with -",
+            style = MaterialTheme.typography.headlineSmall.copy(
+                fontFamily = poppinsFontFamily,
+                fontWeight = FontWeight.Normal,
+                fontSize = 11.sp,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onPrimary
+            ),
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        )  {
+            IconButton(
+                onClick = { /* Handle Google login */ },
+                modifier = Modifier
+                    .shadow(
+                        shape = RoundedCornerShape(50.dp), elevation = 8.dp, spotColor = Color(0x26000000)
+
+
+
+                    )
+                    .background(MaterialTheme.colorScheme.background, shape = RoundedCornerShape(50.dp))
+                    .size(56.dp)
+
+            ) {
+                Icon(
+                    painterResource(id = R.drawable.devicon_apple), // Replace with actual Google icon
+                    contentDescription = "Google",
+                    tint = Color.Unspecified
+                )
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            IconButton(
+                onClick = { /* Handle Facebook login */ },
+                modifier = Modifier
+                    .shadow(
+                        shape = RoundedCornerShape(50.dp), elevation = 8.dp, spotColor = Color(0x26000000)
+
+
+
+                    )
+                    .background(MaterialTheme.colorScheme.background, shape = RoundedCornerShape(50.dp))
+                    .size(56.dp)
+            ) {
+                Icon(
+                    painterResource(id = R.drawable.devicon_google),
+                    contentDescription = "Facebook",
+                    tint = Color.Unspecified
+                )
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            IconButton(
+                onClick = { /* Handle Twitter login */ },
+                modifier = Modifier
+                    .shadow(
+                        shape = RoundedCornerShape(50.dp), elevation = 8.dp, spotColor = Color(0x26000000)
+
+
+
+                    )
+                    .background(MaterialTheme.colorScheme.background, shape = RoundedCornerShape(50.dp))
+                    .size(56.dp)
+            ) {
+                Icon(
+                    painterResource(id = R.drawable.devicon_facebook), // Replace with actual Twitter icon
+                    contentDescription = "Twitter",
+                    tint = Color.Unspecified
+                )
+            }
+        }
+
+
+
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        // Clickable Text (Navigate to Login Page)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(text = "Already have an account? ", fontFamily = poppinsFontFamily, fontSize = 11.dp.value.sp)
+            Text(
+                text = "Login Now",
+                color = MaterialTheme.colorScheme.primary,
+                fontFamily = poppinsFontFamily,
+                fontSize = 11.dp.value.sp,
+                modifier = Modifier.clickable { navController.navigate("login_page")}
+            )
+        }
+    }
 }

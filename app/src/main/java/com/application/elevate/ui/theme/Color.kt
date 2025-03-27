@@ -2,10 +2,15 @@ package com.application.elevate.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+val md_theme_light_primary = Color(0xFF65558F)
+val md_theme_light_onPrimary = Color(0xFF000000)
+val md_theme_light_secondary = Color(0xFFFF725E)
+val md_theme_light_tertiary = Color(0xFF256a4a)
+val backgroundColor_light = Color(0xFFFFFFFF)
+val black = Color(0xFF000000)
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+
+val md_theme_dark_primary = Color(0xFFb1c5ff)
+val md_theme_dark_secondary = Color(0xFFFF725E)
+val md_theme_dark_tertiary = Color(0xFF90d5ae)
+val backgroundColor_dark = Color(0xFF000000)
