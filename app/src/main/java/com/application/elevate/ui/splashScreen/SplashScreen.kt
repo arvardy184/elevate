@@ -25,10 +25,24 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.application.elevate.R
+import com.application.elevate.ui.login.LoginPage
 import com.application.elevate.ui.login.poppinsFontFamily
+import com.application.elevate.ui.theme.ReplyTheme
 import com.google.accompanist.pager.*
 import kotlinx.coroutines.launch
+
+@Preview(showBackground = true)
+@Composable
+fun SplashScreenPreview() {
+    // Gunakan theme aplikasi agar preview sesuai dengan style sebenarnya
+    ReplyTheme {
+        // Buat dummy NavController untuk keperluan preview
+        val navController = rememberNavController()
+        SplashScreen(navController = navController)
+    }
+}
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable
