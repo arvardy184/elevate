@@ -67,20 +67,6 @@ fun SignUpPage(navController: NavController) {
             .padding(top = 55.dp, start = 29.dp, end = 29.dp, bottom = 40.dp ),
         verticalArrangement = Arrangement.Top
     ) {
-//
-//        IconButton(
-//            onClick = { onBackClick() }, // Fungsi kembali
-//            modifier = Modifier.align(Alignment.Start).padding(0.dp)
-//        ) {
-//            Icon(
-//                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-//                contentDescription = "Back",
-//                tint = Color.Black,
-//                modifier = Modifier.padding(end = 16.dp)
-//            )
-//        }
-
-5
 
 
         Spacer(modifier = Modifier.height(65.dp))
