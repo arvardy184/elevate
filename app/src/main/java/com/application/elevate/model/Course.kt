@@ -4,5 +4,7 @@ data class Course(
     val title: String,
     val duration: String,
     val lessons: Int,
-    val completed: Boolean
+    val progressPercent: Int,
+    val imageRes: Int
 )
+
