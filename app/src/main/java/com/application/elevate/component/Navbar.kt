@@ -7,6 +7,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -59,7 +60,7 @@ fun Navbar(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(76.dp)
+            .height(80.dp)
             .background(Color.Transparent),
 
 
@@ -90,8 +91,7 @@ fun Navbar(
                     Box(
                         modifier = Modifier
                             .offset(y = (-15).dp)
-                            .size(56.dp)
-                            .border(4.dp, Color.Black, RoundedCornerShape(50))
+                            .size(60.dp)
                             .padding(3.dp)
                             .clip(CircleShape)
                             .clickable { onItemClick(item.route) },
@@ -115,34 +115,31 @@ fun Navbar(
                         )
                     }
                 } else {
-                    NavigationBarItem(
-                        selected = isSelected,
-                        onClick = { onItemClick(item.route) },
-                        modifier = Modifier.width(10.dp).height(73.dp).padding(top = 30.dp),
-                        icon = {
-                            androidx.compose.foundation.layout.Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Icon(
-                                    painter = painterResource(id = item.iconRes),
-                                    contentDescription = item.title,
-                                    tint = iconColor,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                                Text(
-                                    text = item.title,
-                                    fontSize = 10.sp,
-                                    textAlign = TextAlign.Start,
-                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                    color = iconColor
-                                )
-                            }
-                        },
-                        alwaysShowLabel = false // tetap false karena kita custom sendiri label-nya
-                    )
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable { onItemClick(item.route) },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(
+                                painter = painterResource(id = item.iconRes),
+                                contentDescription = item.title,
+                                tint = iconColor,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Text(
+                                text = item.title,
+                                fontSize = 10.sp,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                color = iconColor
+                            )
+                        }
+                    }
                 }
             }
         }
     }
-
 
 
 }
@@ -152,7 +149,7 @@ fun Navbar(
 fun HomeScreenPrevie() {
     ReplyTheme { // Pastikan ini adalah theme kamu
         Navbar(
-            selectedRoute = "",
+            selectedRoute = "course",
             onItemClick = { route ->
                 // TODO: navigate ke halaman lain
                 Log.d("BottomNavBar", "Navigasi ke: $route")
