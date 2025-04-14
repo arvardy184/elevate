@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.relay)
+    alias(libs.plugins.hilt) // ✅ tambahkan ini
+    kotlin("kapt") // ✅ untuk annotation processor
 
 }
 
@@ -42,7 +44,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        kotlinCompilerExtensionVersion = "1.5.8"
     }
     packaging {
         resources {
@@ -62,11 +64,17 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
+    implementation(libs.hilt.navigation.compose)
     implementation("androidx.compose.material:material-icons-extended:1.6.1")
     implementation ("androidx.compose.ui:ui-text-google-fonts:1.7.8")
     implementation ("com.google.accompanist:accompanist-pager:0.28.0")
     implementation ("androidx.compose.animation:animation:0.28.0")
     implementation ("androidx.navigation:navigation-compose:2.6.0-alpha01")
+    implementation("io.coil-kt:coil-compose:2.5.0")
+
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
