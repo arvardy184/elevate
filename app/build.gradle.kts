@@ -65,6 +65,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.hilt.android)
+    implementation(platform("androidx.compose:compose-bom:2024.05.00")) // atau versi terbaru
     kapt(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
     implementation("androidx.compose.material:material-icons-extended:1.6.1")
