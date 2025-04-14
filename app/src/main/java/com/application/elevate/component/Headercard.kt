@@ -80,7 +80,7 @@ fun HeaderCard(
                             color = Color.White
                         )
                         Text(
-                            user.name,
+                            user.fullName,
                             style = MaterialTheme.typography.headlineSmall,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
