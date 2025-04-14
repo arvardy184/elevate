@@ -16,6 +16,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.application.elevate.component.*
 import com.application.elevate.data.categories
 import com.application.elevate.data.dummyCourses
@@ -25,9 +27,10 @@ import com.application.elevate.model.Course
 import com.application.elevate.ui.theme.ReplyTheme
 
 @Composable
-fun HomeScreen(viewModel: HomeViewModel = HomeViewModel()) {
+fun HomeScreen(viewModel: HomeViewModel = HomeViewModel(), navController: NavController) {
     val uiState by viewModel.uiState.collectAsState()
     val currentRoute = "home"
+    val navController = rememberNavController()
 
     Box(modifier = Modifier.fillMaxSize()) {
         // 🔻 SCROLLABLE CONTENT
@@ -58,6 +61,10 @@ fun HomeScreen(viewModel: HomeViewModel = HomeViewModel()) {
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         items(growthHubItems) { item ->
                             GrowthHubItem(label = item.title, imageRes = item.imageRes) {
+                                when (item.title) {
+                                    "Counseling" -> navController.navigate("consultant")
+                                    else -> Log.d("GrowthHubItem", "Clicked: ${item.title}")
+                                }
                                 Log.d("GrowthHubItem", "Clicked: ${item.title}")
                             }
                         }
@@ -104,6 +111,6 @@ fun HomeScreen(viewModel: HomeViewModel = HomeViewModel()) {
 @Composable
 fun HomeScreenPreview() {
     ReplyTheme { // Pastikan ini adalah theme kamu
-        HomeScreen()
+        HomeScreen(navController = rememberNavController())
     }
 }

@@ -10,9 +10,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.application.elevate.ui.counseling.CategoryScreen
+import com.application.elevate.ui.counseling.CounselingScreen
+import com.application.elevate.ui.counseling.CounselingViewModel
+import com.application.elevate.ui.home.HomeScreen
+import com.application.elevate.ui.home.HomeViewModel
 import com.application.elevate.ui.login.LoginPage
 import com.application.elevate.ui.register.SignUpPage
 import com.application.elevate.ui.splashScreen.SplashScreen
@@ -42,10 +48,12 @@ fun AppNavigation() {
     val navController = rememberNavController()
     NavHost(
         navController = navController,
-        startDestination = "splash_screen" // LoginPage akan tampil pertama kali
+        startDestination = "home" // LoginPage akan tampil pertama kali
     ) {
         composable("login_page") { LoginPage(navController) }
         composable("signup_page") { SignUpPage(navController) }
         composable("splash_screen") { SplashScreen(navController) }
+        composable("consultant") { CounselingScreen(viewModel = CounselingViewModel(),navController ) }
+        composable("home") { HomeScreen(viewModel = HomeViewModel(), navController)}
     }
 }
