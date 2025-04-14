@@ -49,6 +49,7 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            resources.excludes.add("META-INF/versions/9/OSGI-INF/MANIFEST.MF")
         }
     }
 
@@ -59,7 +60,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
-    implementation(platform("androidx.compose:compose-bom:2025.02.00"))
+    implementation(libs.androidx.compose.bom.v20250200)
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
@@ -67,15 +68,15 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(platform("androidx.compose:compose-bom:2024.05.00")) // atau versi terbaru
     kapt(libs.hilt.compiler)
-    implementation(libs.hilt.navigation.compose)
-    implementation("androidx.compose.material:material-icons-extended:1.6.1")
-    implementation ("androidx.compose.ui:ui-text-google-fonts:1.7.8")
-    implementation ("com.google.accompanist:accompanist-pager:0.28.0")
-    implementation ("androidx.compose.animation:animation:0.28.0")
-    implementation ("androidx.navigation:navigation-compose:2.6.0-alpha01")
     implementation("io.coil-kt:coil-compose:2.5.0")
 
 
+    implementation(libs.material.icons.extended)
+    implementation (libs.androidx.ui.text.google.fonts)
+    implementation (libs.accompanist.pager)
+    implementation (libs.androidx.animation)
+    implementation (libs.androidx.navigation.compose)
+    implementation(libs.identity.jvm)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

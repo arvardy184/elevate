@@ -19,10 +19,10 @@ import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.application.elevate.component.*
-import com.application.elevate.data.categories
-import com.application.elevate.data.dummyCourses
-import com.application.elevate.data.dummyUser
-import com.application.elevate.data.growthHubItems
+import com.application.elevate.data.dummy.ProfileDummyData.categories
+import com.application.elevate.data.dummy.ProfileDummyData.currentUser
+import com.application.elevate.data.dummy.ProfileDummyData.dummyCourses
+import com.application.elevate.data.dummy.ProfileDummyData.growthHubItems
 import com.application.elevate.model.Course
 import com.application.elevate.ui.theme.ReplyTheme
 
@@ -45,7 +45,7 @@ fun HomeScreen(viewModel: HomeViewModel = HomeViewModel(), navController: NavCon
                     .zIndex(0f)
             ) {
                 HeaderCard(
-                    user = dummyUser,
+                    user = currentUser,
                     onNotificationClick = {},
                     onFilterClick = {}
                 )

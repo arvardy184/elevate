@@ -56,4 +56,5 @@ fun AppNavigation() {
         composable("consultant") { CounselingScreen(viewModel = CounselingViewModel(),navController ) }
         composable("home") { HomeScreen(viewModel = HomeViewModel(), navController)}
     }
+
 }
