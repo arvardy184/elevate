@@ -29,6 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.navigation.NavController
 import com.application.elevate.R
 import com.application.elevate.data.dummy.ProfileDummyData
 import com.application.elevate.model.User
@@ -38,27 +39,26 @@ import com.application.elevate.ui.theme.ReplyTheme
 
 @Composable
 fun EditProfileScreen(
-    viewModel: ProfileViewModel,
-    onNavigateBack: () -> Unit,
-    onShowChangeProfilePicture: () -> Unit
+    navController: NavController,
+    viewModel: ProfileViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
     EditProfileContent(
         user = uiState.user,
-        onNavigateBack = onNavigateBack,
-        onProfilePictureClick = onShowChangeProfilePicture,
+        onNavigateBack = { navController.popBackStack() },
+        onProfilePictureClick = { viewModel.showChangeProfilePicture() },
         onSaveChanges = { updatedUser ->
             viewModel.updateUser(updatedUser)
-            onNavigateBack()
+            navController.popBackStack()
         }
     )
 
     if (uiState.isChangingProfilePicture) {
         ChangeProfileBottomSheet(
             onDismiss = { viewModel.hideChangeProfilePicture() },
-            onChooseFromGallery = { /* Navigate to gallery */ },
-            onTakePicture = { /* Open camera */ }
+            onChooseFromGallery = { /* TODO */ },
+            onTakePicture = { /* TODO */ }
         )
     }
 }

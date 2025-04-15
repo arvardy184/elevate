@@ -39,15 +39,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import com.application.elevate.R
 import com.application.elevate.model.NavItem
 import com.application.elevate.ui.theme.ReplyTheme
 
-
 @Composable
 fun Navbar(
-    selectedRoute: String,
-    onItemClick: (String) -> Unit
+    navController: NavController
 ) {
     val navItems = listOf(
         NavItem("Home", R.drawable.home_nav, "home"),
@@ -57,56 +58,50 @@ fun Navbar(
         NavItem("Profile", R.drawable.profile_nav, "profile"),
     )
 
+    // Ambil current route dari NavController
+    val currentBackStackEntry = navController.currentBackStackEntryAsState()
+    val currentRoute = currentBackStackEntry.value?.destination?.route
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(80.dp)
-            .background(Color.Transparent),
-
-
+            .background(Color.Transparent)
     ) {
         Image(
-            painter = painterResource(id = R.drawable.navbar_background), // ubah ke nama file kamu
+            painter = painterResource(id = R.drawable.navbar_background),
             contentDescription = "Navbar Background",
             contentScale = ContentScale.FillWidth,
-            modifier = Modifier
-                .matchParentSize()
+            modifier = Modifier.matchParentSize()
         )
-
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(76.dp),
             horizontalArrangement = Arrangement.spacedBy(0.dp),
-            // atau .SpaceBetween, .Center, dll
             verticalAlignment = Alignment.Bottom
         ) {
             navItems.forEachIndexed { index, item ->
-                val isSelected = item.route == selectedRoute
+                val isSelected = item.route == currentRoute
                 val iconColor = if (isSelected) Color.Black else Color.Gray
 
                 if (index == 2) {
-                    // ⬆️ Item tengah beda desain
                     Box(
                         modifier = Modifier
                             .offset(y = (-15).dp)
                             .size(60.dp)
                             .padding(3.dp)
                             .clip(CircleShape)
-                            .clickable { onItemClick(item.route) },
+                            .clickable { navController.navigate(item.route) },
                         contentAlignment = Alignment.Center
                     ) {
-
                         Image(
-                            painter = painterResource(id = R.drawable.main_button), // drawable bg kamu
+                            painter = painterResource(id = R.drawable.main_button),
                             contentDescription = null,
                             contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .matchParentSize()
-                                .clip(CircleShape)
+                            modifier = Modifier.matchParentSize()
                         )
-
                         Icon(
                             painter = painterResource(id = item.iconRes),
                             contentDescription = item.title,
@@ -118,7 +113,7 @@ fun Navbar(
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .clickable { onItemClick(item.route) },
+                            .clickable { navController.navigate(item.route) },
                         contentAlignment = Alignment.Center
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -140,20 +135,13 @@ fun Navbar(
             }
         }
     }
-
-
 }
 
 @Preview(showBackground = true)
 @Composable
-fun HomeScreenPrevie() {
-    ReplyTheme { // Pastikan ini adalah theme kamu
-        Navbar(
-            selectedRoute = "course",
-            onItemClick = { route ->
-                // TODO: navigate ke halaman lain
-                Log.d("BottomNavBar", "Navigasi ke: $route")
-            }
-        )
+fun NavbarPreview() {
+    ReplyTheme {
+        val navController = rememberNavController()
+        Navbar(navController = navController)
     }
 }

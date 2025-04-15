@@ -66,10 +66,10 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.hilt.android)
+    implementation(libs.hilt.navigation.compose)
     implementation(platform("androidx.compose:compose-bom:2024.05.00")) // atau versi terbaru
     kapt(libs.hilt.compiler)
     implementation("io.coil-kt:coil-compose:2.5.0")
-
 
     implementation(libs.material.icons.extended)
     implementation (libs.androidx.ui.text.google.fonts)
@@ -85,4 +85,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 }
+
+apply(plugin = "dagger.hilt.android.plugin")
+
 

@@ -8,6 +8,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material3.*
 import androidx.compose.material3.AlertDialog
 import androidx.compose.runtime.*
@@ -59,58 +61,31 @@ fun SearchScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         // Search Bar
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .shadow(elevation = 8.dp, shape = RoundedCornerShape(50))
-                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(50))
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                painter = painterResource(id = android.R.drawable.ic_menu_search),
-                contentDescription = "Search Icon",
-                tint = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            var query by remember { mutableStateOf("") }
-
-            TextField(
-                value = query,
-                onValueChange = { query = it },
-                placeholder = {
-                    Text(
-                        text = "Search Here...",
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                    )
-                },
-                colors = TextFieldDefaults.colors(
-                    unfocusedContainerColor = Color.Transparent,
-                    focusedContainerColor = Color.Transparent,
-                    cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
-                ),
-                singleLine = true,
-                modifier = Modifier.weight(1f)
-            )
-
-            Spacer(modifier = Modifier.weight(1f))
-            Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .background(Purple5, shape = CircleShape)
-                    .clickable { }
-                    .padding(8.dp),
-                contentAlignment = Alignment.Center
-            ) {
+        OutlinedTextField(
+            value = "",
+            onValueChange = {},
+            placeholder = { Text("Search here...") },
+            leadingIcon = {
                 Icon(
-                    painter = painterResource(id = android.R.drawable.ic_menu_manage),
-                    contentDescription = "Filter",
-                    tint = Neutral1
+                    imageVector = Icons.Default.Search,
+                    contentDescription = "Search"
                 )
-            }
-        }
+            },
+            trailingIcon = {
+                IconButton(onClick = { }) {
+                    Icon(
+                        imageVector = Icons.Default.Sort,
+                        contentDescription = "Filter",
+                    )
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(24.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = Color.White.copy(alpha = 0.95f),
+                unfocusedContainerColor = Color.White.copy(alpha = 0.85f)
+            )
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
