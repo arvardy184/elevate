@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.navigation.NavController
 import com.application.elevate.component.*
 import com.application.elevate.data.categories
 import com.application.elevate.data.dummyCourses
@@ -25,7 +26,7 @@ import com.application.elevate.model.Course
 import com.application.elevate.ui.theme.ReplyTheme
 
 @Composable
-fun HomeScreen(viewModel: HomeViewModel = HomeViewModel()) {
+fun HomeScreen(navController: NavController, viewModel: HomeViewModel = HomeViewModel()) {
     val uiState by viewModel.uiState.collectAsState()
     val currentRoute = "home"
 
@@ -104,6 +105,6 @@ fun HomeScreen(viewModel: HomeViewModel = HomeViewModel()) {
 @Composable
 fun HomeScreenPreview() {
     ReplyTheme { // Pastikan ini adalah theme kamu
-        HomeScreen()
+
     }
 }

@@ -13,7 +13,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.application.elevate.ui.home.HomeScreen
 import com.application.elevate.ui.login.LoginPage
+import com.application.elevate.ui.mycourse.CourseScreen
 import com.application.elevate.ui.register.SignUpPage
 import com.application.elevate.ui.splashScreen.SplashScreen
 
@@ -47,5 +49,7 @@ fun AppNavigation() {
         composable("login_page") { LoginPage(navController) }
         composable("signup_page") { SignUpPage(navController) }
         composable("splash_screen") { SplashScreen(navController) }
+        composable("course_screen") { CourseScreen(navController)}
+        composable("home_screen") { HomeScreen(navController) }
     }
 }
