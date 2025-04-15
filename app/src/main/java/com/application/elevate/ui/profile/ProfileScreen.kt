@@ -34,26 +34,23 @@ import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Icon
 import androidx.compose.ui.text.font.FontWeight
+import androidx.navigation.NavController
 
 @Composable
 fun ProfileScreen(
     viewModel: ProfileViewModel,
-    onNavigateToEditProfile: () -> Unit,
-    onNavigateToYourActivity: () -> Unit,
-    onNavigateToNotification: () -> Unit,
-    onNavigateToHelpCenter: () -> Unit,
-    onLogout: () -> Unit
+    navController: NavController
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
     ProfileScreenContent(
         uiState = uiState,
-        onProfileClick = onNavigateToEditProfile,
-        onProfileSettingsClick = onNavigateToEditProfile,
-        onYourActivityClick = onNavigateToYourActivity,
-        onNotificationClick = onNavigateToNotification,
-        onHelpCenterClick = onNavigateToHelpCenter,
-        onLogoutClick = onLogout
+        onProfileClick = { navController.navigate("edit_profile") },
+        onProfileSettingsClick = { navController.navigate("edit_profile") },
+        onYourActivityClick = { navController.navigate("your_activity") },
+        onNotificationClick = { navController.navigate("notifications") },
+        onHelpCenterClick = { navController.navigate("help_center") },
+        onLogoutClick = { navController.navigate("logout") } // atau langsung jalankan fungsi logout jika bukan halaman
     )
 }
 

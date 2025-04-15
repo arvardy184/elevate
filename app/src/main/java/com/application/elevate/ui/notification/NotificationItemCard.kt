@@ -1,6 +1,5 @@
 package com.application.elevate.ui.notification
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -66,11 +65,11 @@ fun NotificationItemCard(item: NotificationItem) {
 }
 
 
-// Pratinjau untuk NotificationScreen
-@Preview(showBackground = true)
-@Composable
-fun NotificationScreenPreview() {
-    ReplyTheme {
-        NotificationScreen()
-    }
-}
+//// Pratinjau untuk NotificationScreen
+//@Preview(showBackground = true)
+//@Composable
+//fun NotificationScreenPreview() {
+//    ReplyTheme {
+//        NotificationScreen()
+//    }
+//}

@@ -17,6 +17,8 @@ import com.application.elevate.model.NotificationItem
 import com.application.elevate.ui.notification.NotificationItemCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.tooling.preview.Preview
+import com.application.elevate.ui.theme.ReplyTheme
 
 @Composable
 fun NotificationScreen(
@@ -46,5 +48,13 @@ fun NotificationScreen(
                 }
             }
         }
+    }
+}
+
+@Preview
+@Composable
+fun NotificationScreenPreview() {
+    ReplyTheme {
+        NotificationScreen()
     }
 }

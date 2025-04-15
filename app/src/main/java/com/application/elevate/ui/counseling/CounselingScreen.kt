@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.application.elevate.component.CategoryItem
@@ -126,4 +127,10 @@ fun CounselingScreen(
     }
 
 
+}
+
+@Preview
+@Composable
+fun PreviewConselingScreen(){
+    CounselingScreen(viewModel = CounselingViewModel(), navController = NavController(context = androidx.compose.ui.platform.LocalContext.current ))
 }
