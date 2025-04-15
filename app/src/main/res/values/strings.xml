@@ -6,4 +6,12 @@
     <string name="nav_message">Message</string>
     <string name="nav_profile">Profile</string>
 
+        <string name="cv_review_result_title">CV Review Result</string>
+        <string name="back">Back</string>
+        <string name="relevancy_rate">Your CV Relevancy Rate</string>
+        <string name="analyzing_cv">Analyzing your CV...</string>
+        <string name="for_targeted_job">For your targeted job</string>
+        <string name="scoring_metrics">Scoring Metrics</string>
+        <string name="expand_collapse">Expand or Collapse</string>
+
 </resources>

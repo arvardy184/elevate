@@ -197,7 +197,9 @@ fun SignUpPage(navController: NavController) {
 
         )
 
-        Spacer(modifier = Modifier.height(9.dp))
+        Spacer(modifier = Modifier
+            .height(9.dp)
+        )
 
         // Re-enter Password TextField
         OutlinedTextField(

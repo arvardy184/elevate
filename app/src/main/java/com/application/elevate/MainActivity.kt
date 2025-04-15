@@ -14,16 +14,20 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.application.elevate.ui.cvreview.CVReviewResultScreen
+import com.application.elevate.ui.cvreview.CVReviewScreen
+import com.application.elevate.ui.home.HomeScreen
+
 import com.application.elevate.ui.counseling.CategoryScreen
 import com.application.elevate.ui.counseling.CounselingScreen
 import com.application.elevate.ui.counseling.CounselingViewModel
 import com.application.elevate.ui.home.HomeScreen
 import com.application.elevate.ui.home.HomeViewModel
+
 import com.application.elevate.ui.login.LoginPage
 import com.application.elevate.ui.mycourse.CourseScreen
 import com.application.elevate.ui.register.SignUpPage
 import com.application.elevate.ui.splashScreen.SplashScreen
-
 import com.application.elevate.ui.theme.ReplyTheme
 
 class MainActivity : ComponentActivity() {
@@ -49,11 +53,17 @@ fun AppNavigation() {
     val navController = rememberNavController()
     NavHost(
         navController = navController,
+
+        startDestination = "splash_screen"
         startDestination = "home" // LoginPage akan tampil pertama kali
+
     ) {
         composable("login_page") { LoginPage(navController) }
         composable("signup_page") { SignUpPage(navController) }
         composable("splash_screen") { SplashScreen(navController) }
+        composable("home_screen") { HomeScreen(navController) }
+        composable("cv_review"){ CVReviewScreen(navController)}
+        composable("cv_result_review"){ CVReviewResultScreen(navController)}
         composable("consultant") { CounselingScreen(viewModel = CounselingViewModel(),navController ) }
         composable("home") { HomeScreen(viewModel = HomeViewModel(), navController)}
         composable("course_screen") { CourseScreen(navController)}

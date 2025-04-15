@@ -19,18 +19,17 @@ import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.application.elevate.component.*
-import com.application.elevate.data.dummy.ProfileDummyData.categories
-import com.application.elevate.data.dummy.ProfileDummyData.currentUser
-import com.application.elevate.data.dummy.ProfileDummyData.dummyCourses
-import com.application.elevate.data.dummy.ProfileDummyData.growthHubItems
+import com.application.elevate.data.categories
+import com.application.elevate.data.dummyCourses
+import com.application.elevate.data.dummyUser
+import com.application.elevate.data.growthHubItems
 import com.application.elevate.model.Course
 import com.application.elevate.ui.theme.ReplyTheme
 
 @Composable
-fun HomeScreen(viewModel: HomeViewModel = HomeViewModel(), navController: NavController) {
+fun HomeScreen(navController: NavController,viewModel: HomeViewModel = HomeViewModel()) {
     val uiState by viewModel.uiState.collectAsState()
     val currentRoute = "home"
-    val navController = rememberNavController()
 
     Box(modifier = Modifier.fillMaxSize()) {
         // 🔻 SCROLLABLE CONTENT
@@ -39,13 +38,14 @@ fun HomeScreen(viewModel: HomeViewModel = HomeViewModel(), navController: NavCon
         ) { innerPadding ->
             Column(
                 modifier = Modifier
+
                     .padding(innerPadding)
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
                     .zIndex(0f)
             ) {
                 HeaderCard(
-                    user = currentUser,
+                    user = dummyUser,
                     onNotificationClick = {},
                     onFilterClick = {}
                 )
@@ -61,11 +61,11 @@ fun HomeScreen(viewModel: HomeViewModel = HomeViewModel(), navController: NavCon
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         items(growthHubItems) { item ->
                             GrowthHubItem(label = item.title, imageRes = item.imageRes) {
-                                when (item.title) {
-                                    "Counseling" -> navController.navigate("consultant")
-                                    else -> Log.d("GrowthHubItem", "Clicked: ${item.title}")
-                                }
                                 Log.d("GrowthHubItem", "Clicked: ${item.title}")
+                                if(item.title == "CV Review"){
+//                                    Log.d("Cek cv review","click": )
+                                    navController.navigate("cv_review")
+                                }
                             }
                         }
                     }
@@ -111,6 +111,6 @@ fun HomeScreen(viewModel: HomeViewModel = HomeViewModel(), navController: NavCon
 @Composable
 fun HomeScreenPreview() {
     ReplyTheme { // Pastikan ini adalah theme kamu
-        HomeScreen(navController = rememberNavController())
+//        HomeScreen()
     }
 }
