@@ -2,7 +2,6 @@ package com.application.elevate.ui.home
 
 
 import androidx.lifecycle.ViewModel
-import com.application.elevate.data.dummyCourses
 import com.application.elevate.model.Course
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
