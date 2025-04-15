@@ -20,6 +20,7 @@ import com.application.elevate.ui.counseling.CounselingViewModel
 import com.application.elevate.ui.home.HomeScreen
 import com.application.elevate.ui.home.HomeViewModel
 import com.application.elevate.ui.login.LoginPage
+import com.application.elevate.ui.mycourse.CourseScreen
 import com.application.elevate.ui.register.SignUpPage
 import com.application.elevate.ui.splashScreen.SplashScreen
 
@@ -55,6 +56,9 @@ fun AppNavigation() {
         composable("splash_screen") { SplashScreen(navController) }
         composable("consultant") { CounselingScreen(viewModel = CounselingViewModel(),navController ) }
         composable("home") { HomeScreen(viewModel = HomeViewModel(), navController)}
+        composable("course_screen") { CourseScreen(navController)}
+
     }
 
 }
+
