@@ -4,6 +4,7 @@ package com.application.elevate.component
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -18,7 +19,7 @@ import com.application.elevate.R
 import com.application.elevate.ui.home.HomeScreen
 import com.application.elevate.ui.theme.ReplyTheme
 
-@Composable
+
 //fun GrowthHubItem(label: String, imageRes: Int) {
 //    Card(
 //        shape = RoundedCornerShape(12.dp),
@@ -44,6 +45,7 @@ import com.application.elevate.ui.theme.ReplyTheme
 //}
 //
 
+@Composable
 fun GrowthHubItem(
     label: String,
     imageRes: Int,
@@ -51,18 +53,17 @@ fun GrowthHubItem(
 ) {
     Card(
         shape = RoundedCornerShape(12.dp),
-//        elevation = CardDefaults.cardElevation(),
         modifier = Modifier
             .width(IntrinsicSize.Max)
             .height(IntrinsicSize.Min)
             .background(color = MaterialTheme.colorScheme.background)
             .border(1.dp, Color.Black, RoundedCornerShape(12.dp))
+            .clickable(onClick = onClick)  // Menambahkan kemampuan klik
     ) {
         Row(
             modifier = Modifier
                 .background(color = MaterialTheme.colorScheme.background)
-                .padding(8.dp)
-            ,
+                .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
@@ -75,6 +76,7 @@ fun GrowthHubItem(
         }
     }
 }
+
 
 @Preview(showBackground = true)
 @Composable

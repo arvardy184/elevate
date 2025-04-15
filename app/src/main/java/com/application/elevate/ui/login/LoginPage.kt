@@ -205,7 +205,9 @@ fun LoginPage( navController: NavController) {
 
         // Submit Button
         Button(
-            onClick = { /* Handle login logic */ },
+            onClick = {
+                      navController.navigate("home_screen")
+                      },
             shape = RoundedCornerShape(15.dp),
             elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
             colors = ButtonDefaults.buttonColors(

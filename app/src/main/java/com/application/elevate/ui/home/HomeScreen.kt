@@ -16,6 +16,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.application.elevate.component.*
 import com.application.elevate.data.categories
 import com.application.elevate.data.dummyCourses
@@ -25,7 +27,7 @@ import com.application.elevate.model.Course
 import com.application.elevate.ui.theme.ReplyTheme
 
 @Composable
-fun HomeScreen(viewModel: HomeViewModel = HomeViewModel()) {
+fun HomeScreen(navController: NavController,viewModel: HomeViewModel = HomeViewModel()) {
     val uiState by viewModel.uiState.collectAsState()
     val currentRoute = "home"
 
@@ -36,6 +38,7 @@ fun HomeScreen(viewModel: HomeViewModel = HomeViewModel()) {
         ) { innerPadding ->
             Column(
                 modifier = Modifier
+
                     .padding(innerPadding)
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
@@ -59,6 +62,10 @@ fun HomeScreen(viewModel: HomeViewModel = HomeViewModel()) {
                         items(growthHubItems) { item ->
                             GrowthHubItem(label = item.title, imageRes = item.imageRes) {
                                 Log.d("GrowthHubItem", "Clicked: ${item.title}")
+                                if(item.title == "CV Review"){
+//                                    Log.d("Cek cv review","click": )
+                                    navController.navigate("cv_review")
+                                }
                             }
                         }
                     }
@@ -104,6 +111,6 @@ fun HomeScreen(viewModel: HomeViewModel = HomeViewModel()) {
 @Composable
 fun HomeScreenPreview() {
     ReplyTheme { // Pastikan ini adalah theme kamu
-        HomeScreen()
+//        HomeScreen()
     }
 }
