@@ -20,8 +20,8 @@ fun CategoryChip(
         label = { Text(text) },
         shape = RoundedCornerShape(20.dp),
         colors = AssistChipDefaults.assistChipColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            labelColor = MaterialTheme.colorScheme.onPrimary
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            labelColor = MaterialTheme.colorScheme.primary
         )
     )
 }

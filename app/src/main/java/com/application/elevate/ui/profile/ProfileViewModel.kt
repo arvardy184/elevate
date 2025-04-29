@@ -1,5 +1,6 @@
 package com.application.elevate.ui.profile
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.application.elevate.data.dummy.ProfileDummyData
@@ -12,9 +13,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class ProfileViewModel : ViewModel() {
+open class ProfileViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(ProfileUiState())
-    val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
+    open val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
 
     init {
         loadUserData()
@@ -60,7 +61,7 @@ class ProfileViewModel : ViewModel() {
         }
     }
 
-    fun updateUser(updatedUser: User) {
+    open fun updateUser(updatedUser: User) {
         viewModelScope.launch {
             // In a real app, this would be a repository call to update the user
             _uiState.update { it.copy(user = updatedUser) }
@@ -84,11 +85,11 @@ class ProfileViewModel : ViewModel() {
         _uiState.update { it.copy(selectedTab = tab) }
     }
 
-    fun showChangeProfilePicture() {
+    open fun showChangeProfilePicture() {
         _uiState.update { it.copy(isChangingProfilePicture = true) }
     }
 
-    fun hideChangeProfilePicture() {
+    open fun hideChangeProfilePicture() {
         _uiState.update { it.copy(isChangingProfilePicture = false) }
     }
 
@@ -105,5 +106,9 @@ class ProfileViewModel : ViewModel() {
             }
         }
         _uiState.update { it.copy(helpCenterItems = updatedItems) }
+    }
+
+    open fun setProfileImageUri(uri: Uri) {
+        _uiState.update { it.copy(user = it.user.copy(photoUrl = uri.toString())) }
     }
 }

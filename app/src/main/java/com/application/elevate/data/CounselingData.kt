@@ -5,14 +5,14 @@ import com.application.elevate.model.PaymentMethod
 import com.application.elevate.R
 
 object CounselingData {
-    fun getConsultants(category: String = ""): List<Consultant> = listOf(
-        Consultant("1","Barbie S.Ds.","UI/UX Consultant",4.0f,191,25000,R.drawable.cv_review),
-        Consultant("2","Ken S.Kom.","UI/UX Designer",5.0f,204,30000,R.drawable.counseling),
-        Consultant("3","Alan S.Ds.","Graphic Designer",5.0f,178,40000,R.drawable.counseling)
-    )
-
-    fun searchConsultants(q: String): List<Consultant> =
-        getConsultants().filter { it.name.contains(q, ignoreCase = true) }
+//    fun getConsultants(category: String = ""): List<Consultant> = listOf(
+//        Consultant("1","Barbie S.Ds.","UI/UX Consultant",4.0f,191,25000,R.drawable.cv_review),
+//        Consultant("2","Ken S.Kom.","UI/UX Designer",5.0f,204,30000,R.drawable.counseling),
+//        Consultant("3","Alan S.Ds.","Graphic Designer",5.0f,178,40000,R.drawable.counseling)
+//    )
+//
+//    fun searchConsultants(q: String): List<Consultant> =
+//        getConsultants().filter { it.name.contains(q, ignoreCase = true) }
 
     fun getPaymentDetail(): PaymentDetail = PaymentDetail(
         consultationFee = 29999,

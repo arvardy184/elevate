@@ -32,10 +32,12 @@ fun CourseCard(course: Course) {
         modifier = Modifier
             .width(240.dp)
             .wrapContentHeight(),
-//        elevation = CardDefaults.cardElevation(6.dp)
+        elevation = CardDefaults.cardElevation(6.dp)
     ) {
         Column(
-            modifier = Modifier.background(MaterialTheme.colorScheme.background).shadow(2.dp, RoundedCornerShape(20.dp))
+            modifier = Modifier
+                .shadow(2.dp, RoundedCornerShape(20.dp))
+                .background(MaterialTheme.colorScheme.background)
         ) {
 
             // 📷 Course Image

@@ -42,20 +42,34 @@ fun SearchScreen(
     ) {
         // Top Bar
         Row(
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
         ) {
-            IconButton(onClick = onBackClick) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Back",
-                    tint = MaterialTheme.colorScheme.onBackground
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp) // Atur tinggi sesuai kebutuhan
+            ) {
+                // 🔹 Icon tetap di kiri
+                IconButton(
+                    onClick = onBackClick,
+                    modifier = Modifier.align(Alignment.CenterStart).padding(0.dp) // Tempel di kiri
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = "Back",
+                        tint = MaterialTheme.colorScheme.onBackground
+                    )
+                }
+
+                // 🔹 Text tetap di tengah layar (bukan hanya Row)
+                Text(
+                    text = "Search",
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    modifier = Modifier.align(Alignment.Center) // Posisi tepat di tengah Box
                 )
             }
-            Text(
-                text = "Search",
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                modifier = Modifier.padding(start = 8.dp)
-            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -70,14 +84,6 @@ fun SearchScreen(
                     imageVector = Icons.Default.Search,
                     contentDescription = "Search"
                 )
-            },
-            trailingIcon = {
-                IconButton(onClick = { }) {
-                    Icon(
-                        imageVector = Icons.Default.Sort,
-                        contentDescription = "Filter",
-                    )
-                }
             },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(24.dp),

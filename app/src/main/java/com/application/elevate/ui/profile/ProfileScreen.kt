@@ -6,6 +6,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -33,8 +34,11 @@ import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Icon
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 
 @Composable
 fun ProfileScreen(
@@ -44,6 +48,7 @@ fun ProfileScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     ProfileScreenContent(
+        navController = navController, // ⬅️ Tambahkan ini
         uiState = uiState,
         onProfileClick = { navController.navigate("edit_profile") },
         onProfileSettingsClick = { navController.navigate("edit_profile") },
@@ -57,6 +62,7 @@ fun ProfileScreen(
 @Composable
 fun ProfileScreenContent(
     uiState: ProfileUiState,
+    navController: NavController, // ⬅️ Tambahkan ini
     onProfileClick: () -> Unit,
     onProfileSettingsClick: () -> Unit,
     onYourActivityClick: () -> Unit,
@@ -67,8 +73,8 @@ fun ProfileScreenContent(
     Scaffold(
         bottomBar = {
             Navbar(
-                selectedRoute = "profile",
-                onItemClick = { /* Handle navigation */ }
+                navController = navController,onItemClick = { route -> navController.navigate(route) }
+
             )
         }
     ) { paddingValues ->
@@ -92,11 +98,16 @@ fun ProfileScreenContent(
                     color = MaterialTheme.colorScheme.onBackground
                 )
             }
+            Box(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+            ){
+                ProfileHeader(
+                    user = uiState.user,
+                    onProfileClick = onProfileClick
+                )
+            }
             // Profile Header
-            ProfileHeader(
-                user = uiState.user,
-                onProfileClick = onProfileClick
-            )
+
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -104,6 +115,7 @@ fun ProfileScreenContent(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.background)
                     .padding(horizontal = 16.dp)
             ) {
                 Text(
@@ -117,8 +129,8 @@ fun ProfileScreenContent(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(MaterialTheme.colorScheme.surface)
+                        .shadow(2.dp, RoundedCornerShape(5.dp))
+                        .background(MaterialTheme.colorScheme.background)
                         .padding(16.dp)
                 ) {
                     Column {
@@ -144,11 +156,11 @@ fun ProfileScreenContent(
                         )
 
                         ProfileMenuItem(
-                            icon = Icons.Default.ExitToApp,
+                            icon = Icons.AutoMirrored.Filled.ExitToApp,
                             title = "Log Out",
                             subtitle = "Sign out from Elevate",
-                            iconTint = Orange5,
-                            iconBackground = Orange5.copy(alpha = 0.1f),
+                            iconTint = Color(0xFF8A302E),
+                            iconBackground = Color(0xFFFFC7C7),
                             onClick = onLogoutClick
                         )
                     }
@@ -174,8 +186,8 @@ fun ProfileScreenContent(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(MaterialTheme.colorScheme.surface)
+                        .shadow(2.dp, RoundedCornerShape(5.dp))
+                        .background(MaterialTheme.colorScheme.background)
                         .padding(16.dp)
                 ) {
                     Column {
@@ -204,9 +216,13 @@ fun ProfileScreenContent(
 @Preview
 @Composable
 fun ProfileScreenPreview() {
+    val dummyNavController = rememberNavController()
+
     ReplyTheme {
+
         ProfileScreenContent(
             uiState = ProfileUiState(user = ProfileDummyData.currentUser),
+            navController = dummyNavController, // ⬅️ Tambahkan ini
             onProfileClick = {},
             onProfileSettingsClick = {},
             onYourActivityClick = {},

@@ -1,5 +1,6 @@
 package com.application.elevate.ui.profile
 
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -36,16 +37,65 @@ import com.application.elevate.model.User
 import com.application.elevate.ui.theme.Purple5
 import com.application.elevate.ui.theme.Purple6
 import com.application.elevate.ui.theme.ReplyTheme
+import android.net.Uri
+import android.os.Environment
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.FileProvider
+import androidx.navigation.compose.rememberNavController
+import coil.compose.rememberAsyncImagePainter
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.*
 
 @Composable
 fun EditProfileScreen(
     navController: NavController,
     viewModel: ProfileViewModel
 ) {
+    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    var cameraImageUri by remember { mutableStateOf<Uri?>(null) }
+
+    // Galeri
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let {
+            selectedImageUri = it
+            viewModel.setProfileImageUri(it)
+        }
+    }
+
+    // Kamera
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success && cameraImageUri != null) {
+            selectedImageUri = cameraImageUri
+            viewModel.setProfileImageUri(cameraImageUri!!)
+        }
+    }
+
+    // Menyiapkan file URI untuk kamera
+    fun createImageUri(context: Context): Uri {
+        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val imageFileName = "JPEG_${timeStamp}_"
+        val storageDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        val image = File.createTempFile(imageFileName, ".jpg", storageDir)
+
+        return FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.fileprovider",
+            image
+        )
+    }
 
     EditProfileContent(
         user = uiState.user,
+        selectedImageUri = selectedImageUri,
         onNavigateBack = { navController.popBackStack() },
         onProfilePictureClick = { viewModel.showChangeProfilePicture() },
         onSaveChanges = { updatedUser ->
@@ -57,16 +107,22 @@ fun EditProfileScreen(
     if (uiState.isChangingProfilePicture) {
         ChangeProfileBottomSheet(
             onDismiss = { viewModel.hideChangeProfilePicture() },
-            onChooseFromGallery = { /* TODO */ },
-            onTakePicture = { /* TODO */ }
+            onChooseFromGallery = {
+                galleryLauncher.launch("image/*")
+            },
+            onTakePicture = {
+                val uri = createImageUri(context)
+                cameraImageUri = uri
+                cameraLauncher.launch(uri)
+            }
         )
     }
 }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditProfileContent(
     user: User,
+    selectedImageUri: Uri?,
     onNavigateBack: () -> Unit,
     onProfilePictureClick: () -> Unit,
     onSaveChanges: (User) -> Unit
@@ -145,18 +201,23 @@ fun EditProfileContent(
                     .clickable(onClick = onProfilePictureClick),
                 contentAlignment = Alignment.Center
             ) {
-                if (user.photoUrl.isNotEmpty()) {
+                if (selectedImageUri != null) {
                     Image(
-                        painter = painterResource(id = R.drawable.profile_placeholder),
-                        contentDescription = "Profile Picture",
+                        painter = rememberAsyncImagePainter(model = selectedImageUri),
+                        contentDescription = "Selected Profile Picture",
                         contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clickable(onClick = onProfilePictureClick)
                     )
                 } else {
                     Image(
                         painter = painterResource(id = R.drawable.profile_placeholder),
                         contentDescription = "Profile Picture",
-                        modifier = Modifier.size(90.dp)
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clickable(onClick = onProfilePictureClick)
                     )
                 }
             }
@@ -361,15 +422,29 @@ fun EditProfileContent(
     }
 }
 
+//@Preview
+//@Composable
+//fun EditProfileScreenPreview() {
+//    ReplyTheme {
+//        EditProfileContent(
+//            user = ProfileDummyData.currentUser,
+//            onNavigateBack = {},
+//            selectedImageUri: {},
+//        onProfilePictureClick = {},
+//            onSaveChanges = {}
+//        )
+//    }
+//}
 @Preview
 @Composable
-fun EditProfileScreenPreview() {
+fun EditProfileScreenPreviewFull() {
     ReplyTheme {
-        EditProfileContent(
-            user = ProfileDummyData.currentUser,
-            onNavigateBack = {},
-            onProfilePictureClick = {},
-            onSaveChanges = {}
+        val navController = rememberNavController()
+        val dummyViewModel = remember { FakeProfileViewModel() }
+
+        EditProfileScreen(
+            navController = navController,
+            viewModel = dummyViewModel
         )
     }
 }

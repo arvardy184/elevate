@@ -55,6 +55,10 @@ android {
 
 }
 
+hilt {
+    enableAggregatingTask = false
+}
+
 dependencies {
 
     implementation(libs.androidx.core.ktx)
@@ -70,6 +74,7 @@ dependencies {
     implementation(platform("androidx.compose:compose-bom:2024.05.00")) // atau versi terbaru
     kapt(libs.hilt.compiler)
     implementation("io.coil-kt:coil-compose:2.5.0")
+    implementation ("com.google.accompanist:accompanist-navigation-animation:0.32.0")
 
     implementation(libs.material.icons.extended)
     implementation (libs.androidx.ui.text.google.fonts)

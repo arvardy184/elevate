@@ -13,14 +13,23 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.toSize
 import com.application.elevate.R
 import com.application.elevate.model.User
 
@@ -29,8 +38,15 @@ import com.application.elevate.model.User
 fun HeaderCard(
     user: User,
     onNotificationClick: () -> Unit,
-    onFilterClick: () -> Unit
+    onSearchClick: () -> Unit, // ✅ Tambahan ini
+    onSearchBarPositioned: (Offset, Size) -> Unit,  // << Tambahan
+    modifier: Modifier = Modifier
+
 ) {
+
+    var searchBarPosition by remember { mutableStateOf(androidx.compose.ui.geometry.Offset.Zero) }
+    var searchBarSize by remember { mutableStateOf(androidx.compose.ui.geometry.Size.Zero) }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -101,31 +117,41 @@ fun HeaderCard(
 
             Spacer(modifier = Modifier.height(19.dp))
 
-            OutlinedTextField(
-                value = "",
-                onValueChange = {},
-                placeholder = { Text("Search here...") },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "Search"
-                    )
-                },
-                trailingIcon = {
-                    IconButton(onClick = onFilterClick) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onSearchClick() } // Pindah ke luar
+            ) {
+                OutlinedTextField(
+                    value = "",
+                    onValueChange = {},
+                    readOnly = true,
+                    enabled = false,
+                    placeholder = {Text(
+                        "Search here...",
+                        color = Color.Gray // Custom color for placeholder text
+                    )},
+                    leadingIcon = {
                         Icon(
-                            imageVector = Icons.Default.Sort,
-                            contentDescription = "Filter",
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Search",
+                            tint = Color.Gray // Custom color for icon
                         )
-                    }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = Color.White.copy(alpha = 0.95f),
-                    unfocusedContainerColor = Color.White.copy(alpha = 0.85f)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                        .onGloballyPositioned { coordinates ->
+                            val position = coordinates.positionInRoot()
+                            val size = coordinates.size.toSize()
+                            onSearchBarPositioned(position, size) // ⬅️ KIRIM BALIK KE HOMESCREEN
+                        },
+                    shape = RoundedCornerShape(24.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = Color.White.copy(alpha = 0.95f),
+                        unfocusedContainerColor = Color.White.copy(alpha = 0.85f),
+                        disabledContainerColor = Color.White.copy(alpha = 0.85f) // Keep same color when disabled
+                    )
                 )
-            )
+            }
         }
     }
 }

@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -33,8 +34,8 @@ fun ProfileHeader(
         modifier = Modifier
             .fillMaxWidth()
             .height(100.dp)
-            .background(Purple6, RoundedCornerShape(16.dp))
-            .clip(RoundedCornerShape(16.dp))
+            .shadow(5.dp, RoundedCornerShape(5.dp))
+            .background(Purple6, RoundedCornerShape(5.dp))
             .padding(16.dp)
     ) {
         Row(
@@ -70,7 +71,7 @@ fun ProfileHeader(
 
             Text(
                 text = user.fullName,
-                fontSize = 18.sp,
+                fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onPrimary
             )

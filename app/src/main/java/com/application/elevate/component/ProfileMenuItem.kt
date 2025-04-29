@@ -5,7 +5,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.ArrowRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -30,7 +32,7 @@ fun ProfileMenuItem(
     title: String,
     subtitle: String,
     iconTint: Color = MaterialTheme.colorScheme.primary,
-    iconBackground: Color = Purple1,
+    iconBackground: Color = Purple2,
     onClick: () -> Unit
 ) {
     Row(
@@ -43,7 +45,7 @@ fun ProfileMenuItem(
         Box(
             modifier = Modifier
                 .size(40.dp)
-                .clip(RoundedCornerShape(8.dp))
+                .clip(RoundedCornerShape(50))
                 .background(iconBackground),
             contentAlignment = Alignment.Center
         ) {
@@ -93,7 +95,7 @@ fun ProfileMenuItem(
         }
 
         Icon(
-            imageVector = Icons.Default.ArrowRight,
+            imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
             contentDescription = "Navigate",
             tint = Neutral7,
             modifier = Modifier.size(20.dp)
