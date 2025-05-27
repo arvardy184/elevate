@@ -12,6 +12,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -39,6 +40,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.application.elevate.model.User
 
 @Composable
 fun ProfileScreen(
@@ -46,23 +48,37 @@ fun ProfileScreen(
     navController: NavController
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val navigationEvent by viewModel.navigationEvent.collectAsState()
+
+    // Handle navigation events
+    LaunchedEffect(navigationEvent) {
+        when (navigationEvent) {
+            is NavigationEvent.NavigateToLogin -> {
+                navController.navigate("login_page") {
+                    popUpTo("profile") { inclusive = true }
+                }
+                viewModel.onNavigationHandled()
+            }
+            null -> {}
+        }
+    }
 
     ProfileScreenContent(
-        navController = navController, // ⬅️ Tambahkan ini
+        navController = navController,
         uiState = uiState,
         onProfileClick = { navController.navigate("edit_profile") },
         onProfileSettingsClick = { navController.navigate("edit_profile") },
         onYourActivityClick = { navController.navigate("your_activity") },
         onNotificationClick = { navController.navigate("notifications") },
         onHelpCenterClick = { navController.navigate("help_center") },
-        onLogoutClick = { navController.navigate("logout") } // atau langsung jalankan fungsi logout jika bukan halaman
+        onLogoutClick = { viewModel.logout() }
     )
 }
 
 @Composable
 fun ProfileScreenContent(
     uiState: ProfileUiState,
-    navController: NavController, // ⬅️ Tambahkan ini
+    navController: NavController,
     onProfileClick: () -> Unit,
     onProfileSettingsClick: () -> Unit,
     onYourActivityClick: () -> Unit,
@@ -219,10 +235,22 @@ fun ProfileScreenPreview() {
     val dummyNavController = rememberNavController()
 
     ReplyTheme {
-
         ProfileScreenContent(
-            uiState = ProfileUiState(user = ProfileDummyData.currentUser),
-            navController = dummyNavController, // ⬅️ Tambahkan ini
+            uiState = ProfileUiState(user = User(
+                id = 0,
+                firstName = "Guest",
+                lastName = "User",
+                email = "guest@example.com", 
+                photoUrl = "",
+                address = "Default Address",
+                phoneNumber = "+62 000-0000-0000",
+                gender = "Unspecified",
+                birthDate = "01/01/2000",
+                role = "user",
+                isAssessmentCompleted = false
+            )
+            ),
+            navController = dummyNavController,
             onProfileClick = {},
             onProfileSettingsClick = {},
             onYourActivityClick = {},

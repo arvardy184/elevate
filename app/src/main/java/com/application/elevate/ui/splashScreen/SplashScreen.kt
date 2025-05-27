@@ -28,10 +28,11 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.application.elevate.R
 import com.application.elevate.ui.login.LoginPage
-import com.application.elevate.ui.login.poppinsFontFamily
+import com.application.elevate.ui.theme.PoppinsFontFamily
 import com.application.elevate.ui.theme.ReplyTheme
 import com.google.accompanist.pager.*
 import kotlinx.coroutines.launch
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @Preview(showBackground = true)
 @Composable
@@ -46,64 +47,112 @@ fun SplashScreenPreview() {
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable
-fun SplashScreen(navController: NavController) {
-    val pagerState = rememberPagerState(initialPage = 0) // Initial page
+fun SplashScreen(
+    navController: NavController,
+    viewModel: SplashViewModel = hiltViewModel()
+) {
+    val pagerState = rememberPagerState(initialPage = 0)
     val pageCount = 3
-    val coroutineScope =
-        rememberCoroutineScope() // Menggunakan Coroutine Scope untuk suspend function
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(top = 100.dp, bottom = 40.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        // HorizontalPager for Swipeable Pages
-        HorizontalPager(
-            count = pageCount,
-            state = pagerState,
-            modifier = Modifier.fillMaxSize()
-        ) { page ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 29.dp), // Hanya padding konten halaman
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Top
-            ) {
-                when (page) {
-                    0 -> SplashPageOne { coroutineScope.launch { pagerState.animateScrollToPage(page + 1) } }
-                    1 -> SplashPageTwo { coroutineScope.launch { pagerState.animateScrollToPage(page + 1) } }
-                    2 -> SplashPageThree {}
+    val coroutineScope = rememberCoroutineScope()
+    val uiState by viewModel.uiState.collectAsState()
+
+    // Cek status login saat pertama kali dibuka
+    LaunchedEffect(Unit) {
+        viewModel.checkLoginStatus()
+    }
+
+    // Handle navigasi berdasarkan status login
+    LaunchedEffect(uiState) {
+        when (uiState) {
+            is SplashUiState.LoggedIn -> {
+                val user = (uiState as SplashUiState.LoggedIn).user
+                if (user.isAssessmentCompleted) {
+                    navController.navigate("home") {
+                        popUpTo("splash") { inclusive = true }
+                    }
+                } else {
+                    navController.navigate("assessment") {
+                        popUpTo("splash") { inclusive = true }
+                    }
                 }
             }
+            is SplashUiState.NotLoggedIn -> {
+                // Jika bukan first launch dan belum login, langsung ke login
+                navController.navigate("login_page") {
+                    popUpTo("splash") { inclusive = true }
+                }
+            }
+            is SplashUiState.ShowOnboarding -> {
+                // Tampilkan onboarding screens
+            }
+            else -> {}
         }
+    }
 
-        // Footer Pagination Dots dan Tombol Next
-        Row(
+    // Tampilkan onboarding hanya jika state adalah ShowOnboarding
+    if (uiState is SplashUiState.ShowOnboarding) {
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 29.dp)
-                .align(Alignment.BottomCenter),
-            verticalAlignment = Alignment.CenterVertically
+                .fillMaxSize()
+                .padding(top = 100.dp, bottom = 40.dp),
+            contentAlignment = Alignment.Center
         ) {
-            Spacer(modifier = Modifier.weight(1f))
+            // HorizontalPager for Swipeable Pages
+            HorizontalPager(
+                count = pageCount,
+                state = pagerState,
+                modifier = Modifier.fillMaxSize()
+            ) { page ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 29.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Top
+                ) {
+                    when (page) {
+                        0 -> SplashPageOne { coroutineScope.launch { pagerState.animateScrollToPage(page + 1) } }
+                        1 -> SplashPageTwo { coroutineScope.launch { pagerState.animateScrollToPage(page + 1) } }
+                        2 -> SplashPageThree {}
+                    }
+                }
+            }
 
-            PaginationDots(currentPage = pagerState.currentPage, totalPages = 3)
-            Spacer(modifier = Modifier.weight(1f))
+            // Footer Pagination Dots dan Tombol Next
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 29.dp)
+                    .align(Alignment.BottomCenter),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Spacer(modifier = Modifier.weight(1f))
 
-            if (pagerState.currentPage < 3) {
-                NextButton {
-                    coroutineScope.launch {
-                        if (pagerState.currentPage == 2) {
-                            // Jika di halaman ketiga, arahkan ke login_page
-                            navController.navigate("login_page")
-                        } else {
-                            // Jika belum di halaman ketiga, geser ke halaman berikutnya
-                            pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                PaginationDots(currentPage = pagerState.currentPage, totalPages = 3)
+                Spacer(modifier = Modifier.weight(1f))
+
+                if (pagerState.currentPage < 3) {
+                    NextButton {
+                        coroutineScope.launch {
+                            if (pagerState.currentPage == 2) {
+                                navController.navigate("login_page") {
+                                    popUpTo("splash") { inclusive = true }
+                                }
+                            } else {
+                                pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                            }
                         }
                     }
                 }
             }
+        }
+    } else {
+        // Tampilkan loading atau splash screen biasa
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
         }
     }
 }
@@ -172,7 +221,7 @@ fun NextButton(onNextClick: () -> Unit) {
                     fontSize = 18.sp,
                     fontWeight = FontWeight.SemiBold,
                     textAlign = TextAlign.Start,
-                    fontFamily = poppinsFontFamily,
+                    fontFamily = PoppinsFontFamily,
                     lineHeight = 20.dp.value.sp
                 ),
                 modifier = Modifier.fillMaxWidth()
@@ -213,7 +262,7 @@ fun NextButton(onNextClick: () -> Unit) {
                     fontSize = 18.sp,
                     fontWeight = FontWeight.SemiBold,
                     textAlign = TextAlign.Start,
-                    fontFamily = poppinsFontFamily
+                    fontFamily = PoppinsFontFamily
                 ),
                 modifier = Modifier.fillMaxWidth()
             )
@@ -254,7 +303,7 @@ fun NextButton(onNextClick: () -> Unit) {
                     fontSize = 18.sp,
                     fontWeight = FontWeight.SemiBold,
                     textAlign = TextAlign.Start,
-                    fontFamily = poppinsFontFamily
+                    fontFamily = PoppinsFontFamily
                 ),
                 modifier = Modifier.fillMaxWidth()
             )

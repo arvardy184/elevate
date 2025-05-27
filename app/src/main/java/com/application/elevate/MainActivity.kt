@@ -1,5 +1,3 @@
-@file:Suppress("DEPRECATION")
-
 package com.application.elevate
 
 import android.os.Bundle
@@ -14,6 +12,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -23,11 +23,17 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.core.view.WindowCompat
 import com.application.elevate.data.dummy.ProfileDummyData.dummyCourseDetails
+import com.application.elevate.ui.assessment.AssessmentCompletedScreen
+import com.application.elevate.ui.assessment.AssessmentScreen
+import com.application.elevate.ui.assessment.AssessmentViewModel
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.application.elevate.ui.home.HomeScreen
+import com.application.elevate.model.User
 
-import com.application.elevate.ui.counseling.CategoryScreen
+import com.application.elevate.ui.category.CategoryCoursesScreen
+import com.application.elevate.ui.category.CategoryScreen
 import com.application.elevate.ui.counseling.CounselingScreen
 import com.application.elevate.ui.counseling.CounselingViewModel
 import com.application.elevate.ui.cvreview.CVReviewResultScreen
@@ -42,6 +48,8 @@ import com.application.elevate.ui.profile.ProfileScreen
 import com.application.elevate.ui.profile.ProfileViewModel
 import com.application.elevate.ui.mycourse.CourseScreen
 import com.application.elevate.ui.register.SignUpPage
+import com.application.elevate.ui.roadmap.RoadmapScreen
+import com.application.elevate.ui.roadmap.RoadmapViewModel
 import com.application.elevate.ui.search.SearchScreen
 import com.application.elevate.ui.splashScreen.SplashScreen
 import com.application.elevate.ui.theme.ReplyTheme
@@ -52,8 +60,12 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Hilangkan action bar
+        // WindowCompat.setDecorFitsSystemWindows(window, false)
+        
         setContent {
-            ReplyTheme {
+            MaterialTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -73,7 +85,7 @@ fun AppNavigation() {
 
     AnimatedNavHost(
         navController = navController,
-        startDestination = "home",
+        startDestination = "login_page",
         enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }, animationSpec = tween(500)) },
         exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }, animationSpec = tween(500)) },
         popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }, animationSpec = tween(500)) },
@@ -101,8 +113,14 @@ fun AppNavigation() {
             CourseDetailScreen(courseDetail = courseDetail, onBackClick = { navController.popBackStack() })
         }
 
-        composable("login_page") { LoginPage(navController) }
-        composable("signup_page") { SignUpPage(navController) }
+        composable("login_page") {
+            LoginPage(navController = navController)
+        }
+
+        composable("signup_page") {
+            SignUpPage(navController = navController)
+        }
+
         composable("splash_screen") { SplashScreen(navController) }
         composable("home") { HomeScreen(navController) }
         composable("cv_review") { CVReviewScreen(navController) }
@@ -112,6 +130,56 @@ fun AppNavigation() {
             val viewModel: CounselingViewModel = hiltViewModel()
             CounselingScreen(viewModel = viewModel, navController = navController)
         }
+
+        composable("assessment") {
+            val viewModel: AssessmentViewModel = hiltViewModel()
+            AssessmentScreen(viewModel = viewModel, navController = navController)
+        }
+
+        composable("assessment_done") {
+            AssessmentCompletedScreen(
+                onExploreClicked = {
+                    navController.navigate("home") {
+                        popUpTo("assessment") { inclusive = true }
+                    }
+                }
+            )
+        }
         composable("course") { CourseScreen(navController) }
+
+        composable("categories") {
+            CategoryScreen(navController = navController)
+        }
+        
+        composable(
+            route = "category_courses/{categoryId}",
+            arguments = listOf(navArgument("categoryId") { type = NavType.StringType })
+        ) {
+            val categoryId = it.arguments?.getString("categoryId") ?: ""
+            CategoryCoursesScreen(
+                categoryId = categoryId,
+                navController = navController
+            )
+        }
+
+        composable("roadmap") {
+            val viewModel: RoadmapViewModel = hiltViewModel()
+            val profileViewModel: ProfileViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsState()
+            val userData = profileViewModel.getUserData() ?: User(
+                id = 0,
+                firstName = "Guest",
+                lastName = "User",
+                role = "user"
+            )
+            RoadmapScreen(
+                uiState = uiState,
+                user = userData,
+                navController = navController,
+                onCourseClick = { course ->
+                    navController.navigate("course_detail/${course.id}")
+                }
+            )
+        }
     }
 }

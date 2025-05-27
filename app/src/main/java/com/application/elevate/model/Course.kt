@@ -8,5 +8,7 @@ data class Course(
     val progressPercent: Int,
     val rating: Float,
     val ratingCount: Int,
-    val imageRes: Int
+    val imageRes: Int,
+    val isLocked: Boolean = false,
+    val categoryId: String = ""
 )

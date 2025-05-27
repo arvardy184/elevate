@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -62,7 +63,7 @@ fun Navbar(
     val navItems = listOf(
         NavItem("Home", R.drawable.home_nav, "home"),
         NavItem("Course", R.drawable.course_nav, "course"),
-        NavItem("Center", R.drawable.roadmap_nav, "center"),
+        NavItem("Center", R.drawable.roadmap_nav, "roadmap"),
         NavItem("Message", R.drawable.message_nav, "message"),
         NavItem("Profile", R.drawable.profile_nav, "profile"),
     )
@@ -72,8 +73,8 @@ fun Navbar(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(80.dp)
-            .background(Color.Transparent)
+            .height(100.dp)
+            .background(Color.Transparent),
     ) {
         Image(
             painter = painterResource(id = R.drawable.navbar_background),
@@ -82,9 +83,12 @@ fun Navbar(
             modifier = Modifier.matchParentSize()
         )
 
+
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(top = 16.dp)
                 .height(76.dp),
             horizontalArrangement = Arrangement.spacedBy(0.dp),
             verticalAlignment = Alignment.Bottom

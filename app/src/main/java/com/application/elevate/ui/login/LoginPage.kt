@@ -26,6 +26,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -33,6 +34,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,10 +46,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.googlefonts.Font
-import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -54,52 +54,119 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.application.elevate.R
 import com.application.elevate.ui.dropShadow
 import com.application.elevate.ui.theme.ReplyTheme
-
-
-val provider = GoogleFont.Provider(
-    providerAuthority = "com.google.android.gms.fonts",
-    providerPackage = "com.google.android.gms",
-    certificates = R.array.com_google_android_gms_fonts_certs
-)
-
-val poppinsFontFamily = FontFamily(
-    Font(
-        googleFont = GoogleFont("Poppins"),
-        fontProvider = provider
-    )
-)
+import com.application.elevate.ui.theme.PoppinsFontFamily
+import android.util.Log
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.runtime.DisposableEffect
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.windowInsetsPadding
 
 @Preview(showBackground = true)
 @Composable
 fun LoginPagePreview() {
-    // Gunakan theme aplikasi agar preview sesuai dengan style sebenarnya
     ReplyTheme {
-        // Buat dummy NavController untuk keperluan preview
-        val navController = rememberNavController()
-        LoginPage(navController = navController)
+        // Buat mock ViewModel untuk preview
+        val mockViewModel = object : LoginViewModel(
+            repository = null,
+            userRepository = null
+        ) {
+            override val uiState: StateFlow<LoginUiState> = MutableStateFlow(LoginUiState())
+            override val navigationEvent: StateFlow<NavigationEvent?> = MutableStateFlow(null)
+            
+            override fun login(email: String, password: String, rememberMe: Boolean) {
+                // Mock implementation
+            }
+            
+            override fun onNavigationHandled() {
+                // Mock implementation
+            }
+        }
+        
+        LoginPage(
+            navController = rememberNavController(),
+            viewModel = mockViewModel
+        )
     }
 }
 
-
 @Composable
-fun LoginPage( navController: NavController) {
+fun LoginPage(
+    navController: NavController,
+    viewModel: LoginViewModel = hiltViewModel()
+) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var isEmailFocused by remember { mutableStateOf(false) }
     var isPasswordFocused by remember { mutableStateOf(false) }
+    var rememberMe by remember { mutableStateOf(false) }
+    
+    val loginState by viewModel.uiState.collectAsState()
+    val navigationEvent by viewModel.navigationEvent.collectAsState()
+    val context = LocalContext.current
+    
+    // Cleanup resources when the composable is disposed
+    DisposableEffect(Unit) {
+        onDispose {
+            email = ""
+            password = ""
+            passwordVisible = false
+            isEmailFocused = false
+            isPasswordFocused = false
+            rememberMe = false
+        }
+    }
+    
+    // Handle navigation events
+    LaunchedEffect(navigationEvent) {
+        when (navigationEvent) {
+            is NavigationEvent.NavigateToHome -> {
+                navController.navigate("home") {
+                    popUpTo("login") { inclusive = true }
+                }
+                viewModel.onNavigationHandled()
+            }
+            is NavigationEvent.NavigateToAssessment -> {
+                navController.navigate("assessment") {
+                    popUpTo("login") { inclusive = true }
+                }
+                viewModel.onNavigationHandled()
+            }
+            null -> {}
+        }
+    }
+    
+    // Handle login state changes
+    LaunchedEffect(loginState) {
+        when (loginState) {
+            is LoginUiState -> {
+                if (loginState.isSuccess) {
+                    Toast.makeText(context, loginState.message ?: "Login berhasil", Toast.LENGTH_SHORT).show()
+                } else if (loginState.error != null) {
+                    Toast.makeText(context, loginState.error, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(top = 55.dp, start = 29.dp, end = 29.dp, bottom = 40.dp ),
-
+            .padding(top = 55.dp, start = 29.dp, end = 29.dp, bottom = 40.dp),
         verticalArrangement = Arrangement.Top
     ) {
 
@@ -109,11 +176,11 @@ fun LoginPage( navController: NavController) {
         Text(
             text = "Hello There!",
             style = MaterialTheme.typography.headlineSmall.copy(
-                fontFamily = poppinsFontFamily,
+                fontFamily = PoppinsFontFamily,
                 fontWeight = FontWeight.ExtraBold,
                 fontSize = 40.sp,
                 textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onPrimary
+                color = MaterialTheme.colorScheme.primary
             ),
             modifier = Modifier.padding(bottom = 9.dp)
 
@@ -122,11 +189,11 @@ fun LoginPage( navController: NavController) {
         Text(
             text = "Glad to see you back",
             style = MaterialTheme.typography.headlineSmall.copy(
-                fontFamily = poppinsFontFamily,
+                fontFamily = PoppinsFontFamily,
                 fontWeight = FontWeight.Normal,
                 fontSize = 16.sp,
                 textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onPrimary
+                color = MaterialTheme.colorScheme.primary
             ),
             modifier = Modifier.padding(bottom = 35.dp)
         )
@@ -135,14 +202,15 @@ fun LoginPage( navController: NavController) {
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
-            label = { Text("Email", fontFamily = poppinsFontFamily, fontSize = 13.dp.value.sp,  modifier = Modifier.padding(top = 2.dp, bottom = 0.dp)) },
+            label = { Text("Email", fontFamily = PoppinsFontFamily, fontSize = 13.dp.value.sp,  modifier = Modifier.padding(top = 2.dp, bottom = 0.dp)) },
             modifier = Modifier
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.background)
-                .shadow(
-                    elevation = if (isEmailFocused or email.isNotEmpty()) 0.dp else 4.dp,  // Hilangkan shadow saat fokus
-                    shape = RoundedCornerShape(15.dp),
-                )
+//                    .shadow(
+//                        elevation = if (isEmailFocused or email.isNotEmpty()) 0.dp else 4.dp,
+//                        clip = true, // Hilangkan shadow saat fokus
+//                        shape = RoundedCornerShape(15.dp)
+//                    )
                 .onFocusChanged { focusState ->
                     isEmailFocused = focusState.isFocused  // Update status fokus
                 },
@@ -151,11 +219,11 @@ fun LoginPage( navController: NavController) {
                 unfocusedContainerColor = MaterialTheme.colorScheme.background,
                 cursorColor = MaterialTheme.colorScheme.primary,
                 focusedIndicatorColor = MaterialTheme.colorScheme.primary,  // Border warna fokus
-                unfocusedIndicatorColor = if (email.isNotEmpty()) MaterialTheme.colorScheme.primary else Color.Transparent,  // Border saat tidak fokus
+                unfocusedIndicatorColor = if (email.isNotEmpty()) MaterialTheme.colorScheme.primary else Color(0x40000000),  // Border saat tidak fokus
                 focusedLabelColor = MaterialTheme.colorScheme.primary,
                 unfocusedLabelColor = Color.Black
             ),
-
+            textStyle = LocalTextStyle.current,
             shape = RoundedCornerShape(15.dp),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
 
@@ -170,70 +238,84 @@ fun LoginPage( navController: NavController) {
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Password", fontFamily = poppinsFontFamily, fontSize = 13.dp.value.sp,  modifier = Modifier.padding(top = 2.dp, bottom = 0.dp)) },
+            label = { Text("Password", fontFamily = PoppinsFontFamily, fontSize = 13.dp.value.sp,  modifier = Modifier.padding(top = 2.dp, bottom = 0.dp)) },
             trailingIcon = {
                 val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
                     Icon(image, contentDescription = if (passwordVisible) "Hide password" else "Show password", tint = MaterialTheme.colorScheme.primary)
                 }
             },
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = MaterialTheme.colorScheme.background,  // Agar background tetap transparan
-                unfocusedContainerColor = MaterialTheme.colorScheme.background,
-                cursorColor = MaterialTheme.colorScheme.primary,
-                focusedIndicatorColor = MaterialTheme.colorScheme.primary,  // Border warna fokus
-                unfocusedIndicatorColor = if (password.isNotEmpty()) MaterialTheme.colorScheme.primary else Color.Transparent,  // Border saat tidak fokus
-                focusedLabelColor = MaterialTheme.colorScheme.primary,
-                unfocusedLabelColor = Color.Black
-            ),
-            shape = RoundedCornerShape(15.dp),
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             modifier = Modifier
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.background)
                 .shadow(
-                    elevation = if (isPasswordFocused or password.isNotEmpty()) 0.dp else 4.dp,  // Hilangkan shadow saat fokus
+                    elevation = if (isPasswordFocused or password.isNotEmpty()) 0.dp else 4.dp,
                     shape = RoundedCornerShape(15.dp),
                 )
                 .onFocusChanged { focusState ->
-                    isPasswordFocused = focusState.isFocused  // Update status fokus
-                },
+                    isPasswordFocused = focusState.isFocused
+            },
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.background,
+                unfocusedContainerColor = MaterialTheme.colorScheme.background,
+                cursorColor = MaterialTheme.colorScheme.primary,
+                focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                unfocusedIndicatorColor = if (password.isNotEmpty()) MaterialTheme.colorScheme.primary else Color.Transparent,
+                focusedLabelColor = MaterialTheme.colorScheme.primary,
+                unfocusedLabelColor = Color.Black
+            ),
+            textStyle = LocalTextStyle.current,
+            shape = RoundedCornerShape(15.dp),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
         )
+
+        Spacer(modifier = Modifier.height(9.dp))
+
+        // Login Button
+        Button(
+            onClick = { viewModel.login(email, password, rememberMe) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp)
+                .shadow(
+                    elevation = 4.dp,
+                    shape = RoundedCornerShape(15.dp)
+                ),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary
+            ),
+            shape = RoundedCornerShape(15.dp),
+            enabled = !loginState.isLoading
+        ) {
+            if (loginState.isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            } else {
+                Text(
+                    text = "Login",
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontFamily = PoppinsFontFamily,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                )
+            }
+        }
 
        Spacer(modifier = Modifier.height(28.dp))
 
-        // Submit Button
-        Button(
-            onClick = {
-                      navController.navigate("home_screen")
-                      },
-            shape = RoundedCornerShape(15.dp),
-            elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary, // Background color
-                contentColor = MaterialTheme.colorScheme.background // Text color
-            ),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp)
-                .shadow(
-                    elevation = 4.dp,
-                    shape = RoundedCornerShape(15.dp),
-                    spotColor = Color(0x01000000)
-                )
-                .shadow(
-                    elevation = 2.dp,  //
-                    shape = RoundedCornerShape(15.dp),
-                    spotColor = Color(0x03000000)
-                )
-                .shadow(
-                    elevation = 3.dp,  //
-                    spotColor = Color(0x04000000)
-                )
-
-        ) {
-            Text(text = "Login", fontFamily = poppinsFontFamily, fontSize = 16.dp.value.sp)
+        // Tampilkan pesan error jika ada
+        loginState.error?.let { errorMessage ->
+            Text(
+                text = errorMessage,
+                color = Color.Red,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                textAlign = TextAlign.Center
+            )
         }
 
         Row(
@@ -245,24 +327,22 @@ fun LoginPage( navController: NavController) {
         ) {
             // Remember me dengan Checkbox
             Row(verticalAlignment = Alignment.CenterVertically) {
-                var isChecked by remember { mutableStateOf(false) }
                 Checkbox(
-                    checked = isChecked,
-                    onCheckedChange = { isChecked = it },
+                    checked = rememberMe,
+                    onCheckedChange = { rememberMe = it },
                     modifier = Modifier.size(24.dp),
                     colors = CheckboxDefaults.colors(
                         checkedColor = MaterialTheme.colorScheme.primary,
                         uncheckedColor = Color.Gray
                     )
                 )
-                Text(text = "Remember me", fontFamily = poppinsFontFamily, fontSize = 11.dp.value.sp, modifier = Modifier.padding(start = 5.dp))
+                Text(text = "Remember me", fontFamily = PoppinsFontFamily, fontSize = 11.dp.value.sp, modifier = Modifier.padding(start = 5.dp))
             }
-
 
             Text(
                 text = "Forgot Password?",
                 color = MaterialTheme.colorScheme.primary,
-                fontFamily = poppinsFontFamily,
+                fontFamily = PoppinsFontFamily,
                 fontSize = 11.dp.value.sp,
                 fontWeight = FontWeight.ExtraBold,
                 modifier = Modifier.clickable { /* Handle forgot password navigation */ }
@@ -274,7 +354,7 @@ fun LoginPage( navController: NavController) {
         Text(
             text = "- Or sign up with -",
             style = MaterialTheme.typography.headlineSmall.copy(
-                fontFamily = poppinsFontFamily,
+                fontFamily = PoppinsFontFamily,
                 fontWeight = FontWeight.Normal,
                 fontSize = 11.sp,
                 textAlign = TextAlign.Center,
@@ -363,11 +443,11 @@ fun LoginPage( navController: NavController) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
         ) {
-            Text(text = "Don't have an account? ", fontFamily = poppinsFontFamily, fontSize = 11.dp.value.sp)
+            Text(text = "Don't have an account? ", fontFamily = PoppinsFontFamily, fontSize = 11.dp.value.sp)
             Text(
                 text = "Register Now",
                 color = MaterialTheme.colorScheme.primary,
-                fontFamily = poppinsFontFamily,
+                fontFamily = PoppinsFontFamily,
                 fontSize = 11.dp.value.sp,
                 modifier = Modifier.clickable { navController.navigate("signup_page")  }
             )

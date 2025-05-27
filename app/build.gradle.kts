@@ -71,10 +71,20 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)
-    implementation(platform("androidx.compose:compose-bom:2024.05.00")) // atau versi terbaru
+    implementation(platform("androidx.compose:compose-bom:2024.05.00"))
+    implementation("com.google.dagger:hilt-android:2.48")
     kapt(libs.hilt.compiler)
-    implementation("io.coil-kt:coil-compose:2.5.0")
     implementation ("com.google.accompanist:accompanist-navigation-animation:0.32.0")
+    implementation("io.coil-kt:coil-compose:2.5.0")
+    implementation ("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
+    implementation ("androidx.compose.material3:material3:1.3.2" )// atau versi terbaru yang kamu gunakan
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation ("androidx.datastore:datastore-preferences:1.0.0")
 
     implementation(libs.material.icons.extended)
     implementation (libs.androidx.ui.text.google.fonts)

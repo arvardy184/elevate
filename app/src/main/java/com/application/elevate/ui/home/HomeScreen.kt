@@ -31,14 +31,33 @@ import com.application.elevate.data.dummy.ProfileDummyData.currentUser
 import com.application.elevate.data.dummy.ProfileDummyData.dummyCourses
 import com.application.elevate.data.dummy.ProfileDummyData.growthHubItems
 import com.application.elevate.model.Course
+import com.application.elevate.model.User
 import com.application.elevate.ui.theme.ReplyTheme
+import androidx.hilt.navigation.compose.hiltViewModel
 
 
 @Composable
-fun HomeScreen(navController: NavController,viewModel: HomeViewModel = HomeViewModel()) {
+fun HomeScreen(
+    navController: NavController,
+    viewModel: HomeViewModel = androidx.hilt.navigation.compose.hiltViewModel()
+) {
     val uiState by viewModel.uiState.collectAsState()
     val density = LocalDensity.current
 
+    // Gunakan user dari uiState dengan default user jika null
+    val user = uiState.user ?: User(
+        id = 0,
+        firstName = "Guest",
+        lastName = "User",
+        email = "guest@example.com",
+        photoUrl = "",
+        address = "Default Address",
+        phoneNumber = "+62 000-0000-0000",
+        gender = "Unspecified",
+        birthDate = "01/01/2000",
+        role = "USER",
+        isAssessmentCompleted = false
+    )
 
     var tutorialStep by remember { mutableStateOf(0) }
     val showTutorial = tutorialStep in 0..3
@@ -65,7 +84,7 @@ fun HomeScreen(navController: NavController,viewModel: HomeViewModel = HomeViewM
         Scaffold(
             topBar = {
                 HeaderCard(
-                    user = currentUser,
+                    user = user,
                     onNotificationClick = { navController.navigate("notification")},
                     onSearchClick = {Log.d("HeaderCard", "Search clicked")
                         navController.navigate("search")  },
@@ -120,7 +139,12 @@ fun HomeScreen(navController: NavController,viewModel: HomeViewModel = HomeViewM
                             categoryPosition = coordinates.positionInRoot()
                             categorySize = coordinates.size.toSize()}) {
 
-                        SectionHeader(title = "Categories", onViewAllClick = {})
+                        SectionHeader(
+                            title = "Categories", 
+                            onViewAllClick = {
+                                navController.navigate("categories")
+                            }
+                        )
                         LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             items(categories) { category ->
                                 CategoryChip(text = category) {
@@ -142,7 +166,15 @@ fun HomeScreen(navController: NavController,viewModel: HomeViewModel = HomeViewM
 
                         SectionHeader(title = "Popular Courses", onViewAllClick = {})
                         LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            items(dummyCourses) { course -> CourseCard(course) }
+                            items(dummyCourses) { course -> 
+                                CourseCard(
+                                    course = course,
+                                    onClick = { selectedCourse ->
+                                        navController.navigate("course_detail/${selectedCourse.id}")
+                                    },
+                                    modifier = Modifier.width(170.dp)
+                                )
+                            }
                         }
                     }
 
@@ -203,11 +235,10 @@ fun HomeScreen(navController: NavController,viewModel: HomeViewModel = HomeViewM
 
                 TutorialOverlay(
                     highlightRect = rect,
-                    message = "Pick a topic you’re interested in and start learning right away!",
+                    message = "Browse courses by categories that interest you.",
                     onNext = { tutorialStep++ }
                 )
             }
-
             3 -> {
                 val rect = Rect(
                     offset = popularCoursePosition,
@@ -216,8 +247,8 @@ fun HomeScreen(navController: NavController,viewModel: HomeViewModel = HomeViewM
 
                 TutorialOverlay(
                     highlightRect = rect,
-                    message = "Check out our most popular courses and boost your skills today!",
-                    onNext = { tutorialStep++ }
+                    message = "These are our most popular courses — take a look!",
+                    onNext = { tutorialStep = -1 } // Disable tutorial
                 )
             }
         }

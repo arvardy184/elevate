@@ -435,16 +435,16 @@ fun EditProfileContent(
 //        )
 //    }
 //}
-@Preview
-@Composable
-fun EditProfileScreenPreviewFull() {
-    ReplyTheme {
-        val navController = rememberNavController()
-        val dummyViewModel = remember { FakeProfileViewModel() }
-
-        EditProfileScreen(
-            navController = navController,
-            viewModel = dummyViewModel
-        )
-    }
-}
+//@Preview
+//@Composable
+//fun EditProfileScreenPreviewFull() {
+//    ReplyTheme {
+//        val navController = rememberNavController()
+//        val viewModel = remember { ProfileViewModel.createPreviewViewModel() }
+//
+//        EditProfileScreen(
+//            navController = navController,
+//            viewModel = viewModel
+//        )
+//    }
+//}

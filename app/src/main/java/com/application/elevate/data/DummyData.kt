@@ -4,16 +4,19 @@ import com.application.elevate.R
 import com.application.elevate.model.*
 
 object ProfileDummyData {
+    // User default untuk preview
     val currentUser = User(
-        id = "1",
-        firstName = "Keisya Marshanda",
-        lastName = "Setiandini",
-        email = "keisyaamrsh@gmail.com",
+        id = 0,
+        firstName = "Guest",
+        lastName = "User",
+        email = "guest@example.com",
         photoUrl = "",
-        address = "Sunflower Regency K-6, Malang",
-        phoneNumber = "+62 822-3081-9191",
-        gender = "Perempuan",
-        birthDate = "30/03/2004"
+        address = "Default Address",
+        phoneNumber = "+62 000-0000-0000",
+        gender = "Unspecified",
+        birthDate = "01/01/2000",
+        role = "user",
+        isAssessmentCompleted = false
     )
 
     val activities = listOf(
@@ -122,12 +125,12 @@ object ProfileDummyData {
     )
 
     val dummyCourses = listOf(
-        Course("1","UI/UX Design", "2h 45min", 9, 100,5.0f, 201, R.drawable.ui_ux ),
-        Course("2","Front-End Dev", "5h 10min", 10, 60, 4.5f, 140, R.drawable.front_end ),
-        Course("3","SEO & Content Marketing", "1h 28min", 13, 80, 4.0f, 96, R.drawable.content_marketing),
-        Course("4","Social Media Marketing", "2h 20min", 10, 40, 4.5f, 140, R.drawable.social_media_marketing),
-        Course("5","Android Development", "3h 15min", 13, 20, 5.0f, 201, R.drawable.android_development),
-        Course("6","Basic Accounting", "2h 4min", 11, 90, 4.0f, 96, R.drawable.basic_accounting)
+        Course("1","UI/UX Design", "2h 45min", 9, 100,5.0f, 201, R.drawable.ui_ux, true ),
+        Course("2","Front-End Dev", "5h 10min", 10, 60, 4.5f, 140, R.drawable.front_end, true ),
+        Course("3","SEO & Content Marketing", "1h 28min", 13, 80, 4.0f, 96, R.drawable.content_marketing, false),
+        Course("4","Social Media Marketing", "2h 20min", 10, 40, 4.5f, 140, R.drawable.social_media_marketing, false),
+        Course("5","Android Development", "3h 15min", 13, 20, 5.0f, 201, R.drawable.android_development, false),
+        Course("6","Basic Accounting", "2h 4min", 11, 90, 4.0f, 96, R.drawable.basic_accounting, false)
     )
 
     val dummyCourseDetails = listOf(
@@ -246,5 +249,124 @@ object ProfileDummyData {
         )
     )
 
+    // assessment/DummyData.kt
 
-    }
+
+
+    val majorOptions = listOf(
+        "Computer Science",
+        "Information Systems",
+        "Software Engineering",
+        "Data Science",
+        "Information Technology",
+        "Cybersecurity",
+        "Business Administration",
+        "Accounting",
+        "Marketing",
+        "Finance",
+        "Psychology",
+        "Law",
+        "Industrial Engineering",
+        "Mechanical Engineering",
+        "Architecture",
+        "Design Communication Visual",
+        "Education",
+        "Public Health"
+    )
+
+    val interestedFields = listOf(
+        "UI/UX Design",
+        "Data Analytics",
+        "Project Management",
+        "Software Development",
+        "Cybersecurity",
+        "Digital Marketing",
+        "Finance & Accounting",
+        "Entrepreneurship",
+        "AI & Machine Learning"
+    )
+
+    val goalOptions = listOf(
+        "Get Internship",
+        "Full-Time Job",
+        "Skill Improvement",
+        "Career Switch",
+        "Networking",
+        "Freelancing Opportunities"
+    )
+
+    val assessmentDummyData = listOf(
+        AssessmentStep(
+            key = "studentStatus",
+            title = "Let's Get to Know You",
+            subtitle = "Tell us a bit about your academic journey to personalize your experience.",
+            optionTitle = "Student Status",
+            optionSubtitle = "Select your current status:",
+            options = listOf("Active Student", "On Academic Leave", "Graduated"),
+            type = QuestionType.RADIO
+        ),
+        AssessmentStep(
+            key = "major",
+            title = "Let's Get to Know You",
+            subtitle = "Tell us a bit about your academic journey to personalize your experience.",
+            optionTitle = "Major / Field of Study",
+            optionSubtitle = "What are you studying?",
+            options = majorOptions,
+            type = QuestionType.DROPDOWN
+        ),
+        AssessmentStep(
+            key = "semester",
+            title = "Let's Get to Know You",
+            subtitle = "Tell us a bit about your academic journey to personalize your experience.",
+            optionTitle = "Current Semester",
+            optionSubtitle = "Pick your semester",
+            options = listOf("1", "2", "3", "4", "5", "6", "7", "8+"),
+            type = QuestionType.DROPDOWN
+        ),
+        AssessmentStep(
+            key = "currentField",
+            title = "What Drives Your Passion?",
+            subtitle = "Choose the field you're most interested in to shape your learning path.",
+            optionTitle = "Current Field",
+            optionSubtitle = "What field are you currently in?",
+            options = interestedFields,
+            type = QuestionType.DROPDOWN
+        ),
+        AssessmentStep(
+            key = "interestedField",
+            title = "What Drives Your Passion?",
+            subtitle = "Choose the field you're most interested in to shape your learning path.",
+            optionTitle = "Interested Field",
+            optionSubtitle = "What field are you most interested in exploring?",
+            options = interestedFields,
+            type = QuestionType.RADIO
+        ),
+        AssessmentStep(
+            key = "dreamJob",
+            title = "What Drives Your Passion?",
+            subtitle = "Choose the field you're most interested in to shape your learning path.",
+            optionTitle = "Dream Job",
+            optionSubtitle = "What's your dream role or career goal?",
+            options = listOf(
+                "UI/UX Designer", "Data Analyst", "Project Manager",
+                "Software Engineer", "Cybersecurity Specialist",
+                "Digital Marketer", "Financial Analyst", "Entrepreneur", "AI Engineer"
+            ),
+            type = QuestionType.DROPDOWN
+        ),
+        AssessmentStep(
+            key = "goal",
+            title = "What do you want to achieve?",
+            subtitle = "What is your main goal with Elevate?",
+            optionTitle = "Career Goal",
+            optionSubtitle = "Choose what you aim to achieve",
+            options = goalOptions,
+            type = QuestionType.RADIO
+        )
+    )
+
+
+
+
+
+}

@@ -17,30 +17,34 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.application.elevate.data.dummy.ProfileDummyData.dummyCourses
 import com.application.elevate.model.Course
-import com.application.elevate.ui.login.poppinsFontFamily
+import com.application.elevate.ui.theme.PoppinsFontFamily
 
 
 @Composable
-fun CourseCard(course: Course) {
+fun CourseCard(
+    course: Course, 
+    onClick: (Course) -> Unit = {},
+    modifier: Modifier = Modifier
+) {
     Card(
-        shape = RoundedCornerShape(20.dp),
-        modifier = Modifier
-            .width(240.dp)
+        shape = RoundedCornerShape(16.dp),
+        modifier = modifier
+            .fillMaxWidth()
             .wrapContentHeight(),
-        elevation = CardDefaults.cardElevation(6.dp)
+        elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Column(
             modifier = Modifier
-                .shadow(2.dp, RoundedCornerShape(20.dp))
                 .background(MaterialTheme.colorScheme.background)
         ) {
 
-            // 📷 Course Image
+            // Course Image
             Image(
                 painter = painterResource(id = course.imageRes),
                 contentDescription = course.title,
@@ -50,19 +54,21 @@ fun CourseCard(course: Course) {
                     .height(140.dp)
                     .clip(
                         RoundedCornerShape(
-                            topStart = 0.dp,
-                            topEnd = 0.dp,
-                            bottomStart = 16.dp,
-                            bottomEnd = 16.dp
+                            topStart = 16.dp,
+                            topEnd = 16.dp,
+                            bottomStart = 0.dp,
+                            bottomEnd = 0.dp
                         )
                     )
             )
 
-            // 📋 Detail
-            Column(modifier = Modifier.padding(16.dp)) {
+            // Detail
+            Column(modifier = Modifier.padding(12.dp)) {
                 Text(
                     text = course.title,
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
 
                 Text(
@@ -71,26 +77,35 @@ fun CourseCard(course: Course) {
                     color = Color.Gray
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(6.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(
-                        text = "${course.progressPercent}% \nCompleted",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = if (course.progressPercent == 100) Color(0xFF4CAF50) else Color.Gray
-                    )
+                    Column(horizontalAlignment = Alignment.Start) {
+
+                        Text(
+                            text = "${course.progressPercent}%",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = if (course.progressPercent == 100) Color(0xFF4CAF50) else Color.Gray
+                        )
+
+                        Text(
+                            text = "Completed",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = if (course.progressPercent == 100) Color(0xFF4CAF50) else Color.Gray
+                        )
+                    }
 
 
                     AssistChip(
-                        onClick = { /* TODO */ },
+                        onClick = { onClick(course) },
                         label = {
                             Text(
-                                text = "Open Course",
-                                style = MaterialTheme.typography.labelMedium
+                                text = "Open",
+                                style = MaterialTheme.typography.labelSmall
                             )
                         },
                         shape = RoundedCornerShape(50),

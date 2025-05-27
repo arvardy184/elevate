@@ -33,6 +33,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.application.elevate.R
@@ -49,233 +50,205 @@ import com.application.elevate.data.dummy.ProfileDummyData.dummyCourses
 fun CourseScreen(navController: NavController = rememberNavController()) {
     val selectedCategory = remember { mutableStateOf("Design") }
     val categories = listOf("Design", "App & Web Development", "Digital Marketing", "All")
-
     val isViewAll = remember { mutableStateOf(false) }
 
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        text = "My Course",
-                        style = MaterialTheme.typography.headlineSmall.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF4A4A7F),
-
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            topBar = {
+                CenterAlignedTopAppBar(
+                    title = {
+                        Text(
+                            text = "My Course",
+                            style = MaterialTheme.typography.headlineSmall.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF4A4A7F),
+                            )
                         )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = { navController.navigateUp() }) {
+                            Icon(
+                                imageVector = Icons.Default.ArrowBack,
+                                contentDescription = "Back"
+                            )
+                        }
+                    },
+                    actions = {
+                        IconButton(onClick = { /* Search action */ }) {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = "Search"
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.White,
+                        titleContentColor = Color(0xFF4A4A7F)
                     )
-                },
-                navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back"
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { /* Search action */ }) {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = "Search"
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White,
-                    titleContentColor = Color(0xFF4A4A7F)
                 )
-            )
-        },
-        bottomBar = {
-            BottomAppBar(
-                containerColor = Color.White,
-                contentColor = Color.Gray
+            },
+            containerColor = Color.Transparent // agar tidak menutupi background
+        ) { paddingValues ->
+            Column(
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize()
+                    .background(Color(0xFFF8F8F8))
+                    .verticalScroll(rememberScrollState())
             ) {
-                Navbar(
-                    navController = navController, onItemClick = { route -> navController.navigate(route) }
-
-                )
-            }
-        }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize()
-                .background(Color(0xFFF8F8F8))
-                .verticalScroll(rememberScrollState())
-        ) {
-            // Category Chips
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(start = 16.dp)) {
-                items(ProfileDummyData.categories) { category ->
-                    CategoryChip(text = category) {
-                        Log.d("CategoryChip", "Clicked: $category")
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(start = 16.dp)) {
+                    items(ProfileDummyData.categories) { category ->
+                        CategoryChip(text = category) {
+                            Log.d("CategoryChip", "Clicked: $category")
+                        }
                     }
                 }
-            }
-            
-            Spacer(modifier = Modifier.height(20.dp))
-            
-            // Recently Opened Section
-            Column(
-                modifier = Modifier.padding(horizontal = 16.dp)
-            ) {
-                Text(
-                    text = "Recently Opened",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        color = Color.Black
-                    ),
-                    modifier = Modifier.padding(bottom = 12.dp)
-                )
-                
-                // Recently Opened Course Card
-                Card(
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier.fillMaxWidth().height(180.dp).shadow(4.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color.White
-                    )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Column(
+                    modifier = Modifier.padding(horizontal = 16.dp)
                 ) {
-                    Column {
-                        // Course Image with overlay
+                    Text(
+                        text = "Recently Opened",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp,
+                            color = Color.Black
+                        ),
+                        modifier = Modifier.padding(bottom = 12.dp)
+                    )
+
+                    Card(
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(180.dp)
+                            .shadow(4.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color.White
+                        )
+                    ) {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(180.dp)
                         ) {
                             Image(
-                                painter = painterResource(id = R.drawable.banner), // Replace with actual course image
+                                painter = painterResource(id = R.drawable.banner),
                                 contentDescription = "UI/UX Design",
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier.fillMaxSize()
                             )
-                            
 
-
-                                Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-
-                                    Row( modifier = Modifier.fillMaxWidth().padding(top = 45.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                                        Column(
-                                            modifier = Modifier
-                                                .padding(20.dp)
-                                        ) {
-                                            Text(
-                                                text = "UI/UX Design",
-                                                style = MaterialTheme.typography.titleLarge.copy(
-                                                    fontWeight = FontWeight.Bold,
-                                                    color = Color.White
-                                                )
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 45.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column(
+                                        modifier = Modifier.padding(20.dp)
+                                    ) {
+                                        Text(
+                                            text = "UI/UX Design",
+                                            style = MaterialTheme.typography.titleLarge.copy(
+                                                fontWeight = FontWeight.Bold,
+                                                color = Color.White
                                             )
-                                            Text(
-                                                text = "Part 1: Design Principle • 10 Min",
-                                                style = MaterialTheme.typography.bodyMedium.copy(
-                                                    color = Color.White
-                                                )
+                                        )
+                                        Text(
+                                            text = "Part 1: Design Principle • 10 Min",
+                                            style = MaterialTheme.typography.bodyMedium.copy(
+                                                color = Color.White
                                             )
-                                        }
-
-                                        // Arrow button
-                                        Box(
-                                            modifier = Modifier
-                                                .padding(16.dp)
-                                                .size(36.dp)
-                                                .clip(CircleShape)
-                                                .background(Color(0xFF635C9C))
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.ArrowForward,
-                                                contentDescription = "Continue",
-                                                tint = Color.White,
-                                                modifier = Modifier
-                                                    .align(Alignment.Center)
-                                                    .size(20.dp)
-                                            )
-                                        }
-
+                                        )
                                     }
 
-
-                                    LinearProgressIndicator(
-                                        progress = { 0.3f },
+                                    Box(
                                         modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(6.dp)
-                                            .padding(horizontal = 20.dp)
-                                            .clip(RoundedCornerShape(4.dp)),
-                                        color = Color(0xFF65558F),
-                                        trackColor = Color(0xFFEEEEEE),
-                                    )
+                                            .padding(16.dp)
+                                            .size(36.dp)
+                                            .clip(CircleShape)
+                                            .background(Color(0xFF635C9C))
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.ArrowForward,
+                                            contentDescription = "Continue",
+                                            tint = Color.White,
+                                            modifier = Modifier
+                                                .align(Alignment.Center)
+                                                .size(20.dp)
+                                        )
+                                    }
                                 }
 
-
-
-
-
-                            // Course title and details
-
+                                LinearProgressIndicator(
+                                    progress = { 0.3f },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(6.dp)
+                                        .padding(horizontal = 20.dp)
+                                        .clip(RoundedCornerShape(4.dp)),
+                                    color = Color(0xFF65558F),
+                                    trackColor = Color(0xFFEEEEEE),
+                                )
+                            }
                         }
-                        
-                        // Progress bar
-
                     }
                 }
-            }
-            
-            // Saved Courses Section
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 24.dp)
-            ) {
-                SectionHeader(title = "Saved Course", onViewAllClick = {isViewAll.value = !isViewAll.value})
 
-                val coursesToShow = if (isViewAll.value) dummyCourses else dummyCourses.take(3)
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 24.dp)
+                ) {
+                    SectionHeader(title = "Saved Course", onViewAllClick = {
+                        isViewAll.value = !isViewAll.value
+                    })
 
-                coursesToShow.forEach { course ->
-                    SavedCourseItem(
-                        course = course,
-                        onClick = { navController.navigate("course_detail/${course.id}") }
-                    )
+                    val coursesToShow = if (isViewAll.value) dummyCourses else dummyCourses.take(3)
+
+                    coursesToShow.forEach { course ->
+                        SavedCourseItem(
+                            course = course,
+                            onClick = { navController.navigate("course_detail/${course.id}") }
+                        )
+                    }
                 }
+
+                // Spacer untuk memberi ruang di bawah agar konten tidak tertutup navbar
+                Spacer(modifier = Modifier.height(100.dp))
             }
         }
-            
-            // Add some bottom padding to account for the bottom navigation
-            Spacer(modifier = Modifier.height(80.dp))
+
+        // Navbar ditumpuk di bawah layar, menimpa konten
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .zIndex(1f) // pastikan di atas konten
+        ) {
+            Navbar(
+                navController = navController,
+                onItemClick = { route ->
+                    navController.navigate(route) {
+                        popUpTo(navController.graph.startDestinationId) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            )
+        }
     }
 }
-
-
-@Composable
-fun BottomNavItem(
-    icon: androidx.compose.ui.graphics.painter.Painter,
-    label: String,
-    selected: Boolean,
-    onClick: () -> Unit
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .padding(8.dp)
-            .clickable(onClick = onClick)
-    ) {
-        Icon(
-            painter = icon,
-            contentDescription = label,
-            tint = if (selected) Color(0xFF5E5B8C) else Color.Gray,
-            modifier = Modifier.size(24.dp)
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodySmall,
-            color = if (selected) Color(0xFF5E5B8C) else Color.Gray
-        )
-    }
-}
-
 
 
 @Preview(showBackground = true)
