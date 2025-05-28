@@ -1,6 +1,5 @@
 package com.application.elevate.ui.home
 
-
 import android.util.Log
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -35,11 +34,10 @@ import com.application.elevate.model.User
 import com.application.elevate.ui.theme.ReplyTheme
 import androidx.hilt.navigation.compose.hiltViewModel
 
-
 @Composable
 fun HomeScreen(
     navController: NavController,
-    viewModel: HomeViewModel = androidx.hilt.navigation.compose.hiltViewModel()
+    viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val density = LocalDensity.current
@@ -60,7 +58,7 @@ fun HomeScreen(
     )
 
     var tutorialStep by remember { mutableStateOf(0) }
-    val showTutorial = tutorialStep in 0..3
+    val showTutorial = tutorialStep in 0..3 && uiState.showTutorial
 
     var searchBarPosition by remember { mutableStateOf(Offset.Zero) }
     var searchBarSize by remember { mutableStateOf(Size.Zero) }
@@ -76,9 +74,6 @@ fun HomeScreen(
 
     var popularCoursePosition by remember { mutableStateOf(Offset.Zero) }
     var popularCourseSize by remember { mutableStateOf(Size.Zero) }
-
-
-
 
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
@@ -248,7 +243,10 @@ fun HomeScreen(
                 TutorialOverlay(
                     highlightRect = rect,
                     message = "These are our most popular courses — take a look!",
-                    onNext = { tutorialStep = -1 } // Disable tutorial
+                    onNext = { 
+                        tutorialStep = -1
+                        viewModel.onTutorialComplete()
+                    }
                 )
             }
         }

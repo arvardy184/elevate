@@ -283,6 +283,17 @@ class UserRepository @Inject constructor(
         return status
     }
 
+    suspend fun shouldShowTutorial(): Boolean {
+        val preferences = context.dataStore.data.first()
+        return preferences[SHOW_TUTORIAL_KEY] ?: true
+    }
+
+    suspend fun setTutorialShown() {
+        context.dataStore.edit { preferences ->
+            preferences[SHOW_TUTORIAL_KEY] = false
+        }
+    }
+
     companion object {
         private val TOKEN_KEY = stringPreferencesKey("auth_token")
         private val REMEMBER_ME_KEY = booleanPreferencesKey("remember_me")
@@ -298,5 +309,6 @@ class UserRepository @Inject constructor(
         private val USER_ROLE_KEY = stringPreferencesKey("user_role")
         private val USER_IS_ASSESSMENT_COMPLETED_KEY = booleanPreferencesKey("user_is_assessment_completed")
         private val IS_FIRST_LAUNCH_KEY = booleanPreferencesKey("is_first_launch")
+        private val SHOW_TUTORIAL_KEY = booleanPreferencesKey("show_tutorial")
     }
 } 

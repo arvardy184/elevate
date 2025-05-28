@@ -24,6 +24,7 @@ class HomeViewModel @Inject constructor(
     init {
         // Muat data user saat pertama kali
         loadUserData()
+        checkTutorialStatus()
         
         // Memantau perubahan data user secara real-time
         viewModelScope.launch {
@@ -44,6 +45,28 @@ class HomeViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error saat memuat data user: ${e.message}")
+            }
+        }
+    }
+
+    private fun checkTutorialStatus() {
+        viewModelScope.launch {
+            try {
+                val shouldShow = userRepository.shouldShowTutorial()
+                _uiState.value = _uiState.value.copy(showTutorial = shouldShow)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error saat mengecek status tutorial: ${e.message}")
+            }
+        }
+    }
+
+    fun onTutorialComplete() {
+        viewModelScope.launch {
+            try {
+                userRepository.setTutorialShown()
+                _uiState.value = _uiState.value.copy(showTutorial = false)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error saat menyimpan status tutorial: ${e.message}")
             }
         }
     }

@@ -85,7 +85,7 @@ fun AppNavigation() {
 
     AnimatedNavHost(
         navController = navController,
-        startDestination = "login_page",
+        startDestination = "splash_screen",
         enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }, animationSpec = tween(500)) },
         exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }, animationSpec = tween(500)) },
         popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }, animationSpec = tween(500)) },

@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.application.elevate.data.dummy.ProfileDummyData
 import com.application.elevate.data.repository.AuthRepository
+import com.application.elevate.data.repository.ProfileRepository
 import com.application.elevate.data.repository.UserRepository
 import com.application.elevate.model.HelpCenterItem
 import com.application.elevate.model.NotificationSetting
@@ -19,7 +20,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val repository: AuthRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val profileRepository: ProfileRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ProfileUiState())
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
@@ -35,33 +37,38 @@ class ProfileViewModel @Inject constructor(
         loadHelpCenterItems()
     }
 
-    private fun loadUserData() {
+    fun loadUserData() {
         viewModelScope.launch {
             _uiState.update { it.copy(
                 isLoading = true
             ) }
 
             try {
-                val user = userRepository.getUser() ?: User(
-                    id = 0,
-                    firstName = "Guest",
-                    lastName = "User",
-                    email = "guest@example.com", 
-                    photoUrl = "",
-                    address = "Default Address",
-                    phoneNumber = "+62 000-0000-0000",
-                    gender = "Unspecified",
-                    birthDate = "01/01/2000",
-                    role = "user",
-                    isAssessmentCompleted = false
-                )
-                
-                _uiState.update { it.copy(
-                    user = user,
-                    isLoading = false,
-                    error = null
-                ) }
+                profileRepository.getProfile().collect { result ->
+                    result.onSuccess { response ->
+                        val user = response.user
+                        Log.d(TAG, "Data user dari API: $user")
+                        Log.d(TAG, "Nama depan: ${user.firstName}, Nama belakang: ${user.lastName}")
+                        
+                        // Update user di repository lokal
+                        userRepository.updateUser(user)
+                        
+                        // Update state UI
+                        _uiState.update { it.copy(
+                            user = user,
+                            isLoading = false,
+                            error = null
+                        ) }
+                    }.onFailure { error ->
+                        Log.e(TAG, "Error saat mendapatkan profil: ${error.message}")
+                        _uiState.update { it.copy(
+                            isLoading = false,
+                            error = error.message ?: "Failed to load user data"
+                        ) }
+                    }
+                }
             } catch (e: Exception) {
+                Log.e(TAG, "Error saat memuat data user: ${e.message}")
                 _uiState.update { it.copy(
                     isLoading = false,
                     error = e.message ?: "Failed to load user data"
@@ -94,13 +101,38 @@ class ProfileViewModel @Inject constructor(
     fun updateUser(updatedUser: User) {
         viewModelScope.launch {
             try {
-                userRepository.updateUser(updatedUser)
-                _uiState.update { it.copy(
-                    user = updatedUser,
-                    error = null
-                ) }
+                _uiState.update { it.copy(isLoading = true) }
+                
+                Log.d(TAG, "Mencoba update user: $updatedUser")
+                Log.d(TAG, "Nama depan: ${updatedUser.firstName}, Nama belakang: ${updatedUser.lastName}")
+                
+                profileRepository.updateProfile(updatedUser).collect { result ->
+                    result.onSuccess { response ->
+                        val user = response.user
+                        Log.d(TAG, "Response dari API: $response")
+                        Log.d(TAG, "Data user setelah update: $user")
+                        
+                        // Update user di repository lokal
+                        userRepository.updateUser(user)
+                        
+                        // Update state UI
+                        _uiState.update { it.copy(
+                            user = user,
+                            isLoading = false,
+                            error = null
+                        ) }
+                    }.onFailure { error ->
+                        Log.e(TAG, "Error saat update profil: ${error.message}")
+                        _uiState.update { it.copy(
+                            isLoading = false,
+                            error = error.message ?: "Failed to update user data"
+                        ) }
+                    }
+                }
             } catch (e: Exception) {
+                Log.e(TAG, "Error saat update user: ${e.message}")
                 _uiState.update { it.copy(
+                    isLoading = false,
                     error = e.message ?: "Failed to update user data"
                 ) }
             }

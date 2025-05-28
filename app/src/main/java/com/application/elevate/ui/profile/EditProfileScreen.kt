@@ -48,6 +48,7 @@ import coil.compose.rememberAsyncImagePainter
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
+import android.util.Log
 
 @Composable
 fun EditProfileScreen(
@@ -58,6 +59,22 @@ fun EditProfileScreen(
     val uiState by viewModel.uiState.collectAsState()
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     var cameraImageUri by remember { mutableStateOf<Uri?>(null) }
+
+    // Load user data when screen is first displayed
+    LaunchedEffect(Unit) {
+        viewModel.loadUserData()
+    }
+
+    // Update selectedImageUri when user's photoUrl changes
+    LaunchedEffect(uiState.user.photoUrl) {
+        if (uiState.user.photoUrl.isNotEmpty()) {
+            try {
+                selectedImageUri = Uri.parse(uiState.user.photoUrl)
+            } catch (e: Exception) {
+                Log.e("EditProfileScreen", "Error parsing photo URL: ${e.message}")
+            }
+        }
+    }
 
     // Galeri
     val galleryLauncher = rememberLauncherForActivityResult(
@@ -93,16 +110,25 @@ fun EditProfileScreen(
         )
     }
 
-    EditProfileContent(
-        user = uiState.user,
-        selectedImageUri = selectedImageUri,
-        onNavigateBack = { navController.popBackStack() },
-        onProfilePictureClick = { viewModel.showChangeProfilePicture() },
-        onSaveChanges = { updatedUser ->
-            viewModel.updateUser(updatedUser)
-            navController.popBackStack()
+    if (uiState.isLoading) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
         }
-    )
+    } else {
+        EditProfileContent(
+            user = uiState.user,
+            selectedImageUri = selectedImageUri,
+            onNavigateBack = { navController.popBackStack() },
+            onProfilePictureClick = { viewModel.showChangeProfilePicture() },
+            onSaveChanges = { updatedUser ->
+                viewModel.updateUser(updatedUser)
+                navController.popBackStack()
+            }
+        )
+    }
 
     if (uiState.isChangingProfilePicture) {
         ChangeProfileBottomSheet(
@@ -117,7 +143,16 @@ fun EditProfileScreen(
             }
         )
     }
+
+    // Show error message if any
+    uiState.error?.let { error ->
+        LaunchedEffect(error) {
+            // Show error message using Snackbar or Toast
+            // You can implement this based on your UI requirements
+        }
+    }
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditProfileContent(
@@ -134,6 +169,16 @@ fun EditProfileContent(
     var phoneNumber by remember { mutableStateOf(user.phoneNumber) }
     var gender by remember { mutableStateOf(user.gender) }
     var birthDate by remember { mutableStateOf(user.birthDate) }
+
+    LaunchedEffect(user) {
+        firstName = user.firstName
+        lastName = user.lastName
+        email = user.email
+        address = user.address
+        phoneNumber = user.phoneNumber
+        gender = user.gender
+        birthDate = user.birthDate
+    }
 
     Column(
         modifier = Modifier
@@ -255,7 +300,8 @@ fun EditProfileContent(
                 onValueChange = { firstName = it },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp),
-                singleLine = true
+                singleLine = true,
+                placeholder = { Text(text = user.firstName) }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -273,7 +319,8 @@ fun EditProfileContent(
                 onValueChange = { lastName = it },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp),
-                singleLine = true
+                singleLine = true,
+                placeholder = { Text(text = user.lastName) }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -292,7 +339,8 @@ fun EditProfileContent(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp),
                 singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                placeholder = { Text(text = user.email) }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -316,7 +364,8 @@ fun EditProfileContent(
                         imageVector = Icons.Default.MyLocation,
                         contentDescription = "View on map"
                     )
-                }
+                },
+                placeholder = { Text(text = user.address) }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -335,7 +384,8 @@ fun EditProfileContent(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp),
                 singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                placeholder = { Text(text = user.phoneNumber) }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -360,7 +410,8 @@ fun EditProfileContent(
                         imageVector = Icons.Default.KeyboardArrowDown,
                         contentDescription = "Select gender"
                     )
-                }
+                },
+                placeholder = { Text(text = user.gender) }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -384,7 +435,8 @@ fun EditProfileContent(
                         imageVector = Icons.Default.CalendarToday,
                         contentDescription = "Select date"
                     )
-                }
+                },
+                placeholder = { Text(text = user.birthDate) }
             )
 
             Spacer(modifier = Modifier.height(32.dp))
