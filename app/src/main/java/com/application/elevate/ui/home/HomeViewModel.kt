@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-@HiltViewModel
+    @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val userRepository: UserRepository
 ) : ViewModel() {
