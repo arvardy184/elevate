@@ -74,33 +74,33 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.windowInsetsPadding
 
-@Preview(showBackground = true)
-@Composable
-fun LoginPagePreview() {
-    ReplyTheme {
-        // Buat mock ViewModel untuk preview
-        val mockViewModel = object : LoginViewModel(
-            repository = null,
-            userRepository = null
-        ) {
-            override val uiState: StateFlow<LoginUiState> = MutableStateFlow(LoginUiState())
-            override val navigationEvent: StateFlow<NavigationEvent?> = MutableStateFlow(null)
-            
-            override fun login(email: String, password: String, rememberMe: Boolean) {
-                // Mock implementation
-            }
-            
-            override fun onNavigationHandled() {
-                // Mock implementation
-            }
-        }
-        
-        LoginPage(
-            navController = rememberNavController(),
-            viewModel = mockViewModel
-        )
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun LoginPagePreview() {
+//    ReplyTheme {
+//        // Buat mock ViewModel untuk preview
+//        val mockViewModel = object : LoginViewModel(
+//            repository = null,
+//            userRepository = null
+//        ) {
+//            override val uiState: StateFlow<LoginUiState> = MutableStateFlow(LoginUiState())
+//            override val navigationEvent: StateFlow<NavigationEvent?> = MutableStateFlow(null)
+//
+//            override fun login(email: String, password: String, rememberMe: Boolean) {
+//                // Mock implementation
+//            }
+//
+//            override fun onNavigationHandled() {
+//                // Mock implementation
+//            }
+//        }
+//
+//        LoginPage(
+//            navController = rememberNavController(),
+//            viewModel = mockViewModel
+//        )
+//    }
+//}
 
 @Composable
 fun LoginPage(
@@ -219,9 +219,10 @@ fun LoginPage(
                 unfocusedContainerColor = MaterialTheme.colorScheme.background,
                 cursorColor = MaterialTheme.colorScheme.primary,
                 focusedIndicatorColor = MaterialTheme.colorScheme.primary,  // Border warna fokus
-                unfocusedIndicatorColor = if (email.isNotEmpty()) MaterialTheme.colorScheme.primary else Color(0x40000000),  // Border saat tidak fokus
                 focusedLabelColor = MaterialTheme.colorScheme.primary,
-                unfocusedLabelColor = Color.Black
+                unfocusedLabelColor = Color.Black,
+                unfocusedIndicatorColor = if (email.isNotEmpty()) MaterialTheme.colorScheme.primary else Color(0x40000000),  // Border saat tidak fokus
+
             ),
             textStyle = LocalTextStyle.current,
             shape = RoundedCornerShape(15.dp),
@@ -249,21 +250,21 @@ fun LoginPage(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.background)
-                .shadow(
-                    elevation = if (isPasswordFocused or password.isNotEmpty()) 0.dp else 4.dp,
-                    shape = RoundedCornerShape(15.dp),
-                )
+//                .shadow(
+//                    elevation = if (isPasswordFocused or password.isNotEmpty()) 0.dp else 4.dp,
+//                    shape = RoundedCornerShape(15.dp),
+//                )
                 .onFocusChanged { focusState ->
                     isPasswordFocused = focusState.isFocused
             },
             colors = TextFieldDefaults.colors(
-                focusedContainerColor = MaterialTheme.colorScheme.background,
+                focusedContainerColor = MaterialTheme.colorScheme.background,  // Agar background tetap transparan
                 unfocusedContainerColor = MaterialTheme.colorScheme.background,
                 cursorColor = MaterialTheme.colorScheme.primary,
-                focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                unfocusedIndicatorColor = if (password.isNotEmpty()) MaterialTheme.colorScheme.primary else Color.Transparent,
+                focusedIndicatorColor = MaterialTheme.colorScheme.primary,  // Border warna fokus
                 focusedLabelColor = MaterialTheme.colorScheme.primary,
-                unfocusedLabelColor = Color.Black
+                unfocusedLabelColor = Color.Black,
+                unfocusedIndicatorColor = if (password.isNotEmpty()) MaterialTheme.colorScheme.primary else Color(0x40000000)
             ),
             textStyle = LocalTextStyle.current,
             shape = RoundedCornerShape(15.dp),

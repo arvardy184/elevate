@@ -12,13 +12,17 @@ import com.application.elevate.data.repository.AuthRepository
 import com.application.elevate.data.repository.UserRepository
 import com.application.elevate.model.UserRequest
 import android.util.Log
+import com.application.elevate.data.repository.DataStoreRepository
+import androidx.datastore.preferences.core.booleanPreferencesKey
 
 @HiltViewModel
 open class LoginViewModel @Inject constructor(
     private val repository: AuthRepository?,
-    private val userRepository: UserRepository?
+    private val userRepository: UserRepository?,
+    private val dataStoreRepository: DataStoreRepository
 ) : ViewModel() {
     private val TAG = "LoginViewModel"
+    private val USER_IS_ASSESSMENT_COMPLETED_KEY = booleanPreferencesKey("user_is_assessment_completed")
 
     open val _uiState = MutableStateFlow(LoginUiState())
     open val uiState: StateFlow<LoginUiState> = _uiState
@@ -59,6 +63,14 @@ open class LoginViewModel @Inject constructor(
                         // Simpan data user dan status assessment
                         userRepository?.updateUserSync(response.user)
                         userRepository?.updateUser(response.user)
+                        
+                        // Update status assessment di DataStore
+                        userRepository?.let { repo ->
+                            dataStoreRepository.edit { prefs ->
+                                prefs[USER_IS_ASSESSMENT_COMPLETED_KEY] = response.user.isAssessmentCompleted
+                            }
+                        }
+                        
                         Log.d(TAG, "Data user setelah login: ${response.user}")
                         Log.d(TAG, "Status assessment dari API: ${response.user.isAssessmentCompleted}")
                         

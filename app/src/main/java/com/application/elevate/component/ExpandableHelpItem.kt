@@ -1,4 +1,4 @@
-package com.application.elevate.ui.component
+package com.application.elevate.component
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState

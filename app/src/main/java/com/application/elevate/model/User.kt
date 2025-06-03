@@ -6,13 +6,20 @@ data class User(
     val role: String = "USER",
     val firstName: String = "",
     val lastName: String = "",
-    val photoUrl: String = "",
-    val address: String = "",
-    val phoneNumber: String = "",
-    val gender: String = "",
-    val birthDate: String = "",
+    val photoUrl: String? = null,
+    val address: String? = null,
+    val phoneNumber: String? = null,
+    val gender: String? = null,
+    val birthDate: String? = null,
     val isAssessmentCompleted: Boolean = false
 ) {
     val fullName: String
         get() = "$firstName $lastName".trim()
+        
+    // Fungsi helper untuk mendapatkan nilai dengan default
+    fun getPhotoUrlOrDefault(): String = photoUrl ?: ""
+    fun getAddressOrDefault(): String = address ?: ""
+    fun getPhoneNumberOrDefault(): String = phoneNumber ?: ""
+    fun getGenderOrDefault(): String = gender ?: ""
+    fun getBirthDateOrDefault(): String = birthDate ?: ""
 } 

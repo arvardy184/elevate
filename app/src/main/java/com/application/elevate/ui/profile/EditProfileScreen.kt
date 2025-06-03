@@ -49,6 +49,7 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import android.util.Log
+import android.widget.Toast
 
 @Composable
 fun EditProfileScreen(
@@ -67,7 +68,7 @@ fun EditProfileScreen(
 
     // Update selectedImageUri when user's photoUrl changes
     LaunchedEffect(uiState.user.photoUrl) {
-        if (uiState.user.photoUrl.isNotEmpty()) {
+        if (uiState.user.photoUrl?.isNotEmpty() == true) {
             try {
                 selectedImageUri = Uri.parse(uiState.user.photoUrl)
             } catch (e: Exception) {
@@ -147,8 +148,12 @@ fun EditProfileScreen(
     // Show error message if any
     uiState.error?.let { error ->
         LaunchedEffect(error) {
-            // Show error message using Snackbar or Toast
-            // You can implement this based on your UI requirements
+            val errorMessage = when {
+                error.contains("Job was cancelled") -> "Koneksi terputus. Silakan coba lagi."
+                error.contains("Socket closed") -> "Koneksi terputus. Silakan coba lagi."
+                else -> "Terjadi kesalahan: $error"
+            }
+            Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
         }
     }
 }
@@ -162,22 +167,22 @@ fun EditProfileContent(
     onProfilePictureClick: () -> Unit,
     onSaveChanges: (User) -> Unit
 ) {
-    var firstName by remember { mutableStateOf(user.firstName) }
-    var lastName by remember { mutableStateOf(user.lastName) }
-    var email by remember { mutableStateOf(user.email) }
-    var address by remember { mutableStateOf(user.address) }
-    var phoneNumber by remember { mutableStateOf(user.phoneNumber) }
-    var gender by remember { mutableStateOf(user.gender) }
-    var birthDate by remember { mutableStateOf(user.birthDate) }
+    var firstName by remember { mutableStateOf(user.firstName ?: "") }
+    var lastName by remember { mutableStateOf(user.lastName ?: "") }
+    var email by remember { mutableStateOf(user.email ?: "") }
+    var address by remember { mutableStateOf(user.address ?: "") }
+    var phoneNumber by remember { mutableStateOf(user.phoneNumber ?: "") }
+    var gender by remember { mutableStateOf(user.gender ?: "") }
+    var birthDate by remember { mutableStateOf(user.birthDate ?: "") }
 
     LaunchedEffect(user) {
-        firstName = user.firstName
-        lastName = user.lastName
-        email = user.email
-        address = user.address
-        phoneNumber = user.phoneNumber
-        gender = user.gender
-        birthDate = user.birthDate
+        firstName = user.firstName ?: ""
+        lastName = user.lastName ?: ""
+        email = user.email ?: ""
+        address = user.address ?: ""
+        phoneNumber = user.phoneNumber ?: ""
+        gender = user.gender ?: ""
+        birthDate = user.birthDate ?: ""
     }
 
     Column(
@@ -301,7 +306,7 @@ fun EditProfileContent(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp),
                 singleLine = true,
-                placeholder = { Text(text = user.firstName) }
+                placeholder = { Text(text = user.firstName ?: "Enter first name") }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -320,7 +325,7 @@ fun EditProfileContent(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp),
                 singleLine = true,
-                placeholder = { Text(text = user.lastName) }
+                placeholder = { Text(text = user.lastName ?: "Enter last name") }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -340,7 +345,7 @@ fun EditProfileContent(
                 shape = RoundedCornerShape(8.dp),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                placeholder = { Text(text = user.email) }
+                placeholder = { Text(text = user.email ?: "Enter email") }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -365,7 +370,7 @@ fun EditProfileContent(
                         contentDescription = "View on map"
                     )
                 },
-                placeholder = { Text(text = user.address) }
+                placeholder = { Text(text = user.address ?: "Enter address") }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -385,7 +390,7 @@ fun EditProfileContent(
                 shape = RoundedCornerShape(8.dp),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                placeholder = { Text(text = user.phoneNumber) }
+                placeholder = { Text(text = user.phoneNumber ?: "Enter phone number") }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -411,7 +416,7 @@ fun EditProfileContent(
                         contentDescription = "Select gender"
                     )
                 },
-                placeholder = { Text(text = user.gender) }
+                placeholder = { Text(text = user.gender ?: "Select gender") }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -436,7 +441,7 @@ fun EditProfileContent(
                         contentDescription = "Select date"
                     )
                 },
-                placeholder = { Text(text = user.birthDate) }
+                placeholder = { Text(text = user.birthDate ?: "Select birth date") }
             )
 
             Spacer(modifier = Modifier.height(32.dp))

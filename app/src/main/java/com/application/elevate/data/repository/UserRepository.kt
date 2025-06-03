@@ -1,14 +1,12 @@
 package com.application.elevate.data.repository
 
-import android.content.Context
 import android.util.Log
-import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
 import com.application.elevate.model.User
+import com.application.elevate.data.datastore.DataStoreManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,14 +14,15 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.GlobalScope
-
-private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "user_preferences")
+import kotlinx.coroutines.delay
 
 @Singleton
 class UserRepository @Inject constructor(
-    private val context: Context
+    private val dataStoreManager: DataStoreManager
 ) {
     private val TAG = "UserRepository"
     
@@ -32,15 +31,18 @@ class UserRepository @Inject constructor(
     
     private var _token: String? = null
     
+    // Membuat CoroutineScope yang aman
+    private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    
     init {
         // Muat data user dari DataStore saat inisialisasi
         loadUserFromDataStore()
     }
     
     private fun loadUserFromDataStore() {
-        GlobalScope.launch {
+        repositoryScope.launch {
             try {
-                val preferences = context.dataStore.data.first()
+                val preferences = dataStoreManager.dataStore.data.first()
                 val user = User(
                     id = preferences[USER_ID_KEY]?.toIntOrNull() ?: 0,
                     firstName = preferences[USER_FIRST_NAME_KEY] ?: "",
@@ -63,12 +65,12 @@ class UserRepository @Inject constructor(
     }
     
     // Flow untuk memantau perubahan token
-    val tokenFlow: Flow<String?> = context.dataStore.data.map { preferences ->
+    val tokenFlow: Flow<String?> = dataStoreManager.dataStore.data.map { preferences ->
         preferences[TOKEN_KEY]
     }
 
     // Flow untuk memantau status remember me
-    val rememberMeFlow: Flow<Boolean> = context.dataStore.data.map { preferences ->
+    val rememberMeFlow: Flow<Boolean> = dataStoreManager.dataStore.data.map { preferences ->
         preferences[REMEMBER_ME_KEY] ?: false
     }
     
@@ -89,7 +91,7 @@ class UserRepository @Inject constructor(
             }
             
             Log.d(TAG, "Menyimpan token dan mengaktifkan remember me")
-            context.dataStore.edit { preferences ->
+            dataStoreManager.dataStore.edit { preferences ->
                 preferences[TOKEN_KEY] = formattedToken
                 preferences[REMEMBER_ME_KEY] = true
             }
@@ -103,7 +105,7 @@ class UserRepository @Inject constructor(
     suspend fun setRememberMe(remember: Boolean) {
         try {
             Log.d(TAG, "Mengatur status remember me: $remember")
-            context.dataStore.edit { preferences ->
+            dataStoreManager.dataStore.edit { preferences ->
                 preferences[REMEMBER_ME_KEY] = remember
             }
             Log.d(TAG, "Status remember me berhasil diatur: $remember")
@@ -113,31 +115,64 @@ class UserRepository @Inject constructor(
         }
     }
     
+    // Fungsi untuk mendapatkan token dengan retry
     suspend fun getToken(): String? {
-        try {
-            Log.d(TAG, "Mencoba mendapatkan token autentikasi untuk remember me")
-            val preferences = context.dataStore.data.first()
-            val token = preferences[TOKEN_KEY]
-            Log.d(TAG, if (token != null) "Token autentikasi ditemukan" else "Token autentikasi tidak ditemukan")
-            return token
-        } catch (e: Exception) {
-            Log.e(TAG, "Gagal mendapatkan token autentikasi: ${e.message}")
-            throw Exception("Gagal mendapatkan token: ${e.message}")
+        var retryCount = 0
+        val maxRetries = 3
+        var lastError: Exception? = null
+
+        while (retryCount < maxRetries) {
+            try {
+                Log.d(TAG, "Mencoba mendapatkan token autentikasi untuk remember me")
+                val preferences = dataStoreManager.dataStore.data.first()
+                val token = preferences[TOKEN_KEY]
+                
+                if (token != null) {
+                    Log.d(TAG, "Token autentikasi ditemukan")
+                    return token
+                } else {
+                    Log.d(TAG, "Token tidak ditemukan")
+                    return null
+                }
+            } catch (e: Exception) {
+                lastError = e
+                Log.e(TAG, "Gagal mendapatkan token autentikasi: ${e.message}")
+                
+                if (e.message?.contains("Job was cancelled") == true || 
+                    e.message?.contains("Socket closed") == true) {
+                    retryCount++
+                    if (retryCount < maxRetries) {
+                        Log.d(TAG, "Mencoba mendapatkan token lagi (percobaan $retryCount)")
+                        kotlinx.coroutines.delay(1000L * retryCount) // Exponential backoff
+                        continue
+                    }
+                }
+                break
+            }
         }
+        
+        throw lastError ?: Exception("Gagal mendapatkan token setelah $maxRetries percobaan")
     }
     //TumbuhNyata was here
     private fun isTokenValid(token: String): Boolean {
         return try {
             Log.d(TAG, "Memvalidasi token JWT untuk remember me")
             
+            // Hapus prefix Bearer jika ada
+            val cleanToken = if (token.startsWith("Bearer ")) {
+                token.substring(7)
+            } else {
+                token
+            }
+            
             // Validasi format token JWT
-            if (!token.matches(Regex("^[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.?[A-Za-z0-9-_.+/=]*$"))) {
-                Log.e(TAG, "Format token JWT tidak valid: $token")
+            if (!cleanToken.matches(Regex("^[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.?[A-Za-z0-9-_.+/=]*$"))) {
+                Log.e(TAG, "Format token JWT tidak valid: $cleanToken")
                 return false
             }
 
             // Decode payload JWT
-            val parts = token.split(".")
+            val parts = cleanToken.split(".")
             if (parts.size != 3) {
                 Log.e(TAG, "Token JWT tidak memiliki 3 bagian")
                 return false
@@ -168,7 +203,7 @@ class UserRepository @Inject constructor(
     suspend fun isLoggedIn(): Boolean {
         try {
             Log.d(TAG, "Mengecek status login dengan token remember me")
-            val preferences = context.dataStore.data.first()
+            val preferences = dataStoreManager.dataStore.data.first()
             val token = preferences[TOKEN_KEY]
             val rememberMe = preferences[REMEMBER_ME_KEY] ?: false
             
@@ -177,45 +212,112 @@ class UserRepository @Inject constructor(
                 return false
             }
             
-            // Token dianggap valid jika ada dan remember me aktif
-            Log.d(TAG, "Token remember me valid, user sudah login")
-            return true
+            // Validasi token dan sinkronisasi data
+            if (isTokenValid(token)) {
+                Log.d(TAG, "Token remember me valid, melakukan sinkronisasi data")
+                try {
+                    // Ambil data user dari DataStore
+                    val user = getUser()
+                    if (user != null) {
+                        // Update status assessment dari DataStore
+                        val assessmentStatus = preferences[USER_IS_ASSESSMENT_COMPLETED_KEY] ?: false
+                        Log.d(TAG, "Status assessment dari DataStore: $assessmentStatus")
+                        
+                        // Update user flow dengan status assessment yang benar
+                        _userFlow.value = user.copy(isAssessmentCompleted = assessmentStatus)
+                        Log.d(TAG, "User flow diupdate dengan status assessment: $assessmentStatus")
+                    }
+                    return true
+                } catch (e: Exception) {
+                    Log.e(TAG, "Gagal sinkronisasi data: ${e.message}")
+                    return true
+                }
+            }
+            
+            Log.d(TAG, "Token remember me tidak valid")
+            return false
         } catch (e: Exception) {
             Log.e(TAG, "Error saat mengecek status login dengan token remember me: ${e.message}")
             return false
         }
     }
 
+    private suspend fun syncUserDataFromServer() {
+        try {
+            Log.d(TAG, "Memulai sinkronisasi data user dari server")
+            // Ambil data user dari server menggunakan API
+            val user = getUser()
+            if (user != null) {
+                // Update data di DataStore
+                dataStoreManager.dataStore.edit { prefs ->
+                    prefs[USER_ID_KEY] = user.id.toString()
+                    prefs[USER_FIRST_NAME_KEY] = user.firstName
+                    prefs[USER_LAST_NAME_KEY] = user.lastName
+                    prefs[USER_EMAIL_KEY] = user.email
+                    prefs[USER_AVATAR_KEY] = user.getPhotoUrlOrDefault()
+                    prefs[USER_ADDRESS_KEY] = user.getAddressOrDefault()
+                    prefs[USER_PHONE_KEY] = user.getPhoneNumberOrDefault()
+                    prefs[USER_GENDER_KEY] = user.getGenderOrDefault()
+                    prefs[USER_BIRTH_DATE_KEY] = user.getBirthDateOrDefault()
+                    prefs[USER_ROLE_KEY] = user.role
+                    prefs[USER_IS_ASSESSMENT_COMPLETED_KEY] = user.isAssessmentCompleted
+                }
+                
+                // Update user flow
+                _userFlow.value = user
+                
+                Log.d(TAG, "Data user berhasil disinkronkan dari server")
+                Log.d(TAG, "Status assessment terbaru: ${user.isAssessmentCompleted}")
+            } else {
+                Log.e(TAG, "Data user tidak ditemukan di server")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error saat sinkronisasi data user: ${e.message}")
+            throw e
+        }
+    }
+
     suspend fun updateUser(user: User) {
         Log.d(TAG, "Memperbarui data user: $user")
-        Log.d(TAG, "Nama depan: ${user.firstName}, Nama belakang: ${user.lastName}")
-        Log.d(TAG, "Nama lengkap: ${user.fullName}")
         Log.d(TAG, "Status assessment sebelum update: ${_userFlow.value?.isAssessmentCompleted}")
         
-        // Update user flow
-        _userFlow.value = user
+        // Ambil status assessment yang ada di DataStore
+        val currentAssessmentStatus = dataStoreManager.dataStore.data.first()[USER_IS_ASSESSMENT_COMPLETED_KEY] ?: false
+        Log.d(TAG, "Status assessment dari DataStore: $currentAssessmentStatus")
+        
+        // Update user flow dengan mempertahankan status assessment
+        _userFlow.value = user.copy(
+            isAssessmentCompleted = currentAssessmentStatus,
+            photoUrl = user.getPhotoUrlOrDefault(),
+            address = user.getAddressOrDefault(),
+            phoneNumber = user.getPhoneNumberOrDefault(),
+            gender = user.getGenderOrDefault(),
+            birthDate = user.getBirthDateOrDefault()
+        )
         
         try {
-            // Simpan data user ke DataStore
-            context.dataStore.edit { preferences ->
+            // Simpan data user ke DataStore dengan mempertahankan status assessment
+            dataStoreManager.dataStore.edit { preferences ->
                 preferences[USER_ID_KEY] = user.id.toString()
                 preferences[USER_FIRST_NAME_KEY] = user.firstName
                 preferences[USER_LAST_NAME_KEY] = user.lastName
                 preferences[USER_EMAIL_KEY] = user.email
-                preferences[USER_AVATAR_KEY] = user.photoUrl
-                preferences[USER_ADDRESS_KEY] = user.address
-                preferences[USER_PHONE_KEY] = user.phoneNumber
-                preferences[USER_GENDER_KEY] = user.gender
-                preferences[USER_BIRTH_DATE_KEY] = user.birthDate
+                preferences[USER_AVATAR_KEY] = user.getPhotoUrlOrDefault()
+                preferences[USER_ADDRESS_KEY] = user.getAddressOrDefault()
+                preferences[USER_PHONE_KEY] = user.getPhoneNumberOrDefault()
+                preferences[USER_GENDER_KEY] = user.getGenderOrDefault()
+                preferences[USER_BIRTH_DATE_KEY] = user.getBirthDateOrDefault()
                 preferences[USER_ROLE_KEY] = user.role
-                preferences[USER_IS_ASSESSMENT_COMPLETED_KEY] = user.isAssessmentCompleted
+                // Tetap gunakan status assessment yang ada di DataStore
+                preferences[USER_IS_ASSESSMENT_COMPLETED_KEY] = currentAssessmentStatus
             }
             Log.d(TAG, "Data user berhasil disimpan ke DataStore")
+            Log.d(TAG, "Status assessment setelah update di DataStore: $currentAssessmentStatus")
         } catch (e: Exception) {
             Log.e(TAG, "Gagal menyimpan data user ke DataStore: ${e.message}")
         }
         
-        Log.d(TAG, "Status assessment setelah update: ${_userFlow.value?.isAssessmentCompleted}")
+        Log.d(TAG, "Status assessment setelah update di userFlow: ${_userFlow.value?.isAssessmentCompleted}")
     }
 
     // Fungsi untuk update user secara synchronous
@@ -237,7 +339,7 @@ class UserRepository @Inject constructor(
         Log.d(TAG, "Membersihkan data user dan token remember me")
         _userFlow.value = null
         
-        context.dataStore.edit { prefs ->
+        dataStoreManager.dataStore.edit { prefs ->
             // Hapus semua data termasuk token remember me
             prefs.remove(TOKEN_KEY)
             prefs.remove(REMEMBER_ME_KEY)
@@ -265,31 +367,31 @@ class UserRepository @Inject constructor(
     }
 
     suspend fun isFirstLaunch(): Boolean {
-        val preferences = context.dataStore.data.first()
+        val preferences = dataStoreManager.dataStore.data.first()
         return preferences[IS_FIRST_LAUNCH_KEY] ?: true
     }
 
     suspend fun setFirstLaunch(isFirst: Boolean) {
-        context.dataStore.edit { preferences ->
+        dataStoreManager.dataStore.edit { preferences ->
             preferences[IS_FIRST_LAUNCH_KEY] = isFirst
         }
     }
 
     // Tambahkan fungsi untuk mendapatkan status assessment dari DataStore
     suspend fun getAssessmentStatus(): Boolean {
-        val preferences = context.dataStore.data.first()
+        val preferences = dataStoreManager.dataStore.data.first()
         val status = preferences[USER_IS_ASSESSMENT_COMPLETED_KEY] ?: false
         Log.d(TAG, "Status assessment dari DataStore: $status")
         return status
     }
 
     suspend fun shouldShowTutorial(): Boolean {
-        val preferences = context.dataStore.data.first()
+        val preferences = dataStoreManager.dataStore.data.first()
         return preferences[SHOW_TUTORIAL_KEY] ?: true
     }
 
     suspend fun setTutorialShown() {
-        context.dataStore.edit { preferences ->
+        dataStoreManager.dataStore.edit { preferences ->
             preferences[SHOW_TUTORIAL_KEY] = false
         }
     }

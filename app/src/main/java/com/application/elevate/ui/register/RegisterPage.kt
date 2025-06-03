@@ -255,11 +255,11 @@ fun RegisterContent(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(top = 55.dp, start = 29.dp, end = 29.dp, bottom = 40.dp),
+            .padding(top = 0.dp, start = 29.dp, end = 29.dp, bottom = 40.dp),
         verticalArrangement = Arrangement.Top
     ) {
         item {
-            Spacer(modifier = Modifier.height(65.dp))
+            Spacer(modifier = Modifier.height(35.dp))
 
             Text(
                 text = "Get Started!",
@@ -295,10 +295,6 @@ fun RegisterContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.background)
-                    .shadow(
-                        elevation = if (isFirstNameFocused or firstName.isNotEmpty()) 0.dp else 4.dp,
-                        shape = RoundedCornerShape(15.dp),
-                    )
                     .onFocusChanged { focusState ->
                         onFirstNameFocusChange(focusState.isFocused)
                     },
@@ -307,7 +303,7 @@ fun RegisterContent(
                     unfocusedContainerColor = MaterialTheme.colorScheme.background,
                     cursorColor = MaterialTheme.colorScheme.primary,
                     focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                    unfocusedIndicatorColor = if (firstName.isNotEmpty()) MaterialTheme.colorScheme.primary else Color.Transparent,
+                    unfocusedIndicatorColor = if (firstName.isNotEmpty()) MaterialTheme.colorScheme.primary else Color(0x40000000),
                     focusedLabelColor = MaterialTheme.colorScheme.primary,
                     unfocusedLabelColor = Color.Black
                 ),
@@ -328,10 +324,6 @@ fun RegisterContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.background)
-                    .shadow(
-                        elevation = if (isLastNameFocused or lastName.isNotEmpty()) 0.dp else 4.dp,
-                        shape = RoundedCornerShape(15.dp),
-                    )
                     .onFocusChanged { focusState ->
                         onLastNameFocusChange(focusState.isFocused)
                     },
@@ -340,7 +332,7 @@ fun RegisterContent(
                     unfocusedContainerColor = MaterialTheme.colorScheme.background,
                     cursorColor = MaterialTheme.colorScheme.primary,
                     focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                    unfocusedIndicatorColor = if (lastName.isNotEmpty()) MaterialTheme.colorScheme.primary else Color.Transparent,
+                    unfocusedIndicatorColor = if (lastName.isNotEmpty()) MaterialTheme.colorScheme.primary else Color(0x40000000),
                     focusedLabelColor = MaterialTheme.colorScheme.primary,
                     unfocusedLabelColor = Color.Black
                 ),
@@ -361,10 +353,7 @@ fun RegisterContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.background)
-                    .shadow(
-                        elevation = if (isEmailFocused or email.isNotEmpty()) 0.dp else 4.dp,
-                        shape = RoundedCornerShape(15.dp),
-                    )
+
                     .onFocusChanged { focusState ->
                         onEmailFocusChange(focusState.isFocused)
                     },
@@ -373,7 +362,7 @@ fun RegisterContent(
                     unfocusedContainerColor = MaterialTheme.colorScheme.background,
                     cursorColor = MaterialTheme.colorScheme.primary,
                     focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                    unfocusedIndicatorColor = if (email.isNotEmpty()) MaterialTheme.colorScheme.primary else Color.Transparent,
+                    unfocusedIndicatorColor = if (email.isNotEmpty()) MaterialTheme.colorScheme.primary else Color(0x40000000),
                     focusedLabelColor = MaterialTheme.colorScheme.primary,
                     unfocusedLabelColor = Color.Black
                 ),
@@ -394,10 +383,6 @@ fun RegisterContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.background)
-                    .shadow(
-                        elevation = if (isPhoneFocused or phoneNumber.isNotEmpty()) 0.dp else 4.dp,
-                        shape = RoundedCornerShape(15.dp),
-                    )
                     .onFocusChanged { focusState ->
                         onPhoneFocusChange(focusState.isFocused)
                     },
@@ -406,7 +391,7 @@ fun RegisterContent(
                     unfocusedContainerColor = MaterialTheme.colorScheme.background,
                     cursorColor = MaterialTheme.colorScheme.primary,
                     focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                    unfocusedIndicatorColor = if (phoneNumber.isNotEmpty()) MaterialTheme.colorScheme.primary else Color.Transparent,
+                    unfocusedIndicatorColor = if (phoneNumber.isNotEmpty()) MaterialTheme.colorScheme.primary else Color(0x40000000),
                     focusedLabelColor = MaterialTheme.colorScheme.primary,
                     unfocusedLabelColor = Color.Black
                 ),
@@ -435,7 +420,7 @@ fun RegisterContent(
                     unfocusedContainerColor = MaterialTheme.colorScheme.background,
                     cursorColor = MaterialTheme.colorScheme.primary,
                     focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                    unfocusedIndicatorColor = if (password.isNotEmpty()) MaterialTheme.colorScheme.primary else Color.Transparent,
+                    unfocusedIndicatorColor = if (password.isNotEmpty()) MaterialTheme.colorScheme.primary else Color(0x40000000),
                     focusedLabelColor = MaterialTheme.colorScheme.primary,
                     unfocusedLabelColor = Color.Black
                 ),
@@ -446,10 +431,7 @@ fun RegisterContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.background)
-                    .shadow(
-                        elevation = if (isPasswordFocused or password.isNotEmpty()) 0.dp else 4.dp,
-                        shape = RoundedCornerShape(15.dp),
-                    )
+
                     .onFocusChanged { focusState ->
                         onPasswordFocusChange(focusState.isFocused)
                     }
@@ -473,10 +455,6 @@ fun RegisterContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.background)
-                    .shadow(
-                        elevation = if (isConfirmPasswordFocused or rePassword.isNotEmpty()) 0.dp else 4.dp,
-                        shape = RoundedCornerShape(15.dp),
-                    )
                     .onFocusChanged { focusState ->
                         onConfirmPasswordFocusChange(focusState.isFocused)
                     },
@@ -485,7 +463,7 @@ fun RegisterContent(
                     unfocusedContainerColor = MaterialTheme.colorScheme.background,
                     cursorColor = MaterialTheme.colorScheme.primary,
                     focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                    unfocusedIndicatorColor = if (rePassword.isNotEmpty()) MaterialTheme.colorScheme.primary else Color.Transparent,
+                    unfocusedIndicatorColor = if (rePassword.isNotEmpty()) MaterialTheme.colorScheme.primary else Color(0x40000000),
                     focusedLabelColor = MaterialTheme.colorScheme.primary,
                     unfocusedLabelColor = Color.Black
                 ),
@@ -536,7 +514,7 @@ fun RegisterContent(
                 }
             }
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(30.dp))
         }
 
         // Social Login Section

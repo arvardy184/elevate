@@ -1,6 +1,7 @@
 package com.application.elevate.di
 
 import android.content.Context
+import com.application.elevate.data.datastore.DataStoreManager
 import com.application.elevate.data.repository.UserRepository
 import dagger.Module
 import dagger.Provides
@@ -21,7 +22,15 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideUserRepository(context: Context): UserRepository {
-        return UserRepository(context)
+    fun provideUserRepository(dataStoreManager: DataStoreManager): UserRepository {
+        return UserRepository(dataStoreManager)
+    }
+
+    @Provides
+    @Singleton
+    fun provideDataStoreManager(
+        @ApplicationContext context: Context
+    ): DataStoreManager {
+        return DataStoreManager(context)
     }
 } 

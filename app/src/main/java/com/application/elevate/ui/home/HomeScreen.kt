@@ -4,9 +4,6 @@ import android.util.Log
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,13 +23,12 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.application.elevate.component.*
 import com.application.elevate.data.dummy.ProfileDummyData.categories
-import com.application.elevate.data.dummy.ProfileDummyData.currentUser
 import com.application.elevate.data.dummy.ProfileDummyData.dummyCourses
 import com.application.elevate.data.dummy.ProfileDummyData.growthHubItems
-import com.application.elevate.model.Course
 import com.application.elevate.model.User
 import com.application.elevate.ui.theme.ReplyTheme
 import androidx.hilt.navigation.compose.hiltViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(
@@ -41,6 +37,11 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val density = LocalDensity.current
+
+    // Refresh data user saat screen muncul
+    LaunchedEffect(Unit) {
+        viewModel.refreshUserData()
+    }
 
     // Gunakan user dari uiState dengan default user jika null
     val user = uiState.user ?: User(
@@ -68,9 +69,6 @@ fun HomeScreen(
 
     var categoryPosition by remember { mutableStateOf(Offset.Zero) }
     var categorySize by remember { mutableStateOf(Size.Zero) }
-
-    var counselingButtonPosition by remember { mutableStateOf(Offset.Zero) }
-    var counselingButtonSize by remember { mutableStateOf(Size.Zero) }
 
     var popularCoursePosition by remember { mutableStateOf(Offset.Zero) }
     var popularCourseSize by remember { mutableStateOf(Size.Zero) }
@@ -111,16 +109,22 @@ fun HomeScreen(
                         .onGloballyPositioned { coordinates ->
                             growthHubPosition = coordinates.positionInRoot()
                             growthHubSize = coordinates.size.toSize()}) {
-                        SectionHeader(title = "Growth Hub", onViewAllClick = {})
+                        Text(
+                            text = "Growth Hub",
+                            style = MaterialTheme.typography.titleMedium
+                        )
                         Spacer(modifier = Modifier.height(14.dp))
                         LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             items(growthHubItems) { item ->
                                 GrowthHubItem(label = item.title, imageRes = item.imageRes) {
                                     Log.d("GrowthHubItem", "Clicked: ${item.title}")
                                     if(item.title == "CV Review"){
-//                                    Log.d("Cek cv review","click": )
                                         navController.navigate("cv_review")
                                     }
+                                    if(item.title == "Counseling"){
+                                        navController.navigate("consultant")
+                                    }
+
                                 }
                             }
                         }
@@ -256,10 +260,27 @@ fun HomeScreen(
 
 
 
-@Preview(showBackground = true)
-@Composable
-fun HomeScreenPreview() {
-    ReplyTheme { // Pastikan ini adalah theme kamu
-        HomeScreen(navController = rememberNavController())
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun HomeScreenPreview() {
+//    ReplyTheme {
+//        HomeScreen(
+//            navController = rememberNavController(),
+//            viewModel = PreviewHomeViewModel()
+//        )
+//    }
+//}
+
+//@Preview(showBackground = true)
+//@Composable
+//fun HomeScreenWithTutorialPreview() {
+//    ReplyTheme {
+//        val previewViewModel = PreviewHomeViewModel()
+//        previewViewModel.onTutorialComplete() // Ini akan mengatur showTutorial ke false
+//
+//        HomeScreen(
+//            navController = rememberNavController(),
+//            viewModel = previewViewModel
+//        )
+//    }
+//}

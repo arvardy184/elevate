@@ -23,7 +23,6 @@ import com.application.elevate.ui.theme.ReplyTheme
     fun CategoryScreen(onSelect: (String) -> Unit) {
         Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
             TopAppBar(title = { Text("Counseling") }, )
-//                colors = TopAppBarColors(containerColor = MaterialTheme.colorScheme.primary)
             LazyRow(modifier = Modifier.padding(16.dp)) {
                 items(listOf("Design","Development","Finance","Programming")) { cat ->
                     CategoryItem(

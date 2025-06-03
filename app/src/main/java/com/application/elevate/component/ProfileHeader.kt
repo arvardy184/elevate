@@ -1,4 +1,4 @@
-package com.application.elevate.ui.component
+package com.application.elevate.component
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -51,7 +51,7 @@ fun ProfileHeader(
                     .clickable(onClick = onProfileClick),
                 contentAlignment = Alignment.Center
             ) {
-                if (user.photoUrl.isNotEmpty()) {
+                if (user.photoUrl?.isNotEmpty() == true) {
                     Image(
                         painter = painterResource(id = R.drawable.profile_placeholder),
                         contentDescription = "Profile Picture",

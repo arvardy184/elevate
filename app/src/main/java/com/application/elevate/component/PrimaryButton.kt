@@ -1,4 +1,4 @@
-package com.application.elevate.ui.component
+package com.application.elevate.component
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme

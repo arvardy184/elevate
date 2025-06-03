@@ -10,20 +10,15 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import androidx.core.view.WindowCompat
 import com.application.elevate.data.dummy.ProfileDummyData.dummyCourseDetails
 import com.application.elevate.ui.assessment.AssessmentCompletedScreen
 import com.application.elevate.ui.assessment.AssessmentScreen
@@ -38,7 +33,6 @@ import com.application.elevate.ui.counseling.CounselingScreen
 import com.application.elevate.ui.counseling.CounselingViewModel
 import com.application.elevate.ui.cvreview.CVReviewResultScreen
 import com.application.elevate.ui.cvreview.CVReviewScreen
-import com.application.elevate.ui.home.HomeScreen
 import com.application.elevate.ui.home.HomeViewModel
 
 import com.application.elevate.ui.login.LoginPage
@@ -52,7 +46,6 @@ import com.application.elevate.ui.roadmap.RoadmapScreen
 import com.application.elevate.ui.roadmap.RoadmapViewModel
 import com.application.elevate.ui.search.SearchScreen
 import com.application.elevate.ui.splashScreen.SplashScreen
-import com.application.elevate.ui.theme.ReplyTheme
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -122,7 +115,9 @@ fun AppNavigation() {
         }
 
         composable("splash_screen") { SplashScreen(navController) }
-        composable("home") { HomeScreen(navController) }
+        composable("home") {
+            val viewModel: HomeViewModel = hiltViewModel()
+            HomeScreen(navController,viewModel = viewModel) }
         composable("cv_review") { CVReviewScreen(navController) }
         composable("search") { SearchScreen(onBackClick = { navController.popBackStack() }) }
         composable("cv_result_review") { CVReviewResultScreen(navController) }

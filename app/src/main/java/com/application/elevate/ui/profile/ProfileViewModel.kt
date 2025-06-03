@@ -44,18 +44,26 @@ class ProfileViewModel @Inject constructor(
             ) }
 
             try {
+                // Ambil status assessment dari DataStore terlebih dahulu
+                val currentAssessmentStatus = userRepository.getAssessmentStatus()
+                Log.d(TAG, "Status assessment dari DataStore: $currentAssessmentStatus")
+
                 profileRepository.getProfile().collect { result ->
                     result.onSuccess { response ->
                         val user = response.user
                         Log.d(TAG, "Data user dari API: $user")
                         Log.d(TAG, "Nama depan: ${user.firstName}, Nama belakang: ${user.lastName}")
                         
+                        // Update user dengan mempertahankan status assessment dari DataStore
+                        val updatedUser = user.copy(isAssessmentCompleted = currentAssessmentStatus)
+                        Log.d(TAG, "User setelah update dengan status assessment: $updatedUser")
+                        
                         // Update user di repository lokal
-                        userRepository.updateUser(user)
+                        userRepository.updateUser(updatedUser)
                         
                         // Update state UI
                         _uiState.update { it.copy(
-                            user = user,
+                            user = updatedUser,
                             isLoading = false,
                             error = null
                         ) }
@@ -100,41 +108,59 @@ class ProfileViewModel @Inject constructor(
 
     fun updateUser(updatedUser: User) {
         viewModelScope.launch {
-            try {
-                _uiState.update { it.copy(isLoading = true) }
-                
-                Log.d(TAG, "Mencoba update user: $updatedUser")
-                Log.d(TAG, "Nama depan: ${updatedUser.firstName}, Nama belakang: ${updatedUser.lastName}")
-                
-                profileRepository.updateProfile(updatedUser).collect { result ->
-                    result.onSuccess { response ->
-                        val user = response.user
-                        Log.d(TAG, "Response dari API: $response")
-                        Log.d(TAG, "Data user setelah update: $user")
-                        
-                        // Update user di repository lokal
-                        userRepository.updateUser(user)
-                        
-                        // Update state UI
+            var retryCount = 0
+            val maxRetries = 3
+            
+            while (retryCount < maxRetries) {
+                try {
+                    _uiState.update { it.copy(isLoading = true) }
+                    
+                    Log.d(TAG, "Mencoba update user: $updatedUser")
+                    Log.d(TAG, "Nama depan: ${updatedUser.firstName}, Nama belakang: ${updatedUser.lastName}")
+                    
+                    profileRepository.updateProfile(updatedUser).collect { result ->
+                        result.onSuccess { response ->
+                            val user = response.user
+                            Log.d(TAG, "Response dari API: $response")
+                            Log.d(TAG, "Data user setelah update: $user")
+                            
+                            // Update user di repository lokal
+                            userRepository.updateUser(user)
+                            
+                            // Update state UI
+                            _uiState.update { it.copy(
+                                user = user,
+                                isLoading = false,
+                                error = null
+                            ) }
+                            return@collect
+                        }.onFailure { error ->
+                            Log.e(TAG, "Error saat update profil: ${error.message}")
+                            if (error.message?.contains("Job was cancelled") == true || 
+                                error.message?.contains("Socket closed") == true) {
+                                retryCount++
+                                if (retryCount < maxRetries) {
+                                    Log.d(TAG, "Mencoba update profil lagi (percobaan $retryCount)")
+                                    return@collect
+                                }
+                            }
+                            _uiState.update { it.copy(
+                                isLoading = false,
+                                error = error.message ?: "Failed to update user data"
+                            ) }
+                        }
+                    }
+                    break
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error saat update user: ${e.message}")
+                    retryCount++
+                    if (retryCount >= maxRetries) {
                         _uiState.update { it.copy(
-                            user = user,
                             isLoading = false,
-                            error = null
-                        ) }
-                    }.onFailure { error ->
-                        Log.e(TAG, "Error saat update profil: ${error.message}")
-                        _uiState.update { it.copy(
-                            isLoading = false,
-                            error = error.message ?: "Failed to update user data"
+                            error = e.message ?: "Failed to update user data"
                         ) }
                     }
                 }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error saat update user: ${e.message}")
-                _uiState.update { it.copy(
-                    isLoading = false,
-                    error = e.message ?: "Failed to update user data"
-                ) }
             }
         }
     }
@@ -180,8 +206,21 @@ class ProfileViewModel @Inject constructor(
     }
 
     fun setProfileImageUri(uri: Uri) {
+        Log.d(TAG, "Mengatur URI gambar profil: $uri")
         val currentUser = _uiState.value.user
-        _uiState.update { it.copy(user = currentUser.copy(photoUrl = uri.toString())) }
+        if (currentUser != null) {
+            val updatedUser = currentUser.copy(
+                photoUrl = uri.toString(),
+                address = currentUser.getAddressOrDefault(),
+                phoneNumber = currentUser.getPhoneNumberOrDefault(),
+                gender = currentUser.getGenderOrDefault(),
+                birthDate = currentUser.getBirthDateOrDefault()
+            )
+            _uiState.value = _uiState.value.copy(user = updatedUser)
+            Log.d(TAG, "URI gambar profil berhasil diatur")
+        } else {
+            Log.e(TAG, "Tidak dapat mengatur URI gambar profil: user null")
+        }
     }
 
     fun getUserData(): User {

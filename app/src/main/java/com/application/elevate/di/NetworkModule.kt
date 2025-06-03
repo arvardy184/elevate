@@ -1,5 +1,6 @@
 package com.application.elevate.di
 
+import android.content.Context
 import android.util.Log
 import com.application.elevate.api.AuthApiService
 import com.application.elevate.data.repository.AuthRepository
@@ -8,9 +9,12 @@ import com.application.elevate.api.ProfileApiService
 import com.application.elevate.data.repository.ProfileRepository
 import com.application.elevate.data.repository.ProfileRepositoryImpl
 import com.application.elevate.data.repository.UserRepository
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -35,6 +39,14 @@ object NetworkModule {
         Log.d(TAG, "API Response: $message")
     }.apply {
         level = HttpLoggingInterceptor.Level.BODY
+    }
+
+    @Provides
+    @Singleton
+    fun provideGson(): Gson { // Pisahkan Gson provider
+        return GsonBuilder()
+            .serializeNulls() // Ini akan membuat field null dikirim sebagai "fieldName": null
+            .create()
     }
     
     @Provides
@@ -68,18 +80,18 @@ object NetworkModule {
                     .build()
             }
             .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(90, TimeUnit.SECONDS)
+            .writeTimeout(90, TimeUnit.SECONDS)
             .build()
     }
 
     @Provides
     @Singleton
-    fun provideRetrofit(baseUrl: String, okHttpClient: OkHttpClient): Retrofit =
+    fun provideRetrofit(baseUrl: String, okHttpClient: OkHttpClient, gson: Gson): Retrofit =
         Retrofit.Builder()
             .baseUrl(baseUrl)
             .client(okHttpClient)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create(gson)) // Gunakan Gson yang sudah dikonfigurasi
             .build()
 
     @Provides
@@ -101,7 +113,9 @@ object NetworkModule {
     @Singleton
     fun provideProfileRepository(
         api: ProfileApiService,
-        userRepository: UserRepository
-    ): ProfileRepository =
-        ProfileRepositoryImpl(api, userRepository)
+        userRepository: UserRepository,
+        @ApplicationContext context: Context
+    ): ProfileRepository {
+        return ProfileRepositoryImpl(api, userRepository, context)
+    }
 }
