@@ -1,4 +1,4 @@
-package com.application.elevate.component
+package com.application.elevate.ui.component
 
 import android.util.Log
 import androidx.compose.foundation.Image
