@@ -1,6 +1,15 @@
 [versions]
+<<<<<<< Updated upstream
 agp = "8.5.2"
 kotlin = "1.9.0"
+=======
+agp = "8.3.2"
+coachmark = "version"
+kotlin = "1.9.22"
+accompanistPager = "0.28.0"
+animation = "1.7.8"
+composeBomVersion = "2025.02.00"
+>>>>>>> Stashed changes
 coreKtx = "1.15.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"

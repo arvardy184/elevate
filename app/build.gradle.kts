@@ -60,11 +60,48 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+<<<<<<< Updated upstream
     implementation("androidx.compose.material:material-icons-extended:1.6.1")
     implementation ("androidx.compose.ui:ui-text-google-fonts:1.7.8")
     implementation ("com.google.accompanist:accompanist-pager:0.28.0")
     implementation ("androidx.compose.animation:animation:0.28.0")
     implementation ("androidx.navigation:navigation-compose:2.6.0-alpha01")
+=======
+    implementation(libs.hilt.android)
+    implementation(libs.hilt.navigation.compose)
+    implementation(platform("androidx.compose:compose-bom:2024.05.00"))
+    implementation("com.google.dagger:hilt-android:2.48")
+    kapt(libs.hilt.compiler)
+    implementation ("com.google.accompanist:accompanist-navigation-animation:0.32.0")
+    implementation("io.coil-kt:coil-compose:2.5.0")
+    implementation ("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
+    implementation ("androidx.compose.material3:material3:1.3.2" )// atau versi terbaru yang kamu gunakan
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation ("androidx.datastore:datastore-preferences:1.0.0")
+    
+    // Room Database dependencies
+    implementation("androidx.room:room-runtime:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1")
+    kapt("androidx.room:room-compiler:2.6.1")
+    
+    // PDF Generation dependencies
+    implementation("com.tom-roush:pdfbox-android:2.0.27.0") {
+        exclude(group = "org.bouncycastle")
+    }
+    implementation("androidx.activity:activity-ktx:1.8.2")
+
+    implementation(libs.material.icons.extended)
+    implementation (libs.androidx.ui.text.google.fonts)
+    implementation (libs.accompanist.pager)
+    implementation (libs.androidx.animation)
+    implementation (libs.androidx.navigation.compose)
+    implementation(libs.identity.jvm)
+>>>>>>> Stashed changes
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

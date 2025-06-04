@@ -1,0 +1,209 @@
+package com.application.elevate.ui.counseling
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.application.elevate.ui.component.CategoryCounselingItem
+import com.application.elevate.ui.component.ConsultantCard
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.application.elevate.ui.component.SectionHeader
+import com.application.elevate.viewmodel.counseling.CounselingViewModel
+
+@Composable
+fun CounselingScreen(
+    navController: NavController,
+    viewModel: CounselingViewModel = viewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    Column(modifier = Modifier.padding(16.dp)) {
+        Box(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            IconButton(
+                onClick = { navController.popBackStack() },
+                modifier = Modifier
+                    .size(24.dp)
+                    .align(Alignment.CenterStart)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Back",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            Text(
+                text = "Counseling",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.primary,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.Center)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(21.dp))
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { /* TODO: Navigate to search */ }
+        ) {
+            OutlinedTextField(
+                value = "",
+                onValueChange = {},
+                readOnly = true,
+                enabled = false,
+                placeholder = {
+                    Text(
+                        "Search here...",
+                        color = Color.Gray
+                    )
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Search",
+                        tint = Color.Gray
+                    )
+                },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(24.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = Color.White.copy(alpha = 0.95f),
+                    unfocusedContainerColor = Color.White.copy(alpha = 0.85f),
+                    disabledContainerColor = Color.White.copy(alpha = 0.85f)
+                )
+            )
+        }
+        
+        Spacer(modifier = Modifier.height(21.dp))
+
+        Text("Seek guide from the professionals", style = MaterialTheme.typography.titleMedium)
+        Text("Find a category that fits your situation", style = MaterialTheme.typography.bodySmall)
+
+        LazyRow(
+            modifier = Modifier
+                .padding(vertical = 12.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(uiState.categories) { category ->
+                val isSelected = uiState.selectedCategory?.id == category.id
+                CategoryCounselingItem(
+                    category = category,
+                    isSelected = isSelected,
+                    onClick = { viewModel.onCategorySelected(category) }
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        SectionHeader(
+            title = if (uiState.selectedCategory != null) 
+                "${uiState.selectedCategory!!.name} Counselors" 
+            else "Recommendation",
+            onViewAllClick = { viewModel.showAllConsultants() }
+        )
+
+        Box(modifier = Modifier.fillMaxSize()) {
+            when {
+                uiState.isLoading -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+                
+                uiState.error != null -> {
+                    Column(
+                        modifier = Modifier.align(Alignment.Center),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Error: ${uiState.error}",
+                            color = MaterialTheme.colorScheme.error,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(
+                            onClick = { 
+                                viewModel.clearError()
+                                viewModel.loadCounselors() 
+                            }
+                        ) {
+                            Text("Retry")
+                        }
+                    }
+                }
+                
+                uiState.consultants.isEmpty() -> {
+                    Text(
+                        text = "No counselors found",
+                        modifier = Modifier.align(Alignment.Center),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                
+                else -> {
+                    LazyColumn {
+                        items(uiState.consultants) { consultant ->
+                            ConsultantCard(
+                                consultant = consultant,
+                                onClick = {
+                                    navController.navigate("counseling_detail/${consultant.id}")
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewConselingScreen() {
+    val navController = rememberNavController()
+    CounselingScreen(navController = navController)
+}
