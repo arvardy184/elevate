@@ -28,7 +28,6 @@ import com.application.elevate.data.dummy.ProfileDummyData.dummyCourseDetails
 import com.application.elevate.ui.assessment.AssessmentCompletedScreen
 import com.application.elevate.ui.assessment.AssessmentScreen
 import com.application.elevate.ui.assessment.AssessmentViewModel
-import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.application.elevate.ui.home.HomeScreen
 import com.application.elevate.model.User
 
@@ -40,7 +39,6 @@ import com.application.elevate.ui.cvreview.CVReviewResultScreen
 import com.application.elevate.ui.cvreview.CVReviewScreen
 import com.application.elevate.ui.home.HomeScreen
 import com.application.elevate.ui.home.HomeViewModel
-
 import com.application.elevate.ui.login.LoginPage
 import com.application.elevate.ui.mycourse.CourseDetailScreen
 import com.application.elevate.ui.profile.EditProfileScreen
@@ -53,6 +51,7 @@ import com.application.elevate.ui.roadmap.RoadmapViewModel
 import com.application.elevate.ui.search.SearchScreen
 import com.application.elevate.ui.splashScreen.SplashScreen
 import com.application.elevate.ui.theme.ReplyTheme
+import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import dagger.hilt.android.AndroidEntryPoint
 

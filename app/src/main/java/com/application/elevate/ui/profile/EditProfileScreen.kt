@@ -62,7 +62,7 @@ fun EditProfileScreen(
 
     // Load user data when screen is first displayed
     LaunchedEffect(Unit) {
-        viewModel.loadUserData()
+      //  viewModel.loadUserData()
     }
 
     // Update selectedImageUri when user's photoUrl changes

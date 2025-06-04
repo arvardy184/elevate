@@ -4,9 +4,7 @@ import android.util.Log
 import com.application.elevate.api.AuthApiService
 import com.application.elevate.data.repository.AuthRepository
 import com.application.elevate.data.repository.AuthRepositoryImpl
-import com.application.elevate.api.ProfileApiService
-import com.application.elevate.data.repository.ProfileRepository
-import com.application.elevate.data.repository.ProfileRepositoryImpl
+
 import com.application.elevate.data.repository.UserRepository
 import dagger.Module
 import dagger.Provides
@@ -91,17 +89,17 @@ object NetworkModule {
     @Singleton
     fun provideAuthRepository(api: AuthApiService): AuthRepository =
         AuthRepositoryImpl(api)
-
-    @Provides
-    @Singleton
-    fun provideProfileApiService(retrofit: Retrofit): ProfileApiService =
-        retrofit.create(ProfileApiService::class.java)
-
-    @Provides
-    @Singleton
-    fun provideProfileRepository(
-        api: ProfileApiService,
-        userRepository: UserRepository
-    ): ProfileRepository =
-        ProfileRepositoryImpl(api, userRepository)
+//
+//    @Provides
+//    @Singleton
+//    fun provideProfileApiService(retrofit: Retrofit): ProfileApiService =
+//        retrofit.create(ProfileApiService::class.java)
+//
+//    @Provides
+//    @Singleton
+//    fun provideProfileRepository(
+//        api: ProfileApiService,
+//        userRepository: UserRepository
+//    ): ProfileRepository =
+//        ProfileRepositoryImpl(api, userRepository)
 }
