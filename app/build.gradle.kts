@@ -1,6 +1,9 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    alias(libs.plugins.relay)
+    alias(libs.plugins.hilt)
+    kotlin("kapt")
 }
 
 android {
@@ -60,13 +63,11 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-<<<<<<< Updated upstream
     implementation("androidx.compose.material:material-icons-extended:1.6.1")
     implementation ("androidx.compose.ui:ui-text-google-fonts:1.7.8")
     implementation ("com.google.accompanist:accompanist-pager:0.28.0")
     implementation ("androidx.compose.animation:animation:0.28.0")
     implementation ("androidx.navigation:navigation-compose:2.6.0-alpha01")
-=======
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)
     implementation(platform("androidx.compose:compose-bom:2024.05.00"))
@@ -96,12 +97,11 @@ dependencies {
     implementation("androidx.activity:activity-ktx:1.8.2")
 
     implementation(libs.material.icons.extended)
-    implementation (libs.androidx.ui.text.google.fonts)
-    implementation (libs.accompanist.pager)
-    implementation (libs.androidx.animation)
-    implementation (libs.androidx.navigation.compose)
+//    implementation (libs.androidx.ui.text.google.fonts)
+//    implementation (libs.accompanist.pager)
+//    implementation (libs.androidx.animation)
+//    implementation (libs.androidx.navigation.compose)
     implementation(libs.identity.jvm)
->>>>>>> Stashed changes
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

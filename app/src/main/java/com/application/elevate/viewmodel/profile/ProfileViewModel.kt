@@ -6,7 +6,6 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.application.elevate.data.dummy.ProfileDummyData
-import com.application.elevate.data.repository.AuthRepository
 import com.application.elevate.data.repository.ProfileRepository
 import com.application.elevate.data.repository.UserRepository
 import com.application.elevate.model.User

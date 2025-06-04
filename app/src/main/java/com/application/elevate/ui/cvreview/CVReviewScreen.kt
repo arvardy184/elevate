@@ -17,7 +17,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.google.relay.compose.ColumnScopeInstanceImpl.weight
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
@@ -124,12 +123,14 @@ fun CVReviewScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         // Upload CV Button
-        FileUploadButton(
-          selectedFile = selectedFile,
-          onFileUploaded = { 
-            filePickerLauncher.launch("application/pdf")
-          }
-        )
+        Button(
+          onClick = { filePickerLauncher.launch("application/pdf") },
+          modifier = Modifier.fillMaxWidth()
+        ) {
+          Text(
+            text = if (selectedFile != null) "File Selected: ${selectedFile!!.name}" else "Upload CV (PDF only)"
+          )
+        }
         
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -174,23 +175,20 @@ fun CVReviewScreen(
   )
 }
 
-// Utility function to convert Uri to File
+// // Utility function to convert Uri to File
+// fun uriToFile(context: Context, uri: Uri, fileName: String): File {
+//   val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
+//   val file = File(context.cacheDir, fileName)
+//   val outputStream = FileOutputStream(file)
 
+//   inputStream?.use { input ->
+//     outputStream.use { output ->
+//       input.copyTo(output)
+//     }
+//   }
 
-@Composable
-fun FileUploadButton(
-  selectedFile: File?,
-  onFileUploaded: () -> Unit
-) {
-  Button(
-    onClick = onFileUploaded, 
-    modifier = Modifier.fillMaxWidth()
-  ) {
-    Text(
-      text = if (selectedFile != null) "File Selected: ${selectedFile.name}" else "Upload CV (PDF only)"
-    )
-  }
-}
+//   return file
+// }
 
 @Composable
 fun PrimaryButton(
@@ -218,44 +216,55 @@ fun PrimaryButton(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CareerFieldDropdown(
-  selectedCareerField: String, 
+  selectedCareerField: String,
   onCareerFieldSelected: (String) -> Unit
 ) {
-  val careerFields = remember { 
-    listOf("Software Engineer", "Marketing", "Design", "Finance", "Data Science", "Product Manager") 
-  }
   var expanded by remember { mutableStateOf(false) }
+  val careerFields = listOf(
+    "Software Engineer",
+    "Data Scientist", 
+    "Product Manager",
+    "UI/UX Designer",
+    "Marketing",
+    "Finance",
+    "Other"
+  )
 
-  ExposedDropdownMenuBox(
-    expanded = expanded,
-    onExpandedChange = { expanded = !expanded }
-  ) {
-    OutlinedTextField(
-      value = selectedCareerField,
-      onValueChange = { },
-      readOnly = true,
-      label = { Text("Pick Your Career Field") },
-      modifier = Modifier
-        .fillMaxWidth()
-        .menuAnchor(),
-      trailingIcon = {
-        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-      },
-      colors = ExposedDropdownMenuDefaults.textFieldColors()
+  Column {
+    Text(
+      text = "Target Career Field",
+      style = MaterialTheme.typography.bodyLarge,
+      modifier = Modifier.padding(bottom = 8.dp)
     )
-
-    ExposedDropdownMenu(
+    
+    ExposedDropdownMenuBox(
       expanded = expanded,
-      onDismissRequest = { expanded = false }
+      onExpandedChange = { expanded = !expanded }
     ) {
-      careerFields.forEach { field ->
-        DropdownMenuItem(
-          text = { Text(text = field) },
-          onClick = {
-            onCareerFieldSelected(field)
-            expanded = false
-          }
-        )
+      OutlinedTextField(
+        value = selectedCareerField,
+        onValueChange = { },
+        readOnly = true,
+        placeholder = { Text("Select career field") },
+        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+        modifier = Modifier
+          .menuAnchor()
+          .fillMaxWidth()
+      )
+      
+      ExposedDropdownMenu(
+        expanded = expanded,
+        onDismissRequest = { expanded = false }
+      ) {
+        careerFields.forEach { field ->
+          DropdownMenuItem(
+            text = { Text(field) },
+            onClick = {
+              onCareerFieldSelected(field)
+              expanded = false
+            }
+          )
+        }
       }
     }
   }
