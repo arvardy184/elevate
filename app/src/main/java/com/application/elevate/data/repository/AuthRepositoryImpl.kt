@@ -5,6 +5,7 @@ import com.application.elevate.data.api.AuthApiService
 import com.application.elevate.model.RegisterRequest
 import com.application.elevate.model.UserRequest
 import com.application.elevate.model.UserResponse
+import com.application.elevate.model.AssessmentRequest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.catch
@@ -78,6 +79,42 @@ class AuthRepositoryImpl @Inject constructor(
             }
             else -> {
                 Log.e(TAG, "Unexpected error during register: ${e.message}")
+                emit(Result.failure(Exception("Error: ${e.message ?: "Unknown error"}")))
+            }
+        }
+    }
+
+    override suspend fun submitAssessment(token: String, request: AssessmentRequest): Flow<Result<UserResponse>> = flow {
+        try {
+            val authToken = if (token.startsWith("Bearer ")) token else "Bearer $token"
+            Log.d(TAG, "Submitting assessment with token: $authToken")
+            Log.d(TAG, "Request body: $request")
+            val response = api.submitAssessment(authToken, request)
+            Log.d(TAG, "Assessment response: $response")
+            if (response.user != null) {
+                Log.d(TAG, "User data after assessment: ${response.user}")
+                Log.d(TAG, "Assessment status: ${response.user.isAssessmentCompleted}")
+            } else {
+                Log.e(TAG, "User data is null in assessment response")
+            }
+            emit(Result.success(response))
+        } catch (e: Exception) {
+            Log.e(TAG, "Error during assessment: ${e.message}")
+            throw e
+        }
+    }.catch { e ->
+        when (e) {
+            is HttpException -> {
+                Log.e(TAG, "HTTP error during assessment: ${e.code()}, message: ${e.message()}")
+                Log.e(TAG, "Error response body: ${e.response()?.errorBody()?.string()}")
+                emit(Result.failure(Exception("Server error: ${e.code()} - ${e.message()}")))
+            }
+            is IOException -> {
+                Log.e(TAG, "Network error during assessment: ${e.message}")
+                emit(Result.failure(Exception("Network error: Periksa koneksi internet Anda")))
+            }
+            else -> {
+                Log.e(TAG, "Unexpected error during assessment: ${e.message}")
                 emit(Result.failure(Exception("Error: ${e.message ?: "Unknown error"}")))
             }
         }

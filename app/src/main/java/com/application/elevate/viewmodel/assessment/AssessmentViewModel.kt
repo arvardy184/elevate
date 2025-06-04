@@ -7,18 +7,15 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.collectLatest
 import javax.inject.Inject
 import kotlinx.coroutines.launch
 import com.application.elevate.model.AssessmentRequest
-import com.application.elevate.data.repository.AssessmentRepository
+import com.application.elevate.data.repository.AuthRepository
 import com.application.elevate.data.repository.UserRepository
 import com.application.elevate.ui.assessment.AssessmentUiState
-
 @HiltViewModel
 class AssessmentViewModel @Inject constructor(
-    private val assessmentRepository: AssessmentRepository,
+    private val repository: AuthRepository,
     private val userRepository: UserRepository
 ) : ViewModel() {
     private val TAG = "AssessmentViewModel"
@@ -136,36 +133,35 @@ class AssessmentViewModel @Inject constructor(
                 )
                 
                 Log.d(TAG, "Submitting assessment with request: $request")
-                val result = assessmentRepository.submitAssessment(token, request)
-                result.onSuccess { response ->
-                    Log.d(TAG, "Assessment submission successful: $response")
-                    // Update status assessment di user
-                    viewModelScope.launch {
+                repository.submitAssessment(token, request).collect { result ->
+                    result.onSuccess { response ->
+                        Log.d(TAG, "Assessment submission successful: $response")
+                        // Update status assessment di user
                         val user = userRepository.getUser()
                         user?.let { currentUser ->
                             userRepository.updateUser(currentUser.copy(isAssessmentCompleted = true))
                         }
-                    }
-                    
-                    _uiState.update { 
-                        it.copy(
-                            isLoading = false,
-                            isSuccess = true,
-                            isAssessmentCompleted = true,
-                            message = response.message
-                        ) 
-                    }
-                    
-                    // Navigasi ke HomeScreen setelah assessment selesai
-                    _navigationEvent.value = NavigationEvent.NavigateToHome
-                }.onFailure { error ->
-                    Log.e(TAG, "Assessment submission failed", error)
-                    _uiState.update { 
-                        it.copy(
-                            isLoading = false,
-                            isSuccess = false,
-                            error = error.message ?: "Gagal mengirim assessment"
-                        ) 
+                        
+                        _uiState.update { 
+                            it.copy(
+                                isLoading = false,
+                                isSuccess = true,
+                                isAssessmentCompleted = true,
+                                message = response.message
+                            ) 
+                        }
+                        
+                        // Navigasi ke HomeScreen setelah assessment selesai
+                        _navigationEvent.value = NavigationEvent.NavigateToHome
+                    }.onFailure { error ->
+                        Log.e(TAG, "Assessment submission failed", error)
+                        _uiState.update { 
+                            it.copy(
+                                isLoading = false,
+                                isSuccess = false,
+                                error = error.message ?: "Gagal mengirim assessment"
+                            ) 
+                        }
                     }
                 }
             } catch (e: Exception) {
