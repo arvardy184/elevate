@@ -1,4 +1,4 @@
-package com.application.elevate.ui.register
+package com.application.elevate.ui.auth
 
 import android.widget.Toast
 import androidx.compose.foundation.background

@@ -1,8 +1,7 @@
-package com.application.elevate.ui.category
+package com.application.elevate.viewmodel.category
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.application.elevate.data.CategoryData
+import com.application.elevate.data.dummy.CategoryData
 import com.application.elevate.model.Category
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

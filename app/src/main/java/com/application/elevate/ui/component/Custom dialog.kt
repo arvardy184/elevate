@@ -1,2 +1,2 @@
-package com.application.elevate.component
+package com.application.elevate.ui.component
 

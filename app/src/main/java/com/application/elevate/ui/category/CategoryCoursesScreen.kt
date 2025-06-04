@@ -2,8 +2,6 @@ package com.application.elevate.ui.category
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -25,10 +23,13 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.application.elevate.component.CourseCard
-import com.application.elevate.component.Navbar
+import com.application.elevate.ui.component.CourseCard
+import com.application.elevate.ui.component.Navbar
 import com.application.elevate.model.Course
 import com.application.elevate.ui.theme.ReplyTheme
+import com.application.elevate.viewmodel.category.CategoryCoursesUiState
+import com.application.elevate.viewmodel.category.CategoryCoursesViewModel
+import com.application.elevate.viewmodel.category.CategoryCoursesViewModelFactory
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

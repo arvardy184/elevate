@@ -1,4 +1,4 @@
-package com.application.elevate.viewmodel
+package com.application.elevate.viewmodel.assessment
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -13,8 +13,6 @@ import com.application.elevate.model.AssessmentRequest
 import com.application.elevate.data.repository.AuthRepository
 import com.application.elevate.data.repository.UserRepository
 import com.application.elevate.ui.assessment.AssessmentUiState
-import com.application.elevate.viewmodel.auth.NavigationEvent
-
 @HiltViewModel
 class AssessmentViewModel @Inject constructor(
     private val repository: AuthRepository,

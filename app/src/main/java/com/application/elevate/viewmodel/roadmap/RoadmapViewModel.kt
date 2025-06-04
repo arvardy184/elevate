@@ -1,14 +1,12 @@
-package com.application.elevate.ui.roadmap
+package com.application.elevate.viewmodel.roadmap
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.application.elevate.data.dummy.ProfileDummyData.dummyCourses
 import com.application.elevate.model.CourseWithPosition
-import com.application.elevate.model.RoadmapCheckpoint
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import androidx.compose.runtime.State
 import com.application.elevate.data.dummy.ProfileDummyData
+import com.application.elevate.ui.roadmap.RoadmapUiState
 
 open class RoadmapViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(RoadmapUiState())

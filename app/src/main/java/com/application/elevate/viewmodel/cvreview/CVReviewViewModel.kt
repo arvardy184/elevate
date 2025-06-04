@@ -1,4 +1,4 @@
-package com.application.elevate.ui.cvreview
+package com.application.elevate.viewmodel.cvreview
 
 
 

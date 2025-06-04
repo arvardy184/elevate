@@ -15,20 +15,23 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
-import com.application.elevate.component.*
 import com.application.elevate.data.dummy.ProfileDummyData.categories
 import com.application.elevate.data.dummy.ProfileDummyData.dummyCourses
 import com.application.elevate.data.dummy.ProfileDummyData.growthHubItems
 import com.application.elevate.model.User
-import com.application.elevate.ui.theme.ReplyTheme
 import androidx.hilt.navigation.compose.hiltViewModel
-import kotlinx.coroutines.launch
+import com.application.elevate.ui.component.CategoryChip
+import com.application.elevate.ui.component.CourseCard
+import com.application.elevate.ui.component.GrowthHubItem
+import com.application.elevate.ui.component.HeaderCard
+import com.application.elevate.ui.component.Navbar
+import com.application.elevate.ui.component.SectionHeader
+import com.application.elevate.ui.component.TutorialOverlay
+import com.application.elevate.viewmodel.home.HomeViewModel
 
 @Composable
 fun HomeScreen(

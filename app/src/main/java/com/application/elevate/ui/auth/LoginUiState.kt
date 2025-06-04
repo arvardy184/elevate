@@ -1,4 +1,4 @@
-package com.application.elevate.ui.login
+package com.application.elevate.ui.auth
 
 data class LoginUiState(
     val isLoading: Boolean = false,

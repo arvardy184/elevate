@@ -1,4 +1,4 @@
-package com.application.elevate.viewmodel
+package com.application.elevate.viewmodel.auth
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -178,4 +178,6 @@ class AuthViewModel @Inject constructor(
 
 sealed class NavigationEvent {
     object NavigateToLogin : NavigationEvent()
+    object NavigateToHome : NavigationEvent()
+    object NavigateToAssessment : NavigationEvent()
 }

@@ -1,4 +1,4 @@
-package com.application.elevate.ui.splashScreen
+package com.application.elevate.viewmodel.splashscreen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

@@ -1,11 +1,9 @@
-package com.application.elevate.di
+package com.application.elevate.data.api
 
 import android.content.Context
 import android.util.Log
-import com.application.elevate.data.api.AuthApiService
 import com.application.elevate.data.repository.AuthRepository
 import com.application.elevate.data.repository.AuthRepositoryImpl
-import com.application.elevate.data.api.ProfileApiService
 import com.application.elevate.data.repository.ProfileRepository
 import com.application.elevate.data.repository.ProfileRepositoryImpl
 import com.application.elevate.data.repository.UserRepository

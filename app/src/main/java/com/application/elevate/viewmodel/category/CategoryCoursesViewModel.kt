@@ -1,4 +1,4 @@
-package com.application.elevate.ui.category
+package com.application.elevate.viewmodel.category
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

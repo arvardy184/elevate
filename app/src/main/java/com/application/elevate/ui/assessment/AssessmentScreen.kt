@@ -1,13 +1,11 @@
 package com.application.elevate.ui.assessment
 
 import android.util.Log
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.application.elevate.data.dummy.ProfileDummyData.assessmentDummyData
+import com.application.elevate.viewmodel.assessment.AssessmentViewModel
 
 @Composable
 fun AssessmentScreen(

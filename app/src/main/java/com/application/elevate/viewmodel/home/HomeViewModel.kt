@@ -1,11 +1,11 @@
-package com.application.elevate.ui.home
+package com.application.elevate.viewmodel.home
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.application.elevate.data.repository.UserRepository
-import com.application.elevate.model.Course
 import com.application.elevate.model.User
+import com.application.elevate.ui.home.HomeUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

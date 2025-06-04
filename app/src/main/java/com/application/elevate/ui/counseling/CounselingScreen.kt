@@ -1,15 +1,10 @@
 package com.application.elevate.ui.counseling
 
-import android.annotation.SuppressLint
-import android.widget.Space
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -21,17 +16,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -45,16 +35,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.application.elevate.component.CategoryCounselingItem
-import com.application.elevate.component.CategoryItem
-import com.application.elevate.component.ConsultantCard
-import com.application.elevate.component.SearchBar
-import com.application.elevate.data.dummy.ProfileDummyData.categoriesCounseling
-import com.application.elevate.data.dummy.ProfileDummyData.consultants
-import com.application.elevate.model.Consultant
-import com.application.elevate.model.CounselingCategory
+import com.application.elevate.ui.component.CategoryCounselingItem
+import com.application.elevate.ui.component.ConsultantCard
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.application.elevate.component.SectionHeader
+import com.application.elevate.ui.component.SectionHeader
+import com.application.elevate.viewmodel.counseling.CounselingViewModel
 
 
 @Composable

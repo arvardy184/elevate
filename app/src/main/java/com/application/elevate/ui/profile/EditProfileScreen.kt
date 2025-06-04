@@ -50,6 +50,8 @@ import java.text.SimpleDateFormat
 import java.util.*
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.ui.text.font.FontLoadingStrategy.Companion.Async
+import com.application.elevate.viewmodel.profile.ProfileViewModel
 
 @Composable
 fun EditProfileScreen(

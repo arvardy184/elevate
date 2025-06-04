@@ -1,4 +1,4 @@
-package com.application.elevate.ui.search
+package com.application.elevate.ui.home
 
 data class SearchUiState(
     val searchHistory: List<String> = emptyList(),

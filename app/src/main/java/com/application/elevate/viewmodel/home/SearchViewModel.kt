@@ -1,13 +1,14 @@
-package com.application.elevate.ui.search
+package com.application.elevate.viewmodel.home
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import com.application.elevate.ui.home.SearchUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 class SearchViewModel : ViewModel() {
 
-    private val _uiState = MutableStateFlow(SearchUiState(
+    private val _uiState = MutableStateFlow(
+        SearchUiState(
         searchHistory = listOf(
             "Social Media Marketing",
             "Front-End Development",
@@ -17,7 +18,8 @@ class SearchViewModel : ViewModel() {
             "Project Management Fundamental",
             "Flutter Implementation"
         )
-    ))
+    )
+    )
     val uiState: StateFlow<SearchUiState> = _uiState
 
     fun removeHistoryItem(item: String) {

@@ -1,4 +1,4 @@
-package com.application.elevate.data
+package com.application.elevate.data.dummy
 
 import com.application.elevate.R
 import com.application.elevate.model.CategoryCourse

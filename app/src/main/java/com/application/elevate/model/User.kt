@@ -1,18 +1,45 @@
 package com.application.elevate.model
 
+import com.google.gson.annotations.SerializedName
+
 data class User(
-    val id: Int = 0,
-    val email: String = "",
-    val role: String = "USER",
-    val firstName: String = "",
-    val lastName: String = "",
+    @SerializedName("id")
+    val id: Int? = null,
+    
+    @SerializedName("email")
+    val email: String? = null,
+    
+    @SerializedName("role")
+    val role: String? = null,
+    
+    @SerializedName("firstName")
+    val firstName: String? = null,
+    
+    @SerializedName("lastName")
+    val lastName: String? = null,
+    
+    @SerializedName("profilePicture")
     val photoUrl: String? = null,
+    
+    @SerializedName("address")
     val address: String? = null,
+    
+    @SerializedName("phoneNumber")
     val phoneNumber: String? = null,
+    
+    @SerializedName("gender")
     val gender: String? = null,
+    
+    @SerializedName("birthDate")
     val birthDate: String? = null,
+    
+    @SerializedName("isAssessmentCompleted")
     val isAssessmentCompleted: Boolean = false
 ) {
+    companion object {
+        private const val BASE_URL = "https://api.elevate.my.id/" // Base URL yang benar
+    }
+
     val fullName: String
         get() = "$firstName $lastName".trim()
         
@@ -22,4 +49,8 @@ data class User(
     fun getPhoneNumberOrDefault(): String = phoneNumber ?: ""
     fun getGenderOrDefault(): String = gender ?: ""
     fun getBirthDateOrDefault(): String = birthDate ?: ""
+
+    fun getFullProfilePictureUrl(): String {
+        return photoUrl ?: ""
+    }
 } 

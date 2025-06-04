@@ -1,4 +1,4 @@
-package com.application.elevate.ui.login
+package com.application.elevate.viewmodel.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,6 +14,7 @@ import com.application.elevate.model.UserRequest
 import android.util.Log
 import com.application.elevate.data.repository.DataStoreRepository
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import com.application.elevate.ui.auth.LoginUiState
 
 @HiltViewModel
 open class LoginViewModel @Inject constructor(
@@ -147,7 +148,3 @@ open class LoginViewModel @Inject constructor(
     }
 }
 
-sealed class NavigationEvent {
-    object NavigateToHome : NavigationEvent()
-    object NavigateToAssessment : NavigationEvent()
-} 

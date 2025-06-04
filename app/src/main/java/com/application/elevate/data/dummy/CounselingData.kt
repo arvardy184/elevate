@@ -1,8 +1,5 @@
-package com.application.elevate.data
-import com.application.elevate.model.Consultant
+package com.application.elevate.data.dummy
 import com.application.elevate.model.PaymentDetail
-import com.application.elevate.model.PaymentMethod
-import com.application.elevate.R
 
 object CounselingData {
 //    fun getConsultants(category: String = ""): List<Consultant> = listOf(

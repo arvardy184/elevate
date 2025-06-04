@@ -27,12 +27,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.application.elevate.R
-import com.application.elevate.ui.login.LoginPage
 import com.application.elevate.ui.theme.PoppinsFontFamily
 import com.application.elevate.ui.theme.ReplyTheme
 import com.google.accompanist.pager.*
 import kotlinx.coroutines.launch
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.application.elevate.viewmodel.splashscreen.SplashUiState
+import com.application.elevate.viewmodel.splashscreen.SplashViewModel
 
 @Preview(showBackground = true)
 @Composable

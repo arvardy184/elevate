@@ -1,4 +1,4 @@
-package com.application.elevate.ui.profile
+package com.application.elevate.viewmodel.profile
 
 import android.content.ContentValues.TAG
 import android.net.Uri
@@ -9,9 +9,8 @@ import com.application.elevate.data.dummy.ProfileDummyData
 import com.application.elevate.data.repository.AuthRepository
 import com.application.elevate.data.repository.ProfileRepository
 import com.application.elevate.data.repository.UserRepository
-import com.application.elevate.model.HelpCenterItem
-import com.application.elevate.model.NotificationSetting
 import com.application.elevate.model.User
+import com.application.elevate.ui.profile.ProfileUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch

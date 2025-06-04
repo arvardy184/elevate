@@ -1,4 +1,4 @@
-package com.application.elevate.di
+package com.application.elevate.data.di
 
 import android.content.Context
 import com.application.elevate.data.datastore.DataStoreManager

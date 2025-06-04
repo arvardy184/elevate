@@ -1,7 +1,7 @@
 package com.application.elevate.data.repository
 
 import android.util.Log
-import com.application.elevate.api.AuthApiService
+import com.application.elevate.data.api.AuthApiService
 import com.application.elevate.model.RegisterRequest
 import com.application.elevate.model.UserRequest
 import com.application.elevate.model.UserResponse

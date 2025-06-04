@@ -19,12 +19,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,19 +29,16 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.application.elevate.R
 import com.application.elevate.data.dummy.ProfileDummyData
 import com.application.elevate.model.Course
 import com.application.elevate.model.CourseWithPosition
-import androidx.compose.runtime.State
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.application.elevate.component.Navbar
-import com.application.elevate.component.RoadmapHeader
+import com.application.elevate.ui.component.Navbar
+import com.application.elevate.ui.component.RoadmapHeader
 import com.application.elevate.model.User
 
 @Composable
@@ -201,8 +194,18 @@ fun PreviewRoadmapScreen() {
 
     val dummyUiState = RoadmapUiState(courses = coursePositions)
 
-
-    val dummyUser = User(firstName = "Keisya")
+    val dummyUser = User(
+        id = 1,
+        email = "user@example.com",
+        role = "USER",
+        firstName = "Keisya",
+        lastName = "Setiandini",
+        photoUrl = null,
+        address = null,
+        phoneNumber = null,
+        gender = null,
+        birthDate = null
+    )
 
     RoadmapScreen(
         uiState = dummyUiState,

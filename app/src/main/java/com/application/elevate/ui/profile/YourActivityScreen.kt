@@ -18,11 +18,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.application.elevate.component.ActivityCard
+import com.application.elevate.ui.component.ActivityCard
 import com.application.elevate.data.dummy.ProfileDummyData
 import com.application.elevate.model.Activity
 import com.application.elevate.ui.theme.Neutral5
 import com.application.elevate.ui.theme.ReplyTheme
+import com.application.elevate.viewmodel.profile.ProfileViewModel
 
 @Composable
 fun YourActivityScreen(

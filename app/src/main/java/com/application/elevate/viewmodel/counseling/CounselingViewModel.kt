@@ -1,4 +1,4 @@
-package com.application.elevate.ui.counseling
+package com.application.elevate.viewmodel.counseling
 
 
 

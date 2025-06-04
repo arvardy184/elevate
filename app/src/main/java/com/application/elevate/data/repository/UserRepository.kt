@@ -250,16 +250,16 @@ class UserRepository @Inject constructor(
             if (user != null) {
                 // Update data di DataStore
                 dataStoreManager.dataStore.edit { prefs ->
-                    prefs[USER_ID_KEY] = user.id.toString()
-                    prefs[USER_FIRST_NAME_KEY] = user.firstName
-                    prefs[USER_LAST_NAME_KEY] = user.lastName
-                    prefs[USER_EMAIL_KEY] = user.email
+                    prefs[USER_ID_KEY] = user.id?.toString() ?: ""
+                    prefs[USER_FIRST_NAME_KEY] = user.firstName ?: ""
+                    prefs[USER_LAST_NAME_KEY] = user.lastName ?: ""
+                    prefs[USER_EMAIL_KEY] = user.email ?: ""
                     prefs[USER_AVATAR_KEY] = user.getPhotoUrlOrDefault()
                     prefs[USER_ADDRESS_KEY] = user.getAddressOrDefault()
                     prefs[USER_PHONE_KEY] = user.getPhoneNumberOrDefault()
                     prefs[USER_GENDER_KEY] = user.getGenderOrDefault()
                     prefs[USER_BIRTH_DATE_KEY] = user.getBirthDateOrDefault()
-                    prefs[USER_ROLE_KEY] = user.role
+                    prefs[USER_ROLE_KEY] = user.role ?: ""
                     prefs[USER_IS_ASSESSMENT_COMPLETED_KEY] = user.isAssessmentCompleted
                 }
                 
@@ -298,17 +298,16 @@ class UserRepository @Inject constructor(
         try {
             // Simpan data user ke DataStore dengan mempertahankan status assessment
             dataStoreManager.dataStore.edit { preferences ->
-                preferences[USER_ID_KEY] = user.id.toString()
-                preferences[USER_FIRST_NAME_KEY] = user.firstName
-                preferences[USER_LAST_NAME_KEY] = user.lastName
-                preferences[USER_EMAIL_KEY] = user.email
+                preferences[USER_ID_KEY] = user.id?.toString() ?: ""
+                preferences[USER_FIRST_NAME_KEY] = user.firstName ?: ""
+                preferences[USER_LAST_NAME_KEY] = user.lastName ?: ""
+                preferences[USER_EMAIL_KEY] = user.email ?: ""
                 preferences[USER_AVATAR_KEY] = user.getPhotoUrlOrDefault()
                 preferences[USER_ADDRESS_KEY] = user.getAddressOrDefault()
                 preferences[USER_PHONE_KEY] = user.getPhoneNumberOrDefault()
                 preferences[USER_GENDER_KEY] = user.getGenderOrDefault()
                 preferences[USER_BIRTH_DATE_KEY] = user.getBirthDateOrDefault()
-                preferences[USER_ROLE_KEY] = user.role
-                // Tetap gunakan status assessment yang ada di DataStore
+                preferences[USER_ROLE_KEY] = user.role ?: ""
                 preferences[USER_IS_ASSESSMENT_COMPLETED_KEY] = currentAssessmentStatus
             }
             Log.d(TAG, "Data user berhasil disimpan ke DataStore")

@@ -1,4 +1,4 @@
-package com.application.elevate.ui.login
+package com.application.elevate.ui.auth
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -128,6 +128,10 @@ fun LoginPage(
                 navController.navigate("assessment") {
                     popUpTo("login") { inclusive = true }
                 }
+                viewModel.onNavigationHandled()
+            }
+            is NavigationEvent.NavigateToLogin -> {
+                // Tidak perlu melakukan apa-apa karena sudah berada di halaman login
                 viewModel.onNavigationHandled()
             }
             null -> {}

@@ -1,32 +1,26 @@
-package com.application.elevate.ui.search
+package com.application.elevate.ui.home
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material3.*
 import androidx.compose.material3.AlertDialog
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.tooling.preview.Preview
 import com.application.elevate.ui.theme.ReplyTheme
 import com.application.elevate.ui.theme.Purple5
-import com.application.elevate.ui.theme.Neutral1
 import com.application.elevate.ui.theme.Neutral10
 import com.application.elevate.ui.theme.Neutral7
+import com.application.elevate.viewmodel.home.SearchViewModel
 
 @Composable
 fun SearchScreen(

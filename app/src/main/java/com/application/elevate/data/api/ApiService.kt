@@ -1,4 +1,4 @@
-package com.application.elevate.api
+package com.application.elevate.data.api
 
 
 import com.application.elevate.model.RegisterRequest
