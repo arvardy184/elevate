@@ -30,6 +30,9 @@ class AssessmentViewModel @Inject constructor(
     private val _navigationEvent = MutableStateFlow<NavigationEvent?>(null)
     val navigationEvent: StateFlow<NavigationEvent?> = _navigationEvent
 
+    // Map untuk menyimpan jawaban assessment
+    private val answers = mutableMapOf<String, String>()
+
     init {
         checkAssessmentStatus()
     }
@@ -79,8 +82,12 @@ class AssessmentViewModel @Inject constructor(
         _uiState.update { it.copy(goal = value) }
     }
 
+    fun getAnswerForStep(key: String): String {
+        return answers[key] ?: ""
+    }
+
     fun updateAnswerForStep(key: String, value: String) {
-        Log.d(TAG, "Updating $key to $value")
+        answers[key] = value
         when (key) {
             "studentStatus" -> onStudentStatusChange(value)
             "major" -> onMajorChange(value)
@@ -92,19 +99,22 @@ class AssessmentViewModel @Inject constructor(
         }
     }
 
-    fun getAnswerForStep(key: String): String {
-        val answer = when (key) {
-            "studentStatus" -> uiState.value.studentStatus
-            "major" -> uiState.value.major
-            "semester" -> uiState.value.semester
-            "currentField" -> uiState.value.currentField
-            "interestedField" -> uiState.value.interestedField
-            "dreamJob" -> uiState.value.dreamJob
-            "goal" -> uiState.value.goal
-            else -> ""
+    fun setError(message: String) {
+        _uiState.update { 
+            it.copy(
+                error = message,
+                isLoading = false,
+                isSuccess = false
+            ) 
         }
-        Log.d(TAG, "Answer for $key: $answer")
-        return answer
+    }
+
+    fun clearError() {
+        _uiState.update { 
+            it.copy(
+                error = null
+            ) 
+        }
     }
 
     fun submitAssessment() {
@@ -113,12 +123,7 @@ class AssessmentViewModel @Inject constructor(
                 val token = userRepository.getAuthToken()
                 if (token == null) {
                     Log.e(TAG, "Token is null")
-                    _uiState.update { 
-                        it.copy(
-                            error = "Sesi anda telah berakhir. Silakan login kembali.",
-                            isLoading = false
-                        ) 
-                    }
+                    setError("Sesi anda telah berakhir. Silakan login kembali.")
                     return@launch
                 }
 
@@ -160,23 +165,11 @@ class AssessmentViewModel @Inject constructor(
                     _navigationEvent.value = NavigationEvent.NavigateToHome
                 }.onFailure { error ->
                     Log.e(TAG, "Assessment submission failed", error)
-                    _uiState.update { 
-                        it.copy(
-                            isLoading = false,
-                            isSuccess = false,
-                            error = error.message ?: "Gagal mengirim assessment"
-                        ) 
-                    }
+                    setError(error.message ?: "Gagal mengirim assessment")
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error during assessment submission", e)
-                _uiState.update { 
-                    it.copy(
-                        isLoading = false,
-                        isSuccess = false,
-                        error = "Terjadi kesalahan: ${e.message}"
-                    ) 
-                }
+                setError("Terjadi kesalahan: ${e.message}")
             }
         }
     }
