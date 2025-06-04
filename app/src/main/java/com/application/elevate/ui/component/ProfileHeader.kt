@@ -1,0 +1,97 @@
+package com.application.elevate.ui.component
+
+import android.content.ContentValues.TAG
+import android.util.Log
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import com.application.elevate.R
+import com.application.elevate.model.User
+import com.application.elevate.ui.theme.Purple6
+
+@Composable
+fun ProfileHeader(
+    user: User,
+    onProfileClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(100.dp)
+            .shadow(5.dp, RoundedCornerShape(5.dp))
+            .background(Purple6, RoundedCornerShape(5.dp))
+            .padding(16.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Profile Image
+            Box(
+                modifier = Modifier
+                    .size(64.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surface)
+                    .clickable(onClick = onProfileClick),
+                contentAlignment = Alignment.Center
+            ) {
+                if (user.getFullProfilePictureUrl().isNotEmpty()) {
+                    Log.d(TAG,"Profile Picture URL:${user.getFullProfilePictureUrl()}")
+                    AsyncImage(
+                        model = user.getFullProfilePictureUrl(),
+                        contentDescription = "Profile Picture",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    Log.d(TAG,"gaada")
+                    Image(
+                        painter = painterResource(id = R.drawable.user),
+                        contentDescription = "Profile Picture Placeholder",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Text(
+                text = user.fullName,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onPrimary
+            )
+        }
+    }
+}
+
+//@Preview
+//@Composable
+//fun ProfileHeaderPreview() {
+//    ReplyTheme {
+//        ProfileHeader(
+//            user = User(
+//                firstName = "Keisya Marshanda",
+//                lastName = "Setiandini"
+//            ),
+//            onProfileClick = {}
+//        )
+//    }
+//}

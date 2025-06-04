@@ -27,7 +27,6 @@ import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Description
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -66,7 +65,6 @@ fun ProfileScreen(
         onYourActivityClick = { navController.navigate("your_activity") },
         onNotificationClick = { navController.navigate("notifications") },
         onHelpCenterClick = { navController.navigate("help_center") },
-        onCVReviewsClick = { navController.navigate("cv_review_list") },
         onLogoutClick = { viewModel.logout() }
     )
 }
@@ -80,7 +78,6 @@ fun ProfileScreenContent(
     onYourActivityClick: () -> Unit,
     onNotificationClick: () -> Unit,
     onHelpCenterClick: () -> Unit,
-    onCVReviewsClick: () -> Unit,
     onLogoutClick: () -> Unit
 ) {
     Scaffold(
@@ -169,13 +166,6 @@ fun ProfileScreenContent(
                         )
 
                         ProfileMenuItem(
-                            icon = Icons.Default.Description,
-                            title = "My CV Reviews",
-                            subtitle = "View and manage your CV reviews",
-                            onClick = onCVReviewsClick
-                        )
-
-                        ProfileMenuItem(
                             icon = Icons.AutoMirrored.Filled.ExitToApp,
                             title = "Log Out",
                             subtitle = "Sign out from Elevate",
@@ -260,7 +250,6 @@ fun ProfileScreenPreview() {
             onYourActivityClick = {},
             onNotificationClick = {},
             onHelpCenterClick = {},
-            onCVReviewsClick = {},
             onLogoutClick = {}
         )
     }

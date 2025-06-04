@@ -1,0 +1,6 @@
+{
+    "target": "NavbarProfile",
+    "package": "com.application.elevate.navbarprofile",
+    "generateImplementation": true,
+    "generatePreviews": true
+}

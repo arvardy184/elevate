@@ -191,63 +191,63 @@ object ProfileDummyData {
         CounselingCategory("4", "Programming", R.drawable.ic_category_conseling_programming)
     )
 
-//    val consultants = listOf(
-//        Consultant(
-//            id = "1",
-//            name = "Barbie S.Ds., M.Ds.",
-//            title = "UI/UX Design Consultant",
-//            rating = 4.0f,
-//            reviewCount = 191,
-//            categoryId = "1", // Design
-//            price = 25000,
-//            oldPrice = 29999,
-//            imageResId = R.drawable.barbie
-//        ),
-//        Consultant(
-//            id = "2",
-//            name = "Ken S.Kom., M.M.S.I.",
-//            title = "Front-End Developer",
-//            rating = 5.0f,
-//            reviewCount = 204,
-//            categoryId = "2", // Development
-//            price = 30000,
-//            oldPrice = 39999,
-//            imageResId = R.drawable.ken
-//        ),
-//        Consultant(
-//            id = "3",
-//            name = "Alan S.Ds., M.Ds.",
-//            title = "Graphic Designer",
-//            rating = 5.0f,
-//            reviewCount = 178,
-//            categoryId = "1", // Design
-//            price = 40000,
-//            oldPrice = 49999,
-//            imageResId = R.drawable.alan
-//        ),
-//        Consultant(
-//            id = "4",
-//            name = "Peter D.Ds., M.Ds.",
-//            title = "UI/UX Design Consultant",
-//            rating = 4.5f,
-//            reviewCount = 178,
-//            categoryId = "1", // Design
-//            price = 30000,
-//            oldPrice = 39000,
-//            imageResId = R.drawable.peter
-//            ),
-//        Consultant(
-//            id = "5",
-//            name = "Jane S.Psi., M.Psi.",
-//            title = "Personal Development Coach",
-//            rating = 4.0f,
-//            reviewCount = 104,
-//            categoryId = "2", // Programming
-//            price = 30000,
-//            oldPrice = 39000,
-//            imageResId = R.drawable.jane
-//        )
-//    )
+    val consultants = listOf(
+        Consultant(
+            id = "1",
+            name = "Barbie S.Ds., M.Ds.",
+            title = "UI/UX Design Consultant",
+            rating = 4.0f,
+            reviewCount = 191,
+            categoryId = "1", // Design
+            price = 25000,
+            oldPrice = 29999,
+            imageResId = R.drawable.barbie
+        ),
+        Consultant(
+            id = "2",
+            name = "Ken S.Kom., M.M.S.I.",
+            title = "Front-End Developer",
+            rating = 5.0f,
+            reviewCount = 204,
+            categoryId = "2", // Development
+            price = 30000,
+            oldPrice = 39999,
+            imageResId = R.drawable.ken
+        ),
+        Consultant(
+            id = "3",
+            name = "Alan S.Ds., M.Ds.",
+            title = "Graphic Designer",
+            rating = 5.0f,
+            reviewCount = 178,
+            categoryId = "1", // Design
+            price = 40000,
+            oldPrice = 49999,
+            imageResId = R.drawable.alan
+        ),
+        Consultant(
+            id = "4",
+            name = "Peter D.Ds., M.Ds.",
+            title = "UI/UX Design Consultant",
+            rating = 4.5f,
+            reviewCount = 178,
+            categoryId = "1", // Design
+            price = 30000,
+            oldPrice = 39000,
+            imageResId = R.drawable.peter
+            ),
+        Consultant(
+            id = "5",
+            name = "Jane S.Psi., M.Psi.",
+            title = "Personal Development Coach",
+            rating = 4.0f,
+            reviewCount = 104,
+            categoryId = "2", // Programming
+            price = 30000,
+            oldPrice = 39000,
+            imageResId = R.drawable.jane
+        )
+    )
 
     // assessment/DummyData.kt
 

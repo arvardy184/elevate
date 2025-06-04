@@ -4,21 +4,23 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.compose.NavHost
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.composable
-<<<<<<< Updated upstream
 import androidx.navigation.compose.rememberNavController
 import com.application.elevate.ui.login.LoginPage
 import com.application.elevate.ui.register.SignUpPage
 import com.application.elevate.ui.splashScreen.SplashScreen
-=======
 import androidx.navigation.navArgument
 import com.application.elevate.data.dummy.ProfileDummyData.dummyCourseDetails
 import com.application.elevate.ui.assessment.AssessmentCompletedScreen
@@ -51,16 +53,44 @@ import com.application.elevate.ui.splashScreen.SplashScreen
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import dagger.hilt.android.AndroidEntryPoint
 import com.application.elevate.ui.counseling.CounselingDetailScreen
->>>>>>> Stashed changes
+import androidx.navigation.navArgument
+import com.application.elevate.data.dummy.ProfileDummyData.dummyCourseDetails
+import com.application.elevate.ui.assessment.AssessmentCompletedScreen
+import com.application.elevate.ui.assessment.AssessmentScreen
+import com.application.elevate.viewmodel.assessment.AssessmentViewModel
+import com.google.accompanist.navigation.animation.AnimatedNavHost
+import com.application.elevate.ui.home.HomeScreen
 
-import com.application.elevate.ui.theme.ReplyTheme
+import com.application.elevate.ui.category.CategoryCoursesScreen
+import com.application.elevate.ui.category.CategoryScreen
+import com.application.elevate.ui.counseling.CounselingScreen
+import com.application.elevate.viewmodel.counseling.CounselingViewModel
+import com.application.elevate.ui.cvreview.CVReviewResultScreen
+import com.application.elevate.ui.cvreview.CVReviewScreen
+import com.application.elevate.viewmodel.home.HomeViewModel
 
+import com.application.elevate.ui.auth.LoginPage
+import com.application.elevate.ui.mycourse.CourseDetailScreen
+import com.application.elevate.ui.profile.EditProfileScreen
+import com.application.elevate.ui.profile.ProfileScreen
+import com.application.elevate.viewmodel.profile.ProfileViewModel
+import com.application.elevate.ui.mycourse.CourseScreen
+import com.application.elevate.ui.auth.SignUpPage
+import com.application.elevate.ui.home.SearchScreen
+import com.application.elevate.ui.splashScreen.SplashScreen
+import com.google.accompanist.navigation.animation.rememberAnimatedNavController
+import dagger.hilt.android.AndroidEntryPoint
+
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Hilangkan action bar
+        // WindowCompat.setDecorFitsSystemWindows(window, false)
+        
         setContent {
-            ReplyTheme {
-                // A surface container using the 'background' color from the theme
+            MaterialTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -72,24 +102,54 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-<<<<<<< Updated upstream
-=======
 @SuppressLint("UnrememberedGetBackStackEntry")
 @OptIn(ExperimentalAnimationApi::class)
->>>>>>> Stashed changes
+
 @Preview(showBackground = true)
 @Composable
 fun AppNavigation() {
-    val navController = rememberNavController()
-    NavHost(
+    val navController = rememberAnimatedNavController()
+
+    AnimatedNavHost(
         navController = navController,
-        startDestination = "splash_screen" // LoginPage akan tampil pertama kali
+        startDestination = "splash_screen",
+        enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }, animationSpec = tween(500)) },
+        exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }, animationSpec = tween(500)) },
+        popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }, animationSpec = tween(500)) },
+        popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }, animationSpec = tween(500)) }
     ) {
-        composable("login_page") { LoginPage(navController) }
-        composable("signup_page") { SignUpPage(navController) }
+        composable("profile") {
+            val viewModel: ProfileViewModel = hiltViewModel()
+            ProfileScreen(viewModel = viewModel, navController = navController)
+        }
+
+        composable("edit_profile") {
+            val viewModel: ProfileViewModel = hiltViewModel()
+            EditProfileScreen(
+                navController = navController,
+                viewModel = viewModel
+            )
+        }
+
+        composable(
+            route = "course_detail/{courseId}",
+            arguments = listOf(navArgument("courseId") { type = NavType.StringType })
+        ) {
+            val courseId = it.arguments?.getString("courseId") ?: ""
+            val courseDetail = dummyCourseDetails.find { it.id == courseId }!!
+            CourseDetailScreen(courseDetail = courseDetail, onBackClick = { navController.popBackStack() })
+        }
+
+        composable("login_page") {
+            LoginPage(navController = navController)
+        }
+
+        composable("signup_page") {
+            SignUpPage(navController = navController)
+        }
+
         composable("splash_screen") { SplashScreen(navController) }
-<<<<<<< Updated upstream
-=======
+
         composable("home") {
             val viewModel: HomeViewModel = hiltViewModel()
             HomeScreen(navController,viewModel = viewModel) }
@@ -118,6 +178,7 @@ fun AppNavigation() {
             CVReviewDetailScreen(navController, reviewId, viewModel)
         }
         
+
         composable("consultant") {
             val viewModel: CounselingViewModel = hiltViewModel()
             CounselingScreen(viewModel = viewModel, navController = navController)
@@ -154,6 +215,7 @@ fun AppNavigation() {
             )
         }
 
+
         composable(
             route = "counseling_detail/{counselorId}",
             arguments = listOf(navArgument("counselorId") { type = NavType.IntType })
@@ -162,6 +224,7 @@ fun AppNavigation() {
             val viewModel: CounselingViewModel = hiltViewModel()
             CounselingDetailScreen(navController, counselorId, viewModel)
         }
+
 
 //        composable("roadmap") {
 //            val viewModel: RoadmapViewModel = hiltViewModel()
@@ -182,6 +245,6 @@ fun AppNavigation() {
 //                }
 //            )
 //        }
->>>>>>> Stashed changes
+
     }
 }
