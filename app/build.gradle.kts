@@ -4,7 +4,6 @@ plugins {
     alias(libs.plugins.relay)
     alias(libs.plugins.hilt) // ✅ tambahkan ini
     kotlin("kapt") // ✅ untuk annotation processor
-
 }
 
 android {
@@ -26,6 +25,13 @@ android {
 
     buildTypes {
         release {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+        getByName("release") {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -60,7 +66,7 @@ hilt {
 }
 
 dependencies {
-
+    implementation ("com.instabug.library:instabug:15.0.0")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -85,7 +91,7 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation ("androidx.datastore:datastore-preferences:1.0.0")
-
+    implementation("com.instabug.library:instabug:14.3.1")
     implementation(libs.material.icons.extended)
     implementation (libs.androidx.ui.text.google.fonts)
     implementation (libs.accompanist.pager)
