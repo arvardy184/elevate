@@ -3,8 +3,10 @@ package com.application.elevate.component
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -22,6 +24,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.application.elevate.R
 import com.application.elevate.model.User
+import coil.compose.AsyncImage
 
 
 @Composable
@@ -34,14 +37,29 @@ fun RoadmapHeader(user: User) {
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Image(
-                painter = painterResource(id = R.drawable.profile_placeholder), // ganti sesuai kebutuhan
-                contentDescription = "User Photo",
+            Box(
                 modifier = Modifier
                     .size(50.dp)
-                    .clip(CircleShape),
-                contentScale = ContentScale.Crop
-            )
+                    .clip(CircleShape)
+            ) {
+                if (user.photoUrl?.isNotEmpty() == true) {
+                    AsyncImage(
+                        model = user.photoUrl,
+                        contentDescription = "User Photo",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize(),
+                        error = painterResource(id = R.drawable.profile_placeholder),
+                        placeholder = painterResource(id = R.drawable.profile_placeholder)
+                    )
+                } else {
+                    Image(
+                        painter = painterResource(id = R.drawable.profile_placeholder),
+                        contentDescription = "User Photo",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+            }
             Column(modifier = Modifier.padding(start = 8.dp)) {
                 Text(text = "Hi, ${user.firstName}!", style = MaterialTheme.typography.titleMedium)
                 Text(text = "Designer", style = MaterialTheme.typography.bodySmall)
@@ -57,11 +75,10 @@ fun RoadmapHeader(user: User) {
 
         Column(horizontalAlignment = Alignment.End) {
             Image(
-                painter = painterResource(id = R.drawable.ic_gift), // ikon gift
+                painter = painterResource(id = R.drawable.ic_gift),
                 contentDescription = "Gift",
                 modifier = Modifier.size(32.dp)
             )
-
         }
     }
 }

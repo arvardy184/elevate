@@ -1,4 +1,4 @@
-package com.application.elevate.ui.auth
+package com.application.elevate.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -6,8 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.application.elevate.data.repository.AuthRepository
 import com.application.elevate.data.repository.UserRepository
 import com.application.elevate.model.RegisterRequest
-import com.application.elevate.model.User
 import com.application.elevate.model.UserRequest
+import com.application.elevate.ui.auth.AuthUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,7 +31,7 @@ class AuthViewModel @Inject constructor(
     fun login(email: String, password: String, rememberMe: Boolean) {
         if (email.isBlank() || password.isBlank()) {
             _uiState.update { 
-                AuthUiState(isSuccess = false, message = "Email dan password tidak boleh kosong") 
+                AuthUiState(isSuccess = false, message = "Email dan password tidak boleh kosong")
             }
             return
         }
@@ -76,7 +76,7 @@ class AuthViewModel @Inject constructor(
                     }.onFailure { error ->
                         Log.e(TAG, "Login failed", error)
                         _uiState.update { 
-                            AuthUiState(isLoading = false, isSuccess = false, message = error.message) 
+                            AuthUiState(isLoading = false, isSuccess = false, message = error.message)
                         }
                     }
                 }

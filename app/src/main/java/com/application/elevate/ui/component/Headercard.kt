@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import com.application.elevate.R
 import com.application.elevate.model.User
+import coil.compose.AsyncImage
 
 
 @Composable
@@ -78,15 +79,27 @@ fun HeaderCard(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.weight(1f)
                 ) {
-
-
-                    Image(
-                        painter = painterResource(id = R.drawable.user),
-                        contentDescription = "Profile Picture",
+                    Box(
                         modifier = Modifier
                             .size(48.dp)
                             .clip(CircleShape)
-                    )
+                    ) {
+                        if (user.getFullProfilePictureUrl()?.isNotEmpty() == true) {
+                            AsyncImage(
+                                model = user.getFullProfilePictureUrl(),
+                                contentDescription = "Profile Picture",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        } else {
+                            Image(
+                                painter = painterResource(id = R.drawable.user),
+                                contentDescription = "Profile Picture Placeholder",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                    }
 
                     Spacer(modifier = Modifier.width(16.dp))
                     Column {

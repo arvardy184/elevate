@@ -1,5 +1,7 @@
 package com.application.elevate.component
 
+import android.content.ContentValues.TAG
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,9 +21,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.application.elevate.R
 import com.application.elevate.model.User
-import com.application.elevate.ui.theme.Purple5
 import com.application.elevate.ui.theme.Purple6
 import com.application.elevate.ui.theme.ReplyTheme
 
@@ -51,18 +53,21 @@ fun ProfileHeader(
                     .clickable(onClick = onProfileClick),
                 contentAlignment = Alignment.Center
             ) {
-                if (user.photoUrl?.isNotEmpty() == true) {
-                    Image(
-                        painter = painterResource(id = R.drawable.profile_placeholder),
+                if (user.getFullProfilePictureUrl().isNotEmpty()) {
+                    Log.d(TAG,"Profile Picture URL:${user.getFullProfilePictureUrl()}")
+                    AsyncImage(
+                        model = user.getFullProfilePictureUrl(),
                         contentDescription = "Profile Picture",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize()
                     )
                 } else {
+                    Log.d(TAG,"gaada")
                     Image(
-                        painter = painterResource(id = R.drawable.profile_placeholder),
-                        contentDescription = "Profile Picture",
-                        modifier = Modifier.size(500.dp)
+                        painter = painterResource(id = R.drawable.user),
+                        contentDescription = "Profile Picture Placeholder",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
                     )
                 }
             }
@@ -79,16 +84,16 @@ fun ProfileHeader(
     }
 }
 
-@Preview
-@Composable
-fun ProfileHeaderPreview() {
-    ReplyTheme {
-        ProfileHeader(
-            user = User(
-                firstName = "Keisya Marshanda",
-                lastName = "Setiandini"
-            ),
-            onProfileClick = {}
-        )
-    }
-}
+//@Preview
+//@Composable
+//fun ProfileHeaderPreview() {
+//    ReplyTheme {
+//        ProfileHeader(
+//            user = User(
+//                firstName = "Keisya Marshanda",
+//                lastName = "Setiandini"
+//            ),
+//            onProfileClick = {}
+//        )
+//    }
+//}

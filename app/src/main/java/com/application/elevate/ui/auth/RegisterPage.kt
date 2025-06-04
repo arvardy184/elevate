@@ -12,7 +12,6 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.onFocusChanged
@@ -27,15 +26,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.material3.LocalTextStyle
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.application.elevate.R
-import com.application.elevate.ui.auth.AuthUiState
-import com.application.elevate.ui.auth.AuthViewModel
-import com.application.elevate.ui.auth.NavigationEvent
+import com.application.elevate.viewmodel.auth.AuthViewModel
+import com.application.elevate.viewmodel.auth.NavigationEvent
 import com.application.elevate.ui.theme.PoppinsFontFamily
 import com.application.elevate.ui.theme.ReplyTheme
 import com.google.relay.compose.ColumnScopeInstanceImpl.weight
