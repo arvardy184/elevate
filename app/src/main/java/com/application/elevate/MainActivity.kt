@@ -94,11 +94,13 @@ fun AppNavigation() {
 
         composable(
             route = "course_detail/{courseId}",
-            arguments = listOf(navArgument("courseId") { type = NavType.StringType })
+            arguments = listOf(navArgument("courseId") { type = NavType.IntType })
         ) {
-            val courseId = it.arguments?.getString("courseId") ?: ""
-            val courseDetail = dummyCourseDetails.find { it.id == courseId }!!
-            CourseDetailScreen(courseDetail = courseDetail, onBackClick = { navController.popBackStack() })
+            val courseId = it.arguments?.getInt("courseId") ?: 0
+            CourseDetailScreen(
+                courseId = courseId,
+                onBackClick = { navController.popBackStack() }
+            )
         }
 
         composable("login_page") {

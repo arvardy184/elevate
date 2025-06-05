@@ -15,11 +15,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.application.elevate.model.Category
+import com.application.elevate.model.CategoryData
 
 @Composable
 fun CategoryGridItem(
-    category: Category,
+    category: CategoryData,
     onClick: () -> Unit
 ) {
     Card(
