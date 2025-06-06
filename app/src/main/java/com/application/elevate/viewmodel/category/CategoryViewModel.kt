@@ -2,7 +2,8 @@ package com.application.elevate.viewmodel.category
 
 import androidx.lifecycle.ViewModel
 import com.application.elevate.data.dummy.CategoryData
-import com.application.elevate.model.Category
+import com.application.elevate.model.CategoryData as CategoryDataModel
+
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,14 +18,14 @@ class CategoryViewModel : ViewModel() {
         // Load categories from data source
         _uiState.update { currentState ->
             currentState.copy(
-                categories = CategoryData.categories
+                categories = CategoryData.categories,
             )
         }
     }
 }
 
 data class CategoryUiState(
-    val categories: List<Category> = emptyList(),
+    val categories: List<CategoryDataModel> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null
 ) 

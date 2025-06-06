@@ -7,6 +7,8 @@ import com.application.elevate.data.repository.AuthRepositoryImpl
 import com.application.elevate.data.repository.ProfileRepository
 import com.application.elevate.data.repository.ProfileRepositoryImpl
 import com.application.elevate.data.repository.UserRepository
+import com.application.elevate.data.repository.AssessmentRepository
+import com.application.elevate.data.repository.CourseRepository
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import dagger.Module
@@ -113,4 +115,24 @@ object NetworkModule {
     ): ProfileRepository {
         return ProfileRepositoryImpl(api, userRepository, context)
     }
+
+    @Provides
+    @Singleton
+    fun provideAssessmentApiService(retrofit: Retrofit): AssessmentApiService =
+        retrofit.create(AssessmentApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideAssessmentRepository(api: AssessmentApiService): AssessmentRepository =
+        AssessmentRepository(api)
+
+    @Provides
+    @Singleton
+    fun provideCourseApiService(retrofit: Retrofit): CourseApiService =
+        retrofit.create(CourseApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideCourseRepository(api: CourseApiService): CourseRepository =
+        CourseRepository(api)
 }
