@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -16,6 +17,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -41,7 +44,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.application.elevate.ui.component.SectionHeader
 import com.application.elevate.viewmodel.counseling.CounselingViewModel
 
-
 @Composable
 fun CounselingScreen(
     navController: NavController,
@@ -49,12 +51,9 @@ fun CounselingScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    Column(modifier = Modifier.padding(16.dp),
-        ) {
-
+    Column(modifier = Modifier.padding(16.dp)) {
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier = Modifier.fillMaxWidth()
         ) {
             IconButton(
                 onClick = { navController.popBackStack() },
@@ -86,22 +85,24 @@ fun CounselingScreen(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable {  } // Pindah ke luar
+                .clickable { /* TODO: Navigate to search */ }
         ) {
             OutlinedTextField(
                 value = "",
                 onValueChange = {},
                 readOnly = true,
                 enabled = false,
-                placeholder = {Text(
-                    "Search here...",
-                    color = Color.Gray // Custom color for placeholder text
-                )},
+                placeholder = {
+                    Text(
+                        "Search here...",
+                        color = Color.Gray
+                    )
+                },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = "Search",
-                        tint = Color.Gray // Custom color for icon
+                        tint = Color.Gray
                     )
                 },
                 modifier = Modifier.fillMaxWidth(),
@@ -109,12 +110,12 @@ fun CounselingScreen(
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = Color.White.copy(alpha = 0.95f),
                     unfocusedContainerColor = Color.White.copy(alpha = 0.85f),
-                    disabledContainerColor = Color.White.copy(alpha = 0.85f) // Keep same color when disabled
+                    disabledContainerColor = Color.White.copy(alpha = 0.85f)
                 )
             )
         }
+        
         Spacer(modifier = Modifier.height(21.dp))
-
 
         Text("Seek guide from the professionals", style = MaterialTheme.typography.titleMedium)
         Text("Find a category that fits your situation", style = MaterialTheme.typography.bodySmall)
@@ -126,7 +127,7 @@ fun CounselingScreen(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(uiState.categories) { category ->
-                val isSelected = viewModel.selectedCategory.value?.id == category.id
+                val isSelected = uiState.selectedCategory?.id == category.id
                 CategoryCounselingItem(
                     category = category,
                     isSelected = isSelected,
@@ -137,24 +138,68 @@ fun CounselingScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        SectionHeader(title = "Recommendation", onViewAllClick = {viewModel.showAllConsultants()}
-
+        SectionHeader(
+            title = if (uiState.selectedCategory != null) 
+                "${uiState.selectedCategory!!.name} Counselors" 
+            else "Recommendation",
+            onViewAllClick = { viewModel.showAllConsultants() }
         )
-        val displayedConsultants = if (viewModel.showAll.value) {
-            uiState.consultants
-        } else {
-            uiState.consultants.take(3)
-        }
 
-
-        LazyColumn {
-            items(displayedConsultants) { consultant ->
-                ConsultantCard(consultant)
+        Box(modifier = Modifier.fillMaxSize()) {
+            when {
+                uiState.isLoading -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+                
+                uiState.error != null -> {
+                    Column(
+                        modifier = Modifier.align(Alignment.Center),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Error: ${uiState.error}",
+                            color = MaterialTheme.colorScheme.error,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(
+                            onClick = { 
+                                viewModel.clearError()
+                                viewModel.loadCounselors() 
+                            }
+                        ) {
+                            Text("Retry")
+                        }
+                    }
+                }
+                
+                uiState.consultants.isEmpty() -> {
+                    Text(
+                        text = "No counselors found",
+                        modifier = Modifier.align(Alignment.Center),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                
+                else -> {
+                    LazyColumn {
+                        items(uiState.consultants) { consultant ->
+                            ConsultantCard(
+                                consultant = consultant,
+                                onClick = {
+                                    navController.navigate("counseling_detail/${consultant.id}")
+                                }
+                            )
+                        }
+                    }
+                }
             }
         }
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable

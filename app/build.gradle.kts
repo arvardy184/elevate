@@ -2,9 +2,8 @@
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.relay)
-    alias(libs.plugins.hilt) // ✅ tambahkan ini
-    kotlin("kapt") // ✅ untuk annotation processor
-
+    alias(libs.plugins.hilt)
+    kotlin("kapt")
 }
 
 android {
@@ -44,19 +43,14 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.8"
+        kotlinCompilerExtensionVersion = "1.5.1"
     }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
-            resources.excludes.add("META-INF/versions/9/OSGI-INF/MANIFEST.MF")
         }
     }
 
-}
-
-hilt {
-    enableAggregatingTask = false
 }
 
 dependencies {
@@ -64,11 +58,16 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.compose.bom.v20250200)
+    implementation(platform("androidx.compose:compose-bom:2025.02.00"))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation("androidx.compose.material:material-icons-extended:1.6.1")
+    implementation ("androidx.compose.ui:ui-text-google-fonts:1.7.8")
+    implementation ("com.google.accompanist:accompanist-pager:0.28.0")
+    implementation ("androidx.compose.animation:animation:0.28.0")
+    implementation ("androidx.navigation:navigation-compose:2.6.0-alpha01")
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)
     implementation(platform("androidx.compose:compose-bom:2024.05.00"))
@@ -85,12 +84,23 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation ("androidx.datastore:datastore-preferences:1.0.0")
+    
+    // Room Database dependencies
+    implementation("androidx.room:room-runtime:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1")
+    kapt("androidx.room:room-compiler:2.6.1")
+    
+    // PDF Generation dependencies
+    implementation("com.tom-roush:pdfbox-android:2.0.27.0") {
+        exclude(group = "org.bouncycastle")
+    }
+    implementation("androidx.activity:activity-ktx:1.8.2")
 
     implementation(libs.material.icons.extended)
-    implementation (libs.androidx.ui.text.google.fonts)
-    implementation (libs.accompanist.pager)
-    implementation (libs.androidx.animation)
-    implementation (libs.androidx.navigation.compose)
+//    implementation (libs.androidx.ui.text.google.fonts)
+//    implementation (libs.accompanist.pager)
+//    implementation (libs.androidx.animation)
+//    implementation (libs.androidx.navigation.compose)
     implementation(libs.identity.jvm)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -100,7 +110,4 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 }
-
-apply(plugin = "dagger.hilt.android.plugin")
-
 
