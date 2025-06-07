@@ -88,7 +88,7 @@ object NetworkModule {
         Retrofit.Builder()
             .baseUrl(baseUrl)
             .client(okHttpClient)
-            .addConverterFactory(GsonConverterFactory.create(gson)) // Gunakan Gson yang sudah dikonfigurasi
+            .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
 
     @Provides

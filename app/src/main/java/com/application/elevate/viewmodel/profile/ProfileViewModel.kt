@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.application.elevate.data.dummy.ProfileDummyData
 import com.application.elevate.data.repository.AuthRepository
+import com.application.elevate.data.repository.ProfileRepository
 import com.application.elevate.data.repository.UserRepository
 import com.application.elevate.model.User
 import com.application.elevate.ui.profile.ProfileUiState
@@ -18,7 +19,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val repository: AuthRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val profileRepository: ProfileRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ProfileUiState())
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
@@ -34,7 +36,7 @@ class ProfileViewModel @Inject constructor(
         loadHelpCenterItems()
     }
 
-    private fun loadUserData() {
+    fun loadUserData() {
         viewModelScope.launch {
             _uiState.update { it.copy(
                 isLoading = true
@@ -73,6 +75,7 @@ class ProfileViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
+                Log.e(TAG, "Error saat memuat data user: ${e.message}")
                 _uiState.update { it.copy(
                     isLoading = false,
                     error = e.message ?: "Failed to load user data"
@@ -228,29 +231,29 @@ class ProfileViewModel @Inject constructor(
             try {
                 Log.d(TAG, "Memulai proses logout")
                 _uiState.update { it.copy(isLoading = true) }
-
+                
                 // Hapus data user dan token
                 userRepository.clearUser()
-
+                
                 Log.d(TAG, "Logout berhasil, data user dan token telah dihapus")
-                _uiState.update {
+                _uiState.update { 
                     it.copy(
                         isLoading = false,
                         isSuccess = true,
                         message = "Logout berhasil"
-                    )
+                    ) 
                 }
 
                 // Navigasi ke Login
                 _navigationEvent.value = NavigationEvent.NavigateToLogin
             } catch (e: Exception) {
                 Log.e(TAG, "Error saat logout: ${e.message}")
-                _uiState.update {
+                _uiState.update { 
                     it.copy(
                         isLoading = false,
                         isSuccess = false,
                         error = "Terjadi kesalahan saat logout: ${e.message}"
-                    )
+                    ) 
                 }
             }
         }
