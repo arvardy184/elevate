@@ -7,15 +7,18 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
 import javax.inject.Inject
 import kotlinx.coroutines.launch
 import com.application.elevate.model.AssessmentRequest
-import com.application.elevate.data.repository.AuthRepository
+import com.application.elevate.data.repository.AssessmentRepository
 import com.application.elevate.data.repository.UserRepository
 import com.application.elevate.ui.assessment.AssessmentUiState
+
 @HiltViewModel
 class AssessmentViewModel @Inject constructor(
-    private val repository: AuthRepository,
+    private val assessmentRepository: AssessmentRepository,
     private val userRepository: UserRepository
 ) : ViewModel() {
     private val TAG = "AssessmentViewModel"
@@ -26,6 +29,9 @@ class AssessmentViewModel @Inject constructor(
     // State untuk navigasi
     private val _navigationEvent = MutableStateFlow<NavigationEvent?>(null)
     val navigationEvent: StateFlow<NavigationEvent?> = _navigationEvent
+
+    // Map untuk menyimpan jawaban assessment
+    private val answers = mutableMapOf<String, String>()
 
     init {
         checkAssessmentStatus()
@@ -76,8 +82,12 @@ class AssessmentViewModel @Inject constructor(
         _uiState.update { it.copy(goal = value) }
     }
 
+    fun getAnswerForStep(key: String): String {
+        return answers[key] ?: ""
+    }
+
     fun updateAnswerForStep(key: String, value: String) {
-        Log.d(TAG, "Updating $key to $value")
+        answers[key] = value
         when (key) {
             "studentStatus" -> onStudentStatusChange(value)
             "major" -> onMajorChange(value)
@@ -89,19 +99,22 @@ class AssessmentViewModel @Inject constructor(
         }
     }
 
-    fun getAnswerForStep(key: String): String {
-        val answer = when (key) {
-            "studentStatus" -> uiState.value.studentStatus
-            "major" -> uiState.value.major
-            "semester" -> uiState.value.semester
-            "currentField" -> uiState.value.currentField
-            "interestedField" -> uiState.value.interestedField
-            "dreamJob" -> uiState.value.dreamJob
-            "goal" -> uiState.value.goal
-            else -> ""
+    fun setError(message: String) {
+        _uiState.update { 
+            it.copy(
+                error = message,
+                isLoading = false,
+                isSuccess = false
+            ) 
         }
-        Log.d(TAG, "Answer for $key: $answer")
-        return answer
+    }
+
+    fun clearError() {
+        _uiState.update { 
+            it.copy(
+                error = null
+            ) 
+        }
     }
 
     fun submitAssessment() {
@@ -110,12 +123,7 @@ class AssessmentViewModel @Inject constructor(
                 val token = userRepository.getAuthToken()
                 if (token == null) {
                     Log.e(TAG, "Token is null")
-                    _uiState.update { 
-                        it.copy(
-                            error = "Sesi anda telah berakhir. Silakan login kembali.",
-                            isLoading = false
-                        ) 
-                    }
+                    setError("Sesi anda telah berakhir. Silakan login kembali.")
                     return@launch
                 }
 
@@ -133,46 +141,35 @@ class AssessmentViewModel @Inject constructor(
                 )
                 
                 Log.d(TAG, "Submitting assessment with request: $request")
-                repository.submitAssessment(token, request).collect { result ->
-                    result.onSuccess { response ->
-                        Log.d(TAG, "Assessment submission successful: $response")
-                        // Update status assessment di user
+                val result = assessmentRepository.submitAssessment(token, request)
+                result.onSuccess { response ->
+                    Log.d(TAG, "Assessment submission successful: $response")
+                    // Update status assessment di user
+                    viewModelScope.launch {
                         val user = userRepository.getUser()
                         user?.let { currentUser ->
                             userRepository.updateUser(currentUser.copy(isAssessmentCompleted = true))
                         }
-                        
-                        _uiState.update { 
-                            it.copy(
-                                isLoading = false,
-                                isSuccess = true,
-                                isAssessmentCompleted = true,
-                                message = response.message
-                            ) 
-                        }
-                        
-                        // Navigasi ke HomeScreen setelah assessment selesai
-                        _navigationEvent.value = NavigationEvent.NavigateToHome
-                    }.onFailure { error ->
-                        Log.e(TAG, "Assessment submission failed", error)
-                        _uiState.update { 
-                            it.copy(
-                                isLoading = false,
-                                isSuccess = false,
-                                error = error.message ?: "Gagal mengirim assessment"
-                            ) 
-                        }
                     }
+                    
+                    _uiState.update { 
+                        it.copy(
+                            isLoading = false,
+                            isSuccess = true,
+                            isAssessmentCompleted = true,
+                            message = response.message
+                        ) 
+                    }
+                    
+                    // Navigasi ke HomeScreen setelah assessment selesai
+                    _navigationEvent.value = NavigationEvent.NavigateToHome
+                }.onFailure { error ->
+                    Log.e(TAG, "Assessment submission failed", error)
+                    setError(error.message ?: "Gagal mengirim assessment")
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error during assessment submission", e)
-                _uiState.update { 
-                    it.copy(
-                        isLoading = false,
-                        isSuccess = false,
-                        error = "Terjadi kesalahan: ${e.message}"
-                    ) 
-                }
+                setError("Terjadi kesalahan: ${e.message}")
             }
         }
     }
