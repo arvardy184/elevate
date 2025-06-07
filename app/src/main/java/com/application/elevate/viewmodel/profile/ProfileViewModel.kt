@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.application.elevate.data.dummy.ProfileDummyData
+import com.application.elevate.data.repository.AuthRepository
 import com.application.elevate.data.repository.ProfileRepository
 import com.application.elevate.data.repository.UserRepository
 import com.application.elevate.model.User
@@ -115,39 +116,39 @@ class ProfileViewModel @Inject constructor(
                     
                     Log.d(TAG, "Mencoba update user: $updatedUser")
                     Log.d(TAG, "Nama depan: ${updatedUser.firstName}, Nama belakang: ${updatedUser.lastName}")
-//                    
-//                    profileRepository.updateProfile(updatedUser).collect { result ->
-//                        result.onSuccess { response ->
-//                            val user = response.user
-//                            Log.d(TAG, "Response dari API: $response")
-//                            Log.d(TAG, "Data user setelah update: $user")
-//
-//                            // Update user di repository lokal
-//                            userRepository.updateUser(user)
-//
-//                            // Update state UI
-//                            _uiState.update { it.copy(
-//                                user = user,
-//                                isLoading = false,
-//                                error = null
-//                            ) }
-//                            return@collect
-//                        }.onFailure { error ->
-//                            Log.e(TAG, "Error saat update profil: ${error.message}")
-//                            if (error.message?.contains("Job was cancelled") == true ||
-//                                error.message?.contains("Socket closed") == true) {
-//                                retryCount++
-//                                if (retryCount < maxRetries) {
-//                                    Log.d(TAG, "Mencoba update profil lagi (percobaan $retryCount)")
-//                                    return@collect
-//                                }
-//                            }
-//                            _uiState.update { it.copy(
-//                                isLoading = false,
-//                                error = error.message ?: "Failed to update user data"
-//                            ) }
-//                        }
-//                    }
+                    
+                    profileRepository.updateProfile(updatedUser).collect { result ->
+                        result.onSuccess { response ->
+                            val user = response.user
+                            Log.d(TAG, "Response dari API: $response")
+                            Log.d(TAG, "Data user setelah update: $user")
+                            
+                            // Update user di repository lokal
+                            userRepository.updateUser(user)
+                            
+                            // Update state UI
+                            _uiState.update { it.copy(
+                                user = user,
+                                isLoading = false,
+                                error = null
+                            ) }
+                            return@collect
+                        }.onFailure { error ->
+                            Log.e(TAG, "Error saat update profil: ${error.message}")
+                            if (error.message?.contains("Job was cancelled") == true || 
+                                error.message?.contains("Socket closed") == true) {
+                                retryCount++
+                                if (retryCount < maxRetries) {
+                                    Log.d(TAG, "Mencoba update profil lagi (percobaan $retryCount)")
+                                    return@collect
+                                }
+                            }
+                            _uiState.update { it.copy(
+                                isLoading = false,
+                                error = error.message ?: "Failed to update user data"
+                            ) }
+                        }
+                    }
                     break
                 } catch (e: Exception) {
                     Log.e(TAG, "Error saat update user: ${e.message}")
