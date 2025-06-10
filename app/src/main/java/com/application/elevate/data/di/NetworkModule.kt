@@ -1,4 +1,4 @@
-package com.application.elevate.data.di
+package com.application.elevate.di
 
 import android.content.Context
 import android.util.Log
@@ -22,8 +22,13 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Qualifier
 import javax.inject.Singleton
 import androidx.room.Room
+import com.application.elevate.data.api.ProfileApiService
 import com.application.elevate.data.database.AppDatabase
 import com.application.elevate.data.database.dao.CVReviewDao
+import com.application.elevate.api.JobMatchingApiService
+import com.application.elevate.data.repository.jobmatching.JobMatchingRepository
+import com.application.elevate.data.repository.jobmatching.JobMatchingRepositoryImpl
+import com.application.elevate.util.NetworkUtil
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
@@ -133,8 +138,18 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    fun provideJobMatchingApiService(@ProdRetrofit retrofit: Retrofit): JobMatchingApiService =
+        retrofit.create(JobMatchingApiService::class.java)
+
+    @Provides
+    @Singleton
     fun provideCounselingApiService(@ProdRetrofit retrofit: Retrofit): CounselingApiService =
         retrofit.create(CounselingApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideProfileApiService(@ProdRetrofit retrofit: Retrofit): ProfileApiService =
+        retrofit.create(ProfileApiService::class.java)
 
     @Provides
     @Singleton
@@ -151,13 +166,16 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideCounselingRepository(api: CounselingApiService): CounselingRepository =
-        CounselingRepositoryImpl(api)
+    fun provideJobMatchingRepository(
+        api: JobMatchingApiService,
+        userRepository: UserRepository
+    ): JobMatchingRepository =
+        JobMatchingRepositoryImpl(api, userRepository)
 
     @Provides
     @Singleton
-    fun provideDataStoreManager(@ApplicationContext context: Context): DataStoreManager =
-        DataStoreManager(context)
+    fun provideCounselingRepository(api: CounselingApiService): CounselingRepository =
+        CounselingRepositoryImpl(api)
 
     @Provides
     @Singleton
@@ -166,13 +184,8 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideUserRepository(dataStoreManager: DataStoreManager): UserRepository =
-        UserRepository(dataStoreManager)
-
-    @Provides
-    @Singleton
     fun provideProfileRepository(
-        api: AuthApiService,
+        api: ProfileApiService,
         userRepository: UserRepository,
         @ApplicationContext context: Context
     ): ProfileRepository =
@@ -185,9 +198,16 @@ object NetworkModule {
             context,
             AppDatabase::class.java,
             "elevate_database"
-        ).build()
+        )
+        .fallbackToDestructiveMigration()
+        .build()
 
     @Provides
     fun provideCVReviewDao(database: AppDatabase): CVReviewDao =
         database.cvReviewDao()
+        
+    @Provides
+    @Singleton
+    fun provideNetworkUtil(@ApplicationContext context: Context): NetworkUtil =
+        NetworkUtil(context)
 } 

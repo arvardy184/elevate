@@ -20,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import android.util.Log
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,6 +32,16 @@ fun CVReviewResultScreen(
   val cvData = uiState.cvReviewData
   val fileDownloader = rememberFileDownloader()
   
+  // Debug logs
+  LaunchedEffect(uiState) {
+    Log.d("CVReviewResultScreen", "UiState updated - hasData: ${cvData != null}")
+    cvData?.let { data ->
+      Log.d("CVReviewResultScreen", "CV Data - fileName: ${data.fileName}, careerField: ${data.careerField}")
+      Log.d("CVReviewResultScreen", "Scores - relevancy: ${data.scores.relevancyRate}, overall: ${data.scores.overallScore}")
+      Log.d("CVReviewResultScreen", "AI Analysis - summary: ${data.aiAnalysis.summary.take(50)}...")
+    }
+  }
+  
   var relevancyRate by remember { mutableStateOf(0f) }
   var isFinished by remember { mutableStateOf(false) }
   
@@ -40,15 +51,21 @@ fun CVReviewResultScreen(
 
   // Animate progress to actual relevancy rate from API
   LaunchedEffect(cvData) {
-    val targetProgress = (cvData?.scores?.relevancyRate ?: 90.0) / 100.0
-    animatedProgress.animateTo(
-      targetValue = targetProgress.toFloat(),
-      animationSpec = tween(durationMillis = 2000, delayMillis = 200)
-    ) {
-      relevancyRate = this.value * 100
-      if (relevancyRate.toInt() >= (cvData?.scores?.relevancyRate ?: 90.0)) {
-        isFinished = true
+    if (cvData != null) {
+      Log.d("CVReviewResultScreen", "Starting animation with relevancy rate: ${cvData.scores.relevancyRate}")
+      val targetProgress = cvData.scores.relevancyRate / 100.0
+      animatedProgress.animateTo(
+        targetValue = targetProgress.toFloat(),
+        animationSpec = tween(durationMillis = 2000, delayMillis = 200)
+      ) {
+        relevancyRate = this.value * 100
+        if (relevancyRate.toInt() >= cvData.scores.relevancyRate.toInt()) {
+          isFinished = true
+          Log.d("CVReviewResultScreen", "Animation finished - isFinished: true")
+        }
       }
+    } else {
+      Log.w("CVReviewResultScreen", "cvData is null, cannot start animation")
     }
   }
 
@@ -124,7 +141,7 @@ fun CVReviewResultScreen(
           }
         }
 
-        if (isFinished && cvData != null) {
+        if (cvData != null) {
           item {
             CVResultDisplay(
               cvData = cvData,
@@ -139,7 +156,7 @@ fun CVReviewResultScreen(
         } else {
           item {
             Text(
-              text = "Analyzing your CV...",
+              text = "Loading CV analysis...",
               style = MaterialTheme.typography.bodyLarge,
               color = MaterialTheme.colorScheme.secondary,
               modifier = Modifier.padding(top = 16.dp)

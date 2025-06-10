@@ -35,7 +35,6 @@ import com.application.elevate.viewmodel.auth.AuthViewModel
 import com.application.elevate.viewmodel.auth.NavigationEvent
 import com.application.elevate.ui.theme.PoppinsFontFamily
 import com.application.elevate.ui.theme.ReplyTheme
-import com.google.relay.compose.ColumnScopeInstanceImpl.weight
 
 @Preview(showBackground = true)
 @Composable
@@ -593,7 +592,7 @@ fun RegisterContent(
 
         // Login Link
         item {
-            Spacer(modifier = Modifier.weight(1f))
+//            Spacer(modifier = Modifier.weight(1f))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),

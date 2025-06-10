@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.application.elevate.data.dummy.ProfileDummyData
 import com.application.elevate.data.repository.AuthRepository
+import com.application.elevate.data.repository.ProfileRepository
 import com.application.elevate.data.repository.UserRepository
 import com.application.elevate.model.User
 import com.application.elevate.ui.profile.ProfileUiState
@@ -15,10 +16,13 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+
+
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val repository: AuthRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val profileRepository: ProfileRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ProfileUiState())
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
@@ -34,7 +38,7 @@ class ProfileViewModel @Inject constructor(
         loadHelpCenterItems()
     }
 
-    private fun loadUserData() {
+    fun loadUserData() {
         viewModelScope.launch {
             _uiState.update { it.copy(
                 isLoading = true
@@ -50,14 +54,14 @@ class ProfileViewModel @Inject constructor(
                         val user = response.user
                         Log.d(TAG, "Data user dari API: $user")
                         Log.d(TAG, "Nama depan: ${user.firstName}, Nama belakang: ${user.lastName}")
-                        
+
                         // Update user dengan mempertahankan status assessment dari DataStore
                         val updatedUser = user.copy(isAssessmentCompleted = currentAssessmentStatus)
                         Log.d(TAG, "User setelah update dengan status assessment: $updatedUser")
-                        
+
                         // Update user di repository lokal
                         userRepository.updateUser(updatedUser)
-                        
+
                         // Update state UI
                         _uiState.update { it.copy(
                             user = updatedUser,
@@ -73,6 +77,7 @@ class ProfileViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
+                Log.e(TAG, "Error saat memuat data user: ${e.message}")
                 _uiState.update { it.copy(
                     isLoading = false,
                     error = e.message ?: "Failed to load user data"
@@ -106,23 +111,23 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch {
             var retryCount = 0
             val maxRetries = 3
-            
+
             while (retryCount < maxRetries) {
                 try {
                     _uiState.update { it.copy(isLoading = true) }
-                    
+
                     Log.d(TAG, "Mencoba update user: $updatedUser")
                     Log.d(TAG, "Nama depan: ${updatedUser.firstName}, Nama belakang: ${updatedUser.lastName}")
-                    
+
                     profileRepository.updateProfile(updatedUser).collect { result ->
                         result.onSuccess { response ->
                             val user = response.user
                             Log.d(TAG, "Response dari API: $response")
                             Log.d(TAG, "Data user setelah update: $user")
-                            
+
                             // Update user di repository lokal
                             userRepository.updateUser(user)
-                            
+
                             // Update state UI
                             _uiState.update { it.copy(
                                 user = user,
@@ -132,7 +137,7 @@ class ProfileViewModel @Inject constructor(
                             return@collect
                         }.onFailure { error ->
                             Log.e(TAG, "Error saat update profil: ${error.message}")
-                            if (error.message?.contains("Job was cancelled") == true || 
+                            if (error.message?.contains("Job was cancelled") == true ||
                                 error.message?.contains("Socket closed") == true) {
                                 retryCount++
                                 if (retryCount < maxRetries) {

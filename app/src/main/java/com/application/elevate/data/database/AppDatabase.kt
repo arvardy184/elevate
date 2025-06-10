@@ -9,7 +9,7 @@ import com.application.elevate.data.database.entity.CVReviewEntity
 
 @Database(
   entities = [CVReviewEntity::class],
-  version = 1,
+  version = 2,
   exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

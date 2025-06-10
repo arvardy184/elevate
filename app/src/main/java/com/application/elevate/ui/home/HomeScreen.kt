@@ -127,6 +127,9 @@ fun HomeScreen(
                                     if(item.title == "Counseling"){
                                         navController.navigate("consultant")
                                     }
+                                    if(item.title == "Job&skill"){
+                                        navController.navigate("jon&skill")
+                                    }
 
                                 }
                             }

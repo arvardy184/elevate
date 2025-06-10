@@ -15,6 +15,8 @@ data class CVReviewEntity(
   val experienceScore: Float,
   val aiAnalysis: String,
   val suggestions: String,
-  val status: String = "completed", // pending, completed, error
-  val filePath: String? = null // local file path kalau disimpan
+  val status: String = "completed", // pending, uploading, completed, error
+  val filePath: String? = null, // local file path kalau disimpan
+  val isOfflineUpload: Boolean = false, // true kalau upload saat offline
+  val syncStatus: String = "synced" // pending_upload, uploading, synced, error
 )

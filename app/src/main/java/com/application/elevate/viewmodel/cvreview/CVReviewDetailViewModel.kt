@@ -3,9 +3,11 @@ package com.application.elevate.viewmodel.cvreview
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.application.elevate.data.mapper.toSimpleCVReviewData
 import com.application.elevate.data.repository.CVReviewRepository
 import com.application.elevate.data.repository.UserRepository
 import com.application.elevate.model.CVReviewData
+import com.application.elevate.util.NetworkUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,7 +18,8 @@ import javax.inject.Inject
 @HiltViewModel
 class CVReviewDetailViewModel @Inject constructor(
   private val cvReviewRepository: CVReviewRepository,
-  private val userRepository: UserRepository
+  private val userRepository: UserRepository,
+  private val networkUtil: NetworkUtil
 ) : ViewModel() {
 
   private val _uiState = MutableStateFlow(CVReviewDetailUiState())
@@ -26,39 +29,81 @@ class CVReviewDetailViewModel @Inject constructor(
     viewModelScope.launch {
       _uiState.value = _uiState.value.copy(isLoading = true, error = null)
       
-      try {
-        val token = userRepository.getAuthToken()
-        
-        if (token == null) {
-          _uiState.value = _uiState.value.copy(
-            isLoading = false,
-            error = "Session expired. Please login again."
-          )
-          return@launch
-        }
-        
-        cvReviewRepository.getCVReviewById(token, reviewId)
-          .onSuccess { response ->
-            Log.d("CVReviewDetailVM", "Loaded CV review detail successfully")
-            _uiState.value = _uiState.value.copy(
-              isLoading = false,
-              cvReviewData = response.data
-            )
-          }
-          .onFailure { exception ->
-            Log.e("CVReviewDetailVM", "Failed to load CV review detail", exception)
-            _uiState.value = _uiState.value.copy(
-              isLoading = false,
-              error = exception.message ?: "Failed to load CV review detail"
-            )
-          }
-      } catch (e: Exception) {
-        Log.e("CVReviewDetailVM", "Error getting token", e)
+      val isOnline = networkUtil.isOnline()
+      _uiState.value = _uiState.value.copy(isOffline = !isOnline)
+      
+      if (isOnline) {
+        // Online: Try API first
+        loadFromAPI(reviewId)
+      } else {
+        // Offline: Load dari Room
+        loadFromLocal(reviewId)
+      }
+    }
+  }
+  
+  private suspend fun loadFromAPI(reviewId: String) {
+    try {
+      val token = userRepository.getAuthToken()
+      
+      if (token == null) {
         _uiState.value = _uiState.value.copy(
           isLoading = false,
-          error = "Failed to get authentication token"
+          error = "Session expired. Please login again."
+        )
+        return
+      }
+      
+      cvReviewRepository.getCVReviewById(token, reviewId)
+        .onSuccess { response ->
+          Log.d("CVReviewDetailVM", "Loaded CV review detail successfully from API")
+          _uiState.value = _uiState.value.copy(
+            isLoading = false,
+            cvReviewData = response.data,
+            isOffline = false
+          )
+        }
+        .onFailure { exception ->
+          Log.e("CVReviewDetailVM", "API failed, trying local data", exception)
+          // Fallback ke local data
+          loadFromLocal(reviewId)
+        }
+    } catch (e: Exception) {
+      Log.e("CVReviewDetailVM", "Error getting token", e)
+      // Fallback ke local data
+      loadFromLocal(reviewId)
+    }
+  }
+  
+  private suspend fun loadFromLocal(reviewId: String) {
+    try {
+      val localEntity = cvReviewRepository.getCVReviewByIdLocal(reviewId)
+      
+      if (localEntity != null) {
+        // Convert entity to CVReviewData (simplified version)
+        val localData = localEntity.toSimpleCVReviewData()
+        
+        Log.d("CVReviewDetailVM", "Loaded CV review detail from local database")
+        _uiState.value = _uiState.value.copy(
+          isLoading = false,
+          cvReviewData = localData,
+          isOffline = true
+        )
+      } else {
+        Log.w("CVReviewDetailVM", "CV review not found in local database")
+        _uiState.value = _uiState.value.copy(
+          isLoading = false,
+          error = "CV review not found. Please sync data when online.",
+          isOffline = true
         )
       }
+    } catch (e: Exception) {
+      Log.e("CVReviewDetailVM", "Failed to load from local database", e)
+      _uiState.value = _uiState.value.copy(
+        isLoading = false,
+        error = "Failed to load CV review details: ${e.message}",
+        isOffline = true
+      )
     }
   }
 
@@ -123,5 +168,6 @@ data class CVReviewDetailUiState(
   val isUpdating: Boolean = false,
   val cvReviewData: CVReviewData? = null,
   val error: String? = null,
-  val successMessage: String? = null
+  val successMessage: String? = null,
+  val isOffline: Boolean = false
 ) 

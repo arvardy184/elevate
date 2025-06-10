@@ -39,7 +39,7 @@ fun CVReviewScreen(
     contract = ActivityResultContracts.GetContent()
   ) { uri: Uri? ->
     uri?.let {
-      val file = uriToFile(context, it, "cv.pdf")
+      val file = FilePicker.getFileFromUri(context, it, "cv.pdf")
       selectedFile = file
     }
   }
@@ -174,21 +174,6 @@ fun CVReviewScreen(
     }
   )
 }
-
-// // Utility function to convert Uri to File
-// fun uriToFile(context: Context, uri: Uri, fileName: String): File {
-//   val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
-//   val file = File(context.cacheDir, fileName)
-//   val outputStream = FileOutputStream(file)
-
-//   inputStream?.use { input ->
-//     outputStream.use { output ->
-//       input.copyTo(output)
-//     }
-//   }
-
-//   return file
-// }
 
 @Composable
 fun PrimaryButton(
