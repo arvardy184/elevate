@@ -121,12 +121,11 @@ fun CategoryScreen(
                 ) {
                     items(uiState.categories) { category ->
                         CategoryGridItem(
-                            category = category,
-                            onClick = { 
-                                // Navigate to CategoryCoursesScreen with the category ID
-                                navController.navigate("category_courses/${category.id}")
-                            }
-                        )
+                            category = category
+                        ) {
+                            // Navigate to CategoryCoursesScreen with the category ID
+                            navController.navigate("category_courses/${category.id}")
+                        }
                     }
                 }
             }

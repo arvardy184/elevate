@@ -17,6 +17,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.application.elevate.viewmodel.cvreview.CVReviewViewModel
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream

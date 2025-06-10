@@ -31,21 +31,3 @@ data class CourseItem(
     @SerializedName("category")
     val category: Category
 )
-
-data class Category(
-    @SerializedName("id")
-    val id: Int,
-    @SerializedName("name")
-    val name: String
-)
-
-data class Pagination(
-    @SerializedName("total")
-    val total: Int,
-    @SerializedName("page")
-    val page: Int,
-    @SerializedName("limit")
-    val limit: Int,
-    @SerializedName("totalPages")
-    val totalPages: Int
-) 

@@ -51,10 +51,10 @@ import com.application.elevate.viewmodel.counseling.CounselingViewModel
 import com.application.elevate.viewmodel.home.HomeViewModel
 
 import com.application.elevate.ui.auth.LoginPage
-import com.application.elevate.ui.cvreview.CVReviewViewModel
 import com.application.elevate.ui.mycourse.CourseDetailScreen
 import com.application.elevate.ui.profile.EditProfileScreen
 import com.application.elevate.ui.profile.ProfileScreen
+import com.application.elevate.viewmodel.cvreview.CVReviewViewModel
 import com.application.elevate.viewmodel.profile.ProfileViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -114,7 +114,7 @@ fun AppNavigation() {
         ) {
             val courseId = it.arguments?.getString("courseId") ?: ""
             val courseDetail = dummyCourseDetails.find { it.id == courseId }!!
-            CourseDetailScreen(courseDetail = courseDetail, onBackClick = { navController.popBackStack() })
+//            CourseDetailScreen( onBackClick = { navController.popBackStack() })
         }
 
         composable("login_page") {

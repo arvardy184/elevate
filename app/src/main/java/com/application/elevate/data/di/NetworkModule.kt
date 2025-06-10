@@ -2,11 +2,14 @@ package com.application.elevate.di
 
 import android.content.Context
 import android.util.Log
-import com.application.elevate.api.CVReviewApiService
+import com.application.elevate.data.api.CVReviewApiService
 import com.application.elevate.data.api.AuthApiService
 import com.application.elevate.data.api.CounselingApiService
+import com.application.elevate.data.api.CourseApiService
+import com.application.elevate.data.api.AssessmentApiService
 import com.application.elevate.data.datastore.DataStoreManager
 import com.application.elevate.data.repository.*
+import com.application.elevate.data.repository.DataStoreRepositoryImpl
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import dagger.Module
@@ -153,6 +156,16 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    fun provideCourseApiService(@ProdRetrofit retrofit: Retrofit): CourseApiService =
+        retrofit.create(CourseApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideAssessmentApiService(@ProdRetrofit retrofit: Retrofit): AssessmentApiService =
+        retrofit.create(AssessmentApiService::class.java)
+
+    @Provides
+    @Singleton
     fun provideAuthRepository(api: AuthApiService): AuthRepository =
         AuthRepositoryImpl(api)
 
@@ -176,11 +189,6 @@ object NetworkModule {
     @Singleton
     fun provideCounselingRepository(api: CounselingApiService): CounselingRepository =
         CounselingRepositoryImpl(api)
-
-    @Provides
-    @Singleton
-    fun provideDataStoreRepository(dataStoreManager: DataStoreManager): DataStoreRepository =
-        DataStoreRepository(dataStoreManager)
 
     @Provides
     @Singleton

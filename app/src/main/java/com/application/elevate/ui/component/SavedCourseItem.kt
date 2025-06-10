@@ -22,7 +22,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.application.elevate.R
 import com.application.elevate.model.Course
-import com.google.relay.compose.RowScopeInstanceImpl.align
 
 @Composable
 fun SavedCourseItem(course: Course, onClick: () -> Unit) {
@@ -32,7 +31,7 @@ fun SavedCourseItem(course: Course, onClick: () -> Unit) {
             .fillMaxWidth()
             .height(120.dp)
             .padding(vertical = 8.dp)
-            .align(Alignment.CenterVertically)
+//            .align(Alignment.CenterVertically)
             .clickable { onClick() }
         .shadow(4.dp, RoundedCornerShape(16.dp)),
 

@@ -1,7 +1,8 @@
-package com.application.elevate.api
+package com.application.elevate.data.api
 
 import com.application.elevate.model.CVReviewResponse
 import com.application.elevate.model.CVReviewListResponse
+import com.application.elevate.model.CVReviewDetailResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.http.*
@@ -26,7 +27,7 @@ interface CVReviewApiService {
   suspend fun getCVReviewById(
     @Header("Authorization") token: String,
     @Path("id") id: String
-  ): CVReviewResponse
+  ): CVReviewDetailResponse
 
   @FormUrlEncoded
   @PUT("cv-review/{id}")
