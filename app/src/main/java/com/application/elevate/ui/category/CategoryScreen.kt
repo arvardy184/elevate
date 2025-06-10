@@ -119,12 +119,12 @@ fun CategoryScreen(
                     contentPadding = PaddingValues(16.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    items(uiState.categories) { CategoryData ->
+                    items(uiState.categories) { category ->
                         CategoryGridItem(
-                            category = CategoryData,
+                            category = category,
                             onClick = { 
                                 // Navigate to CategoryCoursesScreen with the category ID
-                                navController.navigate("category_courses/${CategoryData.id}")
+                                navController.navigate("category_courses/${category.id}")
                             }
                         )
                     }

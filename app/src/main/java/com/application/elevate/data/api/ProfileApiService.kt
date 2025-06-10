@@ -22,4 +22,4 @@ interface ProfileApiService {
         @Part("birthDate") birthDate: okhttp3.RequestBody,
         @Part profilePicture: MultipartBody.Part?
     ): ProfileResponse
-} 
+}

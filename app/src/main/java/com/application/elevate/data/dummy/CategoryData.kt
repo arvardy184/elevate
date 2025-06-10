@@ -1,49 +1,49 @@
 package com.application.elevate.data.dummy
 
 import com.application.elevate.R
-import com.application.elevate.model.CategoryData
+import com.application.elevate.model.Category
 
 object CategoryData {
     val categories = listOf(
-        CategoryData(
+        Category(
             id = "1",
             name = "Design",
             iconResId = R.drawable.ic_category_design
         ),
-        CategoryData(
+        Category(
             id = "2",
             name = "Web Development",
             iconResId = R.drawable.ic_category_webdev
         ),
-        CategoryData(
+        Category(
             id = "3",
             name = "Digital Marketing",
             iconResId = R.drawable.ic_catagory_digital_marketing
         ),
-        CategoryData(
+        Category(
             id = "4",
             name = "Mobile Development",
             iconResId = R.drawable.ic_category_mobile_dev
         ),
-        CategoryData(
+        Category(
+            id = "5",
+            name = "Product Management",
+            iconResId = R.drawable.ic_category_product_management
+        ),
+        Category(
             id = "6",
             name = "Finance & Accounting",
             iconResId = R.drawable.ic_category_finance
         ),
-        CategoryData(
+        Category(
             id = "7",
             name = "HR Management",
             iconResId = R.drawable.ic_category_hr
         ),
-        CategoryData(
+        Category(
             id = "8",
             name = "Personal Branding",
             iconResId = R.drawable.ic_category_personal_brand
-        ),
-        CategoryData(
-            id = "5",
-            name = "Product Management",
-            iconResId = R.drawable.ic_category_product_management
         )
     )
-}
+} 
