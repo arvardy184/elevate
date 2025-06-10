@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -63,6 +64,7 @@ fun ProfileScreen(
         onProfileClick = { navController.navigate("edit_profile") },
         onProfileSettingsClick = { navController.navigate("edit_profile") },
         onYourActivityClick = { navController.navigate("your_activity") },
+        onMyCVReviewClick = { navController.navigate("cv_review_list") },
         onNotificationClick = { navController.navigate("notifications") },
         onHelpCenterClick = { navController.navigate("help_center") },
         onLogoutClick = { viewModel.logout() }
@@ -76,6 +78,7 @@ fun ProfileScreenContent(
     onProfileClick: () -> Unit,
     onProfileSettingsClick: () -> Unit,
     onYourActivityClick: () -> Unit,
+    onMyCVReviewClick: () -> Unit,
     onNotificationClick: () -> Unit,
     onHelpCenterClick: () -> Unit,
     onLogoutClick: () -> Unit
@@ -166,6 +169,13 @@ fun ProfileScreenContent(
                         )
 
                         ProfileMenuItem(
+                            icon = Icons.Default.Description,
+                            title = "My CV Review",
+                            subtitle = "Review your CV",
+                            onClick = onMyCVReviewClick
+                        )
+
+                        ProfileMenuItem(
                             icon = Icons.AutoMirrored.Filled.ExitToApp,
                             title = "Log Out",
                             subtitle = "Sign out from Elevate",
@@ -248,6 +258,7 @@ fun ProfileScreenPreview() {
             onProfileClick = {},
             onProfileSettingsClick = {},
             onYourActivityClick = {},
+            onMyCVReviewClick = {},
             onNotificationClick = {},
             onHelpCenterClick = {},
             onLogoutClick = {}

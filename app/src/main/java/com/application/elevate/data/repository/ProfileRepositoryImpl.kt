@@ -33,7 +33,7 @@ class ProfileRepositoryImpl @Inject constructor(
 ) : ProfileRepository {
     private val TAG = "ProfileRepository"
     private val TIMEOUT_DURATION = 180000L // 180 detik timeout untuk upload file besar
-    
+
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     private fun createRequestBody(value: String?): okhttp3.RequestBody {
@@ -48,25 +48,25 @@ class ProfileRepositoryImpl @Inject constructor(
             Log.d(TAG, "Mencoba membuat multipart dari URI: $uri")
             val contentUri = Uri.parse(uri)
             val contentResolver = context.contentResolver
-            
+
             // Mendapatkan mime type
             val mimeType = contentResolver.getType(contentUri) ?: "image/jpeg"
             Log.d(TAG, "Mime type: $mimeType")
-            
+
             // Membuat file temporary dengan ekstensi yang benar
             val extension = MimeTypeMap.getSingleton()
                 .getExtensionFromMimeType(mimeType) ?: "jpg"
-            
+
             val tempFile = File.createTempFile(
-                "profile_picture", 
-                ".$extension", 
+                "profile_picture",
+                ".$extension",
                 context.cacheDir
             ).apply {
                 deleteOnExit() // Hapus file sementara setelah selesai
             }
-            
+
             Log.d(TAG, "Temporary file created: ${tempFile.absolutePath}")
-            
+
             // Copy file dari URI ke temporary file dengan buffer yang lebih besar
             contentResolver.openInputStream(contentUri)?.use { input ->
                 FileOutputStream(tempFile).use { output ->
@@ -81,9 +81,9 @@ class ProfileRepositoryImpl @Inject constructor(
                     output.flush()
                 }
             }
-            
+
             Log.d(TAG, "File size: ${tempFile.length()} bytes")
-            
+
             // Membuat MultipartBody.Part
             val requestFile = tempFile.asRequestBody(mimeType.toMediaTypeOrNull())
             val part = MultipartBody.Part.createFormData(
@@ -91,7 +91,7 @@ class ProfileRepositoryImpl @Inject constructor(
                 "profile_picture.$extension",
                 requestFile
             )
-            
+
             Log.d(TAG, "Multipart created successfully")
             part
         } catch (e: Exception) {
@@ -100,7 +100,7 @@ class ProfileRepositoryImpl @Inject constructor(
             null
         }
     }
-    
+
     override suspend fun getProfile(): Flow<Result<ProfileResponse>> = flow {
         try {
             Log.d(TAG, "Mencoba mendapatkan data profil")
@@ -108,7 +108,7 @@ class ProfileRepositoryImpl @Inject constructor(
                 userRepository.getToken() ?: throw Exception("Token tidak ditemukan")
             }
             Log.d(TAG, "Token yang digunakan: $token")
-            
+
             val response = withTimeout(TIMEOUT_DURATION) {
                 withContext(Dispatchers.IO) {
                     api.getProfile(token)
@@ -133,9 +133,9 @@ class ProfileRepositoryImpl @Inject constructor(
         while (retryCount < maxRetries) {
             try {
                 Log.d(TAG, "Mencoba update profil (percobaan ${retryCount + 1}): $user")
-                
+
                 val token = userRepository.getToken() ?: throw Exception("Token tidak ditemukan")
-                
+
                 // Membuat multipart jika ada foto
                 val profilePicturePart = user.photoUrl?.let { photoUrl ->
                     if (photoUrl.isNotEmpty() && photoUrl != "null" && !photoUrl.startsWith("http")) {
@@ -150,9 +150,9 @@ class ProfileRepositoryImpl @Inject constructor(
                 val phoneNumberBody = createRequestBody(user.phoneNumber)
                 val genderBody = createRequestBody(user.gender)
                 val birthDateBody = createRequestBody(user.birthDate)
-                
+
                 Log.d(TAG, "Mengirim request dengan data: firstName=${user.firstName}, lastName=${user.lastName}, address=${user.address}, phoneNumber=${user.phoneNumber}, gender=${user.gender}, birthDate=${user.birthDate}")
-                
+
                 val response = withContext(Dispatchers.IO) {
                     api.updateProfile(
                         token = token,
@@ -167,7 +167,7 @@ class ProfileRepositoryImpl @Inject constructor(
                 }
 
                 Log.d(TAG, "Update profile berhasil")
-                
+
                 // Update user di repository lokal
                 userRepository.updateUser(response.user)
                 emit(Result.success(response))
@@ -176,7 +176,7 @@ class ProfileRepositoryImpl @Inject constructor(
             } catch (e: Exception) {
                 lastError = e
                 Log.e(TAG, "Error pada percobaan ${retryCount + 1}: ${e.message}")
-                
+
                 when (e) {
                     is TimeoutCancellationException,
                     is IOException,
@@ -197,7 +197,7 @@ class ProfileRepositoryImpl @Inject constructor(
                 }
             }
         }
-        
+
         if (lastError != null) {
             emit(Result.failure(lastError))
         }

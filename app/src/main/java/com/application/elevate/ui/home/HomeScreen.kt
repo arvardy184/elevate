@@ -15,7 +15,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.zIndex
@@ -33,9 +32,6 @@ import com.application.elevate.ui.component.Navbar
 import com.application.elevate.ui.component.SectionHeader
 import com.application.elevate.ui.component.TutorialOverlay
 import com.application.elevate.viewmodel.home.HomeViewModel
-import com.application.elevate.R
-import com.application.elevate.model.Course
-import com.application.elevate.model.GrowthHub
 
 @Composable
 fun HomeScreen(
@@ -103,12 +99,15 @@ fun HomeScreen(
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
             ) {
+
+
                 Column(
                     modifier = Modifier
                         .padding(horizontal = 16.dp, vertical = 16.dp)
                         .padding(bottom = 150.dp)
                         .zIndex(0f)// 👉 Biarkan ruang kosong buat navbar
                 ) {
+
                     Column(modifier = Modifier
                         .onGloballyPositioned { coordinates ->
                             growthHubPosition = coordinates.positionInRoot()
@@ -117,27 +116,26 @@ fun HomeScreen(
                             text = "Growth Hub",
                             style = MaterialTheme.typography.titleMedium
                         )
-                        LazyRow(
-                            modifier = Modifier.fillMaxWidth(),
-                            contentPadding = PaddingValues(horizontal = 16.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            items(viewModel.getGrowthHubItems()) { item ->
-                                GrowthHubItem(
-                                    label = item.title,
-                                    imageRes = item.imageRes,
-                                    onClick = {
-                                        if(item.title == "CV Review"){
-                                            navController.navigate("cv_review")
-                                        }
-                                        if(item.title == "Counseling"){
-                                            navController.navigate("consultant")
-                                        }
+                        Spacer(modifier = Modifier.height(14.dp))
+                        LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            items(growthHubItems) { item ->
+                                GrowthHubItem(label = item.title, imageRes = item.imageRes) {
+                                    Log.d("GrowthHubItem", "Clicked: ${item.title}")
+                                    if(item.title == "CV Review"){
+                                        navController.navigate("cv_review")
                                     }
-                                )
+                                    if(item.title == "Counseling"){
+                                        navController.navigate("consultant")
+                                    }
+                                    if(item.title == "Job&skill"){
+                                        navController.navigate("jon&skill")
+                                    }
+
+                                }
                             }
                         }
                     }
+
 
                     Spacer(modifier = Modifier.height(16.dp))
 
@@ -145,23 +143,24 @@ fun HomeScreen(
                         .onGloballyPositioned { coordinates ->
                             categoryPosition = coordinates.positionInRoot()
                             categorySize = coordinates.size.toSize()}) {
+
                         SectionHeader(
-                            title = "Categories",
-                            onViewAllClick = { navController.navigate("categories") }
+                            title = "Categories", 
+                            onViewAllClick = {
+                                navController.navigate("categories")
+                            }
                         )
-                        LazyRow(
-                            modifier = Modifier.fillMaxWidth(),
-                            contentPadding = PaddingValues(horizontal = 16.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            items(viewModel.getCategories()) { category ->
-                                CategoryChip(
-                                    text = category,
-                                    onClick = { /* TODO: Filter by category */ }
-                                )
+                        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            items(categories) { category ->
+                                CategoryChip(text = category) {
+                                    Log.d("CategoryChip", "Clicked: $category")
+                                }
                             }
                         }
+
                     }
+
+
 
                     Spacer(modifier = Modifier.height(16.dp))
 
@@ -169,25 +168,23 @@ fun HomeScreen(
                         .onGloballyPositioned { coordinates ->
                             popularCoursePosition = coordinates.positionInRoot()
                             popularCourseSize = coordinates.size.toSize()}) {
-                        SectionHeader(
-                            title = "Recommended Courses",
-                            onViewAllClick = { /* TODO: Navigate to course list */ }
-                        )
-                        LazyRow(
-                            modifier = Modifier.fillMaxWidth(),
-                            contentPadding = PaddingValues(horizontal = 16.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            items(viewModel.getRecommendedCourses()) { course ->
+
+                        SectionHeader(title = "Popular Courses", onViewAllClick = {})
+                        LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            items(dummyCourses) { course -> 
                                 CourseCard(
                                     course = course,
                                     onClick = { selectedCourse ->
                                         navController.navigate("course_detail/${selectedCourse.id}")
-                                    }
+                                    },
+                                    modifier = Modifier.width(170.dp)
                                 )
                             }
                         }
                     }
+
+
+
                 }
             }
         }
@@ -200,9 +197,13 @@ fun HomeScreen(
                 .zIndex(1f)
         ) {
             Navbar(navController = navController,     onItemClick = { navController.navigate("home") }
+
             )
         }
     }
+
+
+    // >>>> Tambahan Tutorial Overlay
 
     // Tutorial Overlay Logic
     if (showTutorial) {
@@ -264,207 +265,6 @@ fun HomeScreen(
 
 
 
-@Composable
-private fun MenuSection(
-    items: List<GrowthHub>,
-    onPositioned: (Offset, Size) -> Unit = { _, _ -> },
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier
-            .padding(16.dp)
-            .onGloballyPositioned { coordinates ->
-                onPositioned(
-                    coordinates.positionInRoot(),
-                    coordinates.size.toSize()
-                )
-            }
-    ) {
-        Text(
-            text = "Menu Utama",
-            style = MaterialTheme.typography.titleMedium
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            items.forEach { item ->
-                MenuCard(item = item)
-            }
-        }
-    }
-}
-
-@Composable
-private fun MenuCard(item: GrowthHub) {
-    Card(
-        modifier = Modifier
-            .padding(8.dp)
-            .size(100.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = item.title,
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-    }
-}
-
-@Composable
-private fun CourseListSection(
-    courses: List<Course>,
-    onPositioned: (Offset, Size) -> Unit = { _, _ -> },
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier
-            .padding(16.dp)
-            .onGloballyPositioned { coordinates ->
-                onPositioned(
-                    coordinates.positionInRoot(),
-                    coordinates.size.toSize()
-                )
-            }
-    ) {
-        Text(
-            text = "Kursus Tersedia",
-            style = MaterialTheme.typography.titleMedium
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        courses.forEach { course ->
-            CourseCard(course = course)
-        }
-    }
-}
-
-@Composable
-private fun CourseCard(course: Course) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = course.title,
-                    style = MaterialTheme.typography.titleSmall
-                )
-                Text(
-                    text = "${course.duration} • ${course.lessons} pelajaran",
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun LoadingIndicator(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        CircularProgressIndicator()
-    }
-}
-
-@Composable
-private fun ErrorSection(
-    message: String,
-    onRetry: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(text = message)
-        Spacer(modifier = Modifier.height(8.dp))
-        Button(onClick = onRetry) {
-            Text("Coba Lagi")
-        }
-    }
-}
-
-@Composable
-private fun EmptyState(
-    message: String,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Icon(
-            painter = painterResource(R.drawable.ic_empty_state),
-            contentDescription = null,
-            modifier = Modifier.size(48.dp)
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(text = message)
-    }
-}
-
-@Composable
-private fun OfflineBanner(modifier: Modifier = Modifier) {
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.error,
-        contentColor = MaterialTheme.colorScheme.onError
-    ) {
-        Text(
-            text = "Anda sedang offline. Beberapa fitur mungkin tidak tersedia.",
-            modifier = Modifier.padding(16.dp)
-        )
-    }
-}
-
-@Composable
-private fun TutorialOverlay(
-    highlightRect: Rect,
-    message: String,
-    onNext: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.7f))
-            .clickable(onClick = onNext),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            modifier = Modifier
-                .padding(32.dp)
-                .fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = message,
-                style = MaterialTheme.typography.bodyLarge,
-                color = Color.White
-            )
-        }
-    }
-}
 
 //@Preview(showBackground = true)
 //@Composable
