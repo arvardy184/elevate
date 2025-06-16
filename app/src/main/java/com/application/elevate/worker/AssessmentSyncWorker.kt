@@ -5,7 +5,7 @@ import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import androidx.work.ListenableWorker
-import com.application.elevate.data.repository.ProfileRepository
+import com.application.elevate.data.repository.AssessmentOfflineRepository
 import com.application.elevate.util.NetworkUtil
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.EntryPoint
@@ -15,31 +15,31 @@ import kotlinx.coroutines.flow.collect
 
 @EntryPoint
 @InstallIn(SingletonComponent::class)
-interface ProfileSyncWorkerEntryPoint {
-    fun profileRepository(): ProfileRepository
+interface AssessmentSyncWorkerEntryPoint {
+    fun assessmentOfflineRepository(): AssessmentOfflineRepository
     fun networkUtil(): NetworkUtil
 }
 
-class ProfileSyncWorker(
+class AssessmentSyncWorker(
     private val context: Context,
     workerParams: WorkerParameters
 ) : CoroutineWorker(context, workerParams) {
 
     companion object {
-        const val TAG = "ProfileSyncWorker"
-        const val UNIQUE_WORK_NAME = "profile_sync_work"
+        const val TAG = "AssessmentSyncWorker"
+        const val UNIQUE_WORK_NAME = "assessment_sync_work"
     }
 
     private val entryPoint = EntryPointAccessors.fromApplication(
         context,
-        ProfileSyncWorkerEntryPoint::class.java
+        AssessmentSyncWorkerEntryPoint::class.java
     )
     
-    private val profileRepository = entryPoint.profileRepository()
+    private val assessmentRepository = entryPoint.assessmentOfflineRepository()
     private val networkUtil = entryPoint.networkUtil()
 
     override suspend fun doWork(): ListenableWorker.Result {
-        Log.d(TAG, "Starting ProfileSyncWorker")
+        Log.d(TAG, "Starting AssessmentSyncWorker")
         
         return try {
             // Check if device is online
@@ -52,33 +52,33 @@ class ProfileSyncWorker(
             Log.d(TAG, "Device online, starting sync...")
             var syncResult: kotlin.Result<Boolean>? = null
             
-            profileRepository.syncProfile().collect { result ->
+            assessmentRepository.syncAssessments().collect { result ->
                 syncResult = result
                 result.onSuccess { synced ->
-                    Log.d(TAG, "Profile sync completed successfully: $synced")
+                    Log.d(TAG, "Assessment sync completed successfully: $synced")
                 }.onFailure { error ->
-                    Log.e(TAG, "Profile sync failed: ${error.message}")
+                    Log.e(TAG, "Assessment sync failed: ${error.message}")
                 }
             }
 
             // Determine worker result based on sync result
             when {
                 syncResult?.isSuccess == true -> {
-                    Log.d(TAG, "ProfileSyncWorker completed successfully")
+                    Log.d(TAG, "AssessmentSyncWorker completed successfully")
                     ListenableWorker.Result.success()
                 }
                 syncResult?.isFailure == true -> {
-                    Log.e(TAG, "ProfileSyncWorker failed: ${syncResult?.exceptionOrNull()?.message}")
+                    Log.e(TAG, "AssessmentSyncWorker failed: ${syncResult?.exceptionOrNull()?.message}")
                     ListenableWorker.Result.retry()
                 }
                 else -> {
-                    Log.e(TAG, "ProfileSyncWorker completed with unknown result")
+                    Log.e(TAG, "AssessmentSyncWorker completed with unknown result")
                     ListenableWorker.Result.failure()
                 }
             }
             
-        } catch (exception: Exception) {
-            Log.e(TAG, "ProfileSyncWorker failed with exception: ${exception.message}")
+        } catch (e: Exception) {
+            Log.e(TAG, "AssessmentSyncWorker exception: ${e.message}")
             ListenableWorker.Result.failure()
         }
     }

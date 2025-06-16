@@ -29,11 +29,14 @@ import com.application.elevate.data.api.ProfileApiService
 import com.application.elevate.data.database.AppDatabase
 import com.application.elevate.data.database.dao.CVReviewDao
 import com.application.elevate.data.database.dao.ProfileDao
+import com.application.elevate.data.database.dao.AssessmentDao
 import com.application.elevate.api.JobMatchingApiService
 import com.application.elevate.data.repository.jobmatching.JobMatchingRepository
 import com.application.elevate.data.repository.jobmatching.JobMatchingRepositoryImpl
 import com.application.elevate.data.repository.AssessmentRepository
 import com.application.elevate.data.repository.AssessmentRepositoryInterface
+import com.application.elevate.data.repository.AssessmentOfflineRepository
+import com.application.elevate.data.repository.AssessmentOfflineRepositoryImpl
 import com.application.elevate.util.NetworkUtil
 
 @Qualifier
@@ -174,6 +177,16 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    fun provideAssessmentOfflineRepository(
+        api: AssessmentApiService,
+        userRepository: UserRepository,
+        assessmentDao: AssessmentDao,
+        networkUtil: NetworkUtil
+    ): AssessmentOfflineRepository =
+        AssessmentOfflineRepositoryImpl(api, userRepository, assessmentDao, networkUtil)
+
+    @Provides
+    @Singleton
     fun provideAuthRepository(api: AuthApiService): AuthRepository =
         AuthRepositoryImpl(api)
 
@@ -227,6 +240,10 @@ object NetworkModule {
     @Provides
     fun provideProfileDao(database: AppDatabase): ProfileDao =
         database.profileDao()
+
+    @Provides
+    fun provideAssessmentDao(database: AppDatabase): AssessmentDao =
+        database.assessmentDao()
         
     @Provides
     @Singleton

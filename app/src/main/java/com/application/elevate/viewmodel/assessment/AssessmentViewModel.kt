@@ -13,12 +13,14 @@ import javax.inject.Inject
 import kotlinx.coroutines.launch
 import com.application.elevate.model.AssessmentRequest
 import com.application.elevate.data.repository.AssessmentRepositoryInterface
+import com.application.elevate.data.repository.AssessmentOfflineRepository
 import com.application.elevate.data.repository.UserRepository
 import com.application.elevate.ui.assessment.AssessmentUiState
 
 @HiltViewModel
 class AssessmentViewModel @Inject constructor(
     private val assessmentRepository: AssessmentRepositoryInterface,
+    private val assessmentOfflineRepository: AssessmentOfflineRepository,
     private val userRepository: UserRepository
 ) : ViewModel() {
     private val TAG = "AssessmentViewModel"
@@ -120,14 +122,7 @@ class AssessmentViewModel @Inject constructor(
     fun submitAssessment() {
         viewModelScope.launch {
             try {
-                val token = userRepository.getAuthToken()
-                if (token == null) {
-                    Log.e(TAG, "Token is null")
-                    setError("Sesi anda telah berakhir. Silakan login kembali.")
-                    return@launch
-                }
-
-                Log.d(TAG, "Starting assessment submission")
+                Log.d(TAG, "Starting assessment submission (offline-first)")
                 _uiState.update { it.copy(isLoading = true) }
 
                 val request = AssessmentRequest(
@@ -141,31 +136,32 @@ class AssessmentViewModel @Inject constructor(
                 )
                 
                 Log.d(TAG, "Submitting assessment with request: $request")
-                assessmentRepository.submitAssessment(token, request).collect { result ->
-                result.onSuccess { response ->
-                    Log.d(TAG, "Assessment submission successful: $response")
-                    // Update status assessment di user
-                    viewModelScope.launch {
-                        val user = userRepository.getUser()
-                        user?.let { currentUser ->
-                            userRepository.updateUser(currentUser.copy(isAssessmentCompleted = true))
+                assessmentOfflineRepository.submitAssessmentOfflineFirst(request).collect { result ->
+                    result.onSuccess { assessmentHistory ->
+                        Log.d(TAG, "Assessment submission successful (offline-first): $assessmentHistory")
+                        
+                        // Update status assessment di user
+                        viewModelScope.launch {
+                            val user = userRepository.getUser()
+                            user?.let { currentUser ->
+                                userRepository.updateUser(currentUser.copy(isAssessmentCompleted = true))
+                            }
                         }
-                    }
-                    
-                    _uiState.update { 
-                        it.copy(
-                            isLoading = false,
-                            isSuccess = true,
-                            isAssessmentCompleted = true,
-                            message = response.message
-                        ) 
-                    }
-                    
-                    // Navigasi ke HomeScreen setelah assessment selesai
-                    _navigationEvent.value = NavigationEvent.NavigateToHome
-                }.onFailure { error ->
-                    Log.e(TAG, "Assessment submission failed", error)
-                    setError(error.message ?: "Gagal mengirim assessment")
+                        
+                        _uiState.update { 
+                            it.copy(
+                                isLoading = false,
+                                isSuccess = true,
+                                isAssessmentCompleted = true,
+                                message = "Assessment berhasil disimpan"
+                            ) 
+                        }
+                        
+                        // Navigasi ke HomeScreen setelah assessment selesai
+                        _navigationEvent.value = NavigationEvent.NavigateToHome
+                    }.onFailure { error ->
+                        Log.e(TAG, "Assessment submission failed", error)
+                        setError(error.message ?: "Gagal mengirim assessment")
                     }
                 }
             } catch (e: Exception) {

@@ -9,35 +9,40 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.application.elevate.data.repository.AssessmentRepositoryInterface
 import com.application.elevate.data.repository.AssessmentOfflineRepository
 import com.application.elevate.data.repository.UserRepository
 import com.application.elevate.model.AssessmentHistory
 
-data class AssessmentCompletedUiState(
+data class MyAssessmentUiState(
     val isLoading: Boolean = false,
     val error: String? = null,
-    val assessmentHistory: AssessmentHistory? = null
+    val assessmentHistory: AssessmentHistory? = null,
+    val hasAssessment: Boolean = false
 )
 
 @HiltViewModel
-class AssessmentCompletedViewModel @Inject constructor(
+class MyAssessmentViewModel @Inject constructor(
+    private val assessmentRepository: AssessmentRepositoryInterface,
     private val assessmentOfflineRepository: AssessmentOfflineRepository,
     private val userRepository: UserRepository
 ) : ViewModel() {
-    private val TAG = "AssessmentCompletedViewModel"
+    
+    private val TAG = "MyAssessmentViewModel"
 
-    private val _uiState = MutableStateFlow(AssessmentCompletedUiState())
-    val uiState: StateFlow<AssessmentCompletedUiState> = _uiState
+    private val _uiState = MutableStateFlow(MyAssessmentUiState())
+    val uiState: StateFlow<MyAssessmentUiState> = _uiState
 
     init {
-        fetchAssessmentHistory()
+        fetchAssessmentData()
     }
 
-    fun fetchAssessmentHistory() {
+    fun fetchAssessmentData() {
         viewModelScope.launch {
             try {
                 val user = userRepository.getUser()
-                if (user == null) {
+                val userId = user?.id
+                if (userId == null) {
                     _uiState.update { 
                         it.copy(
                             error = "Sesi anda telah berakhir. Silakan login kembali.",
@@ -47,44 +52,33 @@ class AssessmentCompletedViewModel @Inject constructor(
                     return@launch
                 }
 
-                val userId = user.id
-                if (userId == null) {
-                    _uiState.update { 
-                        it.copy(
-                            error = "User ID tidak ditemukan. Silakan login kembali.",
-                            isLoading = false
-                        ) 
-                    }
-                    return@launch
-                }
-
                 _uiState.update { it.copy(isLoading = true, error = null) }
                 
-                Log.d(TAG, "Fetching assessment history offline-first for user: $userId")
-                
-                // Menggunakan offline-first approach
+                // Use offline-first approach
                 assessmentOfflineRepository.getLatestAssessmentOfflineFirst(userId).collect { result ->
                     result.onSuccess { latestAssessment ->
-                        Log.d(TAG, "Assessment history fetched successfully: $latestAssessment")
+                        Log.d(TAG, "Assessment data fetched successfully (offline-first): $latestAssessment")
+                        
                         _uiState.update { 
                             it.copy(
                                 isLoading = false,
                                 assessmentHistory = latestAssessment,
+                                hasAssessment = latestAssessment != null,
                                 error = null
                             ) 
                         }
                     }.onFailure { error ->
-                        Log.e(TAG, "Failed to fetch assessment history", error)
+                        Log.e(TAG, "Failed to fetch assessment data", error)
                         _uiState.update { 
                             it.copy(
                                 isLoading = false,
-                                error = error.message ?: "Gagal mengambil riwayat assessment"
+                                error = error.message ?: "Gagal mengambil data assessment"
                             ) 
                         }
                     }
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Error fetching assessment history", e)
+                Log.e(TAG, "Error fetching assessment data", e)
                 _uiState.update { 
                     it.copy(
                         isLoading = false,
@@ -95,7 +89,12 @@ class AssessmentCompletedViewModel @Inject constructor(
         }
     }
 
-    fun retryFetchAssessment() {
-        fetchAssessmentHistory()
+    fun onEditAssessment() {
+        // Fungsi ini akan diimplementasi nanti
+        Log.d(TAG, "Edit assessment clicked - will be implemented later")
+    }
+
+    fun retryLoadData() {
+        fetchAssessmentData()
     }
 } 

@@ -24,6 +24,7 @@ import androidx.navigation.navArgument
 import com.application.elevate.data.dummy.ProfileDummyData.dummyCourseDetails
 import com.application.elevate.ui.assessment.AssessmentCompletedScreen
 import com.application.elevate.ui.assessment.AssessmentScreen
+import com.application.elevate.ui.assessment.MyAssessmentScreen
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.application.elevate.ui.home.HomeScreen
 
@@ -196,6 +197,11 @@ fun AppNavigation() {
                 }
             )
         }
+        
+        composable("my_assessment") {
+            MyAssessmentScreen(navController = navController)
+        }
+        
         composable("course") { CourseScreen(navController) }
 
         composable("categories") {
