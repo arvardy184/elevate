@@ -17,6 +17,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.application.elevate.ui.component.CareerFieldDropdown
 import com.application.elevate.viewmodel.cvreview.CVReviewViewModel
 import java.io.File
 import java.io.FileOutputStream
@@ -199,62 +200,7 @@ fun PrimaryButton(
   }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun CareerFieldDropdown(
-  selectedCareerField: String,
-  onCareerFieldSelected: (String) -> Unit
-) {
-  var expanded by remember { mutableStateOf(false) }
-  val careerFields = listOf(
-    "Software Engineer",
-    "Data Scientist", 
-    "Product Manager",
-    "UI/UX Designer",
-    "Marketing",
-    "Finance",
-    "Other"
-  )
 
-  Column {
-    Text(
-      text = "Target Career Field",
-      style = MaterialTheme.typography.bodyLarge,
-      modifier = Modifier.padding(bottom = 8.dp)
-    )
-    
-    ExposedDropdownMenuBox(
-      expanded = expanded,
-      onExpandedChange = { expanded = !expanded }
-    ) {
-      OutlinedTextField(
-        value = selectedCareerField,
-        onValueChange = { },
-        readOnly = true,
-        placeholder = { Text("Select career field") },
-        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-        modifier = Modifier
-          .menuAnchor()
-          .fillMaxWidth()
-      )
-      
-      ExposedDropdownMenu(
-        expanded = expanded,
-        onDismissRequest = { expanded = false }
-      ) {
-        careerFields.forEach { field ->
-          DropdownMenuItem(
-            text = { Text(field) },
-            onClick = {
-              onCareerFieldSelected(field)
-              expanded = false
-            }
-          )
-        }
-      }
-    }
-  }
-}
 
 @Preview(showBackground = true)
 @Composable

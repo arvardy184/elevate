@@ -28,9 +28,12 @@ import androidx.room.Room
 import com.application.elevate.data.api.ProfileApiService
 import com.application.elevate.data.database.AppDatabase
 import com.application.elevate.data.database.dao.CVReviewDao
+import com.application.elevate.data.database.dao.ProfileDao
 import com.application.elevate.api.JobMatchingApiService
 import com.application.elevate.data.repository.jobmatching.JobMatchingRepository
 import com.application.elevate.data.repository.jobmatching.JobMatchingRepositoryImpl
+import com.application.elevate.data.repository.AssessmentRepository
+import com.application.elevate.data.repository.AssessmentRepositoryInterface
 import com.application.elevate.util.NetworkUtil
 
 @Qualifier
@@ -163,6 +166,11 @@ object NetworkModule {
     @Singleton
     fun provideAssessmentApiService(@ProdRetrofit retrofit: Retrofit): AssessmentApiService =
         retrofit.create(AssessmentApiService::class.java)
+    
+    @Provides
+    @Singleton
+    fun provideAssessmentRepository(api: AssessmentApiService): AssessmentRepositoryInterface =
+        AssessmentRepository(api)
 
     @Provides
     @Singleton
@@ -195,9 +203,11 @@ object NetworkModule {
     fun provideProfileRepository(
         api: ProfileApiService,
         userRepository: UserRepository,
+        profileDao: ProfileDao,
+        networkUtil: NetworkUtil,
         @ApplicationContext context: Context
     ): ProfileRepository =
-        ProfileRepositoryImpl(api, userRepository, context)
+        ProfileRepositoryImpl(api, userRepository, profileDao, networkUtil, context)
 
     @Provides
     @Singleton
@@ -215,7 +225,24 @@ object NetworkModule {
         database.cvReviewDao()
         
     @Provides
+    fun provideProfileDao(database: AppDatabase): ProfileDao =
+        database.profileDao()
+        
+    @Provides
     @Singleton
     fun provideNetworkUtil(@ApplicationContext context: Context): NetworkUtil =
         NetworkUtil(context)
+
+    @Provides
+    @Singleton
+    fun provideNetworkMonitor(@ApplicationContext context: Context): com.application.elevate.util.NetworkMonitor =
+        com.application.elevate.util.NetworkMonitor(context)
+
+    @Provides
+    @Singleton
+    fun provideSyncManager(
+        @ApplicationContext context: Context,
+        networkMonitor: com.application.elevate.util.NetworkMonitor
+    ): com.application.elevate.util.SyncManager =
+        com.application.elevate.util.SyncManager(context, networkMonitor)
 } 

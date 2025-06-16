@@ -1,7 +1,7 @@
 [versions]
 agp = "8.3.2"
 coachmark = "version"
-kotlin = "1.9.0"
+kotlin = "1.9.22"
 accompanistPager = "0.28.0"
 animation = "1.7.8"
 composeBomVersion = "2025.02.00"

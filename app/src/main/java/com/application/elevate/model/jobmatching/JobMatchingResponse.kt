@@ -36,4 +36,23 @@ data class AIJobAnalysis(
     val careerPath: String,
     val recommendations: List<String>,
     val dreamJobAlignment: String
+)
+
+data class JobMatchingHistoryResponse(
+    val status: String,
+    val message: String,
+    val data: List<JobMatchingHistoryItem>,
+    val total: Int
+)
+
+data class JobMatchingHistoryItem(
+    val id: String,
+    val userId: Int,
+    val cvReviewId: String?,
+    val dreamJob: String,
+    val matches: List<JobMatch>,
+    val aiAnalysis: AIJobAnalysis,
+    val createdAt: String,
+    val updatedAt: String,
+    val cvreview: String?
 ) 

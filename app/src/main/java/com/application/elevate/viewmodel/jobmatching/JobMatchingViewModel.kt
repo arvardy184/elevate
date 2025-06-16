@@ -4,7 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.application.elevate.data.repository.jobmatching.JobMatchingRepository
 import com.application.elevate.data.repository.jobmatching.JobMatchingResult
+import com.application.elevate.data.repository.jobmatching.JobMatchingHistoryResult
 import com.application.elevate.model.jobmatching.JobMatchingResponse
+import com.application.elevate.model.jobmatching.JobMatchingHistoryResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,11 +28,13 @@ sealed class JobMatchingError {
 data class JobMatchingUiState(
     val isLoading: Boolean = false,
     val jobMatchingResult: JobMatchingResponse? = null,
+    val historyResult: JobMatchingHistoryResponse? = null,
     val errorMessage: String? = null,
     val errorType: JobMatchingError? = null,
     val isUploadSuccessful: Boolean = false,
     val canRetry: Boolean = false,
-    val validationErrors: Map<String, String> = emptyMap()
+    val validationErrors: Map<String, String> = emptyMap(),
+    val isLoadingHistory: Boolean = false
 )
 
 @HiltViewModel
@@ -171,6 +175,39 @@ class JobMatchingViewModel @Inject constructor(
                 JobMatchingError.FileValidationError to false
             }
             else -> JobMatchingError.CustomError(errorMessage) to true
+        }
+    }
+
+    fun getJobMatchingHistory() {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(
+                isLoadingHistory = true,
+                errorMessage = null,
+                errorType = null
+            )
+
+            when (val result = jobMatchingRepository.getJobMatchingHistory()) {
+                is JobMatchingHistoryResult.Success -> {
+                    _uiState.value = _uiState.value.copy(
+                        isLoadingHistory = false,
+                        historyResult = result.data,
+                        errorMessage = null,
+                        errorType = null
+                    )
+                }
+                is JobMatchingHistoryResult.Error -> {
+                    val (errorType, canRetry) = categorizeError(result.message)
+                    _uiState.value = _uiState.value.copy(
+                        isLoadingHistory = false,
+                        errorMessage = getErrorMessage(errorType, result.message),
+                        errorType = errorType,
+                        canRetry = canRetry
+                    )
+                }
+                is JobMatchingHistoryResult.Loading -> {
+                    _uiState.value = _uiState.value.copy(isLoadingHistory = true)
+                }
+            }
         }
     }
 

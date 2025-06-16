@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import com.application.elevate.data.repository.AssessmentRepository
+import com.application.elevate.data.repository.AssessmentRepositoryInterface
 import com.application.elevate.data.repository.UserRepository
 import com.application.elevate.model.AssessmentHistory
 
@@ -21,7 +21,7 @@ data class AssessmentCompletedUiState(
 
 @HiltViewModel
 class AssessmentCompletedViewModel @Inject constructor(
-    private val assessmentRepository: AssessmentRepository,
+    private val assessmentRepository: AssessmentRepositoryInterface,
     private val userRepository: UserRepository
 ) : ViewModel() {
     private val TAG = "AssessmentCompletedViewModel"
@@ -49,7 +49,7 @@ class AssessmentCompletedViewModel @Inject constructor(
 
                 _uiState.update { it.copy(isLoading = true) }
                 
-                val result = assessmentRepository.getAssessmentHistory(token)
+                assessmentRepository.getAssessmentHistory(token).collect { result ->
                 result.onSuccess { response ->
                     Log.d(TAG, "Assessment history fetched successfully: $response")
                     val latestAssessment = response.data.firstOrNull()
@@ -67,6 +67,7 @@ class AssessmentCompletedViewModel @Inject constructor(
                             isLoading = false,
                             error = error.message ?: "Gagal mengambil riwayat assessment"
                         ) 
+                        }
                     }
                 }
             } catch (e: Exception) {

@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Assignment
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -67,6 +68,7 @@ fun ProfileScreen(
         onMyCVReviewClick = { navController.navigate("cv_review_list") },
         onNotificationClick = { navController.navigate("notifications") },
         onHelpCenterClick = { navController.navigate("help_center") },
+        onMyAssessmentClick = { navController.navigate("my_assessment") },
         onLogoutClick = { viewModel.logout() }
     )
 }
@@ -81,6 +83,7 @@ fun ProfileScreenContent(
     onMyCVReviewClick: () -> Unit,
     onNotificationClick: () -> Unit,
     onHelpCenterClick: () -> Unit,
+    onMyAssessmentClick: () -> Unit,
     onLogoutClick: () -> Unit
 ) {
     Scaffold(
@@ -212,6 +215,13 @@ fun ProfileScreenContent(
                 ) {
                     Column {
                         ProfileMenuItem(
+                            icon = Icons.Default.Assignment,
+                            title = "My Assessment",
+                            subtitle = "View your assessment results and history",
+                            onClick = onMyAssessmentClick
+                        )
+
+                        ProfileMenuItem(
                             icon = Icons.Default.Notifications,
                             title = "Notification",
                             subtitle = "Manage your notification settings",
@@ -261,6 +271,7 @@ fun ProfileScreenPreview() {
             onMyCVReviewClick = {},
             onNotificationClick = {},
             onHelpCenterClick = {},
+            onMyAssessmentClick = {},
             onLogoutClick = {}
         )
     }

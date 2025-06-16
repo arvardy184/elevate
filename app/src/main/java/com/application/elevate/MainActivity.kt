@@ -51,17 +51,29 @@ import com.application.elevate.viewmodel.counseling.CounselingViewModel
 import com.application.elevate.viewmodel.home.HomeViewModel
 
 import com.application.elevate.ui.auth.LoginPage
+import com.application.elevate.ui.jobmatching.JobMatchingScreen
+import com.application.elevate.ui.jobmatching.JobMatchingResultScreen
 import com.application.elevate.ui.mycourse.CourseDetailScreen
 import com.application.elevate.ui.profile.EditProfileScreen
 import com.application.elevate.ui.profile.ProfileScreen
 import com.application.elevate.viewmodel.cvreview.CVReviewViewModel
+import com.application.elevate.viewmodel.jobmatching.JobMatchingViewModel
 import com.application.elevate.viewmodel.profile.ProfileViewModel
+import com.application.elevate.util.SyncManager
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    
+    @Inject
+    lateinit var syncManager: SyncManager
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Initialize sync on app startup
+        initializeSync()
         
         // Hilangkan action bar
         // WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -76,6 +88,12 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+    
+    private fun initializeSync() {
+        // Schedule periodic sync and trigger immediate sync if online
+        syncManager.schedulePeriodicSync()
+        syncManager.triggerImmediateSync()
     }
 }
 
@@ -203,6 +221,19 @@ fun AppNavigation() {
             val counselorId = backStackEntry.arguments?.getInt("counselorId") ?: 0
             val viewModel: CounselingViewModel = hiltViewModel()
             CounselingDetailScreen(navController, counselorId, viewModel)
+        }
+
+        composable("job_skill_matching") {
+            val viewModel: JobMatchingViewModel = hiltViewModel()
+            JobMatchingScreen(navController, viewModel)
+        }
+        
+        composable("job_matching_result") {
+            val parentEntry = remember(it) {
+                navController.getBackStackEntry("job_skill_matching")
+            }
+            val viewModel: JobMatchingViewModel = hiltViewModel(parentEntry)
+            JobMatchingResultScreen(navController, viewModel)
         }
 
 

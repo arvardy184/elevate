@@ -12,13 +12,13 @@ import kotlinx.coroutines.flow.collectLatest
 import javax.inject.Inject
 import kotlinx.coroutines.launch
 import com.application.elevate.model.AssessmentRequest
-import com.application.elevate.data.repository.AssessmentRepository
+import com.application.elevate.data.repository.AssessmentRepositoryInterface
 import com.application.elevate.data.repository.UserRepository
 import com.application.elevate.ui.assessment.AssessmentUiState
 
 @HiltViewModel
 class AssessmentViewModel @Inject constructor(
-    private val assessmentRepository: AssessmentRepository,
+    private val assessmentRepository: AssessmentRepositoryInterface,
     private val userRepository: UserRepository
 ) : ViewModel() {
     private val TAG = "AssessmentViewModel"
@@ -141,7 +141,7 @@ class AssessmentViewModel @Inject constructor(
                 )
                 
                 Log.d(TAG, "Submitting assessment with request: $request")
-                val result = assessmentRepository.submitAssessment(token, request)
+                assessmentRepository.submitAssessment(token, request).collect { result ->
                 result.onSuccess { response ->
                     Log.d(TAG, "Assessment submission successful: $response")
                     // Update status assessment di user
@@ -166,6 +166,7 @@ class AssessmentViewModel @Inject constructor(
                 }.onFailure { error ->
                     Log.e(TAG, "Assessment submission failed", error)
                     setError(error.message ?: "Gagal mengirim assessment")
+                    }
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error during assessment submission", e)

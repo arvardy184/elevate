@@ -74,4 +74,34 @@ class JobMatchingRepositoryImpl @Inject constructor(
             JobMatchingResult.Error(errorMessage)
         }
     }
+
+    override suspend fun getJobMatchingHistory(): JobMatchingHistoryResult {
+        return try {
+            Log.d(TAG, "Getting job matching history")
+            
+            // Get auth token from UserRepository
+            val token = userRepository.getAuthToken()
+            if (token.isNullOrEmpty()) {
+                return JobMatchingHistoryResult.Error("Token not found. Please login again.")
+            }
+
+            val response = apiService.getJobMatchingHistory(authorization = token)
+
+            if (response.isSuccessful) {
+                response.body()?.let { historyResponse ->
+                    Log.d(TAG, "Job matching history retrieved: ${historyResponse.total} items")
+                    JobMatchingHistoryResult.Success(historyResponse)
+                } ?: JobMatchingHistoryResult.Error("Empty response from server")
+            } else {
+                val errorMessage = "Failed to get history: ${response.code()} - ${response.message()}"
+                Log.e(TAG, errorMessage)
+                JobMatchingHistoryResult.Error(errorMessage)
+            }
+
+        } catch (e: Exception) {
+            val errorMessage = "Error getting history: ${e.localizedMessage}"
+            Log.e(TAG, errorMessage, e)
+            JobMatchingHistoryResult.Error(errorMessage)
+        }
+    }
 } 

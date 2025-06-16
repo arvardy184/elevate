@@ -15,4 +15,5 @@ interface CourseApiService {
         @Header("Authorization") token: String,
         @Path("id") courseId: Int
     ): CourseDetailResponse
-} 
+}
+
