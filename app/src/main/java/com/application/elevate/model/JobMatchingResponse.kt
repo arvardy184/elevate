@@ -1,4 +1,4 @@
-package com.application.elevate.model.jobmatching
+package com.application.elevate.model
 
 data class JobMatchingResponse(
     val status: String,

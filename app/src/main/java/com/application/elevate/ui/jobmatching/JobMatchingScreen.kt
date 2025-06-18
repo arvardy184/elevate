@@ -27,6 +27,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.application.elevate.ui.component.CareerFieldDropdown
 import com.application.elevate.ui.component.JobMatchingLoadingScreen
+import com.application.elevate.ui.component.OfflineDialog
 import com.application.elevate.ui.cvreview.PrimaryButton
 import com.application.elevate.ui.cvreview.FilePicker
 import com.application.elevate.viewmodel.jobmatching.JobMatchingViewModel
@@ -349,6 +350,13 @@ fun JobMatchingScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
         }
+    }
+    
+    // Offline Dialog
+    if (uiState.showOfflineDialog) {
+        OfflineDialog(
+            onDismiss = { viewModel.hideOfflineDialog() }
+        )
     }
 }
 

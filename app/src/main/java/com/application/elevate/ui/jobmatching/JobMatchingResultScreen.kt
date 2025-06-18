@@ -5,8 +5,6 @@ package com.application.elevate.ui.jobmatching
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,8 +25,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.application.elevate.model.jobmatching.JobMatch
-import com.application.elevate.model.jobmatching.AIJobAnalysis
+import com.application.elevate.model.JobMatch
+import com.application.elevate.model.AIJobAnalysis
 import com.application.elevate.ui.component.JobMatchingLoadingScreen
 import com.application.elevate.viewmodel.jobmatching.JobMatchingViewModel
 
@@ -40,22 +38,11 @@ fun JobMatchingResultScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     
-    // Load history data when screen loads
-    LaunchedEffect(Unit) {
-        viewModel.getJobMatchingHistory()
-    }
-
-    // Show loading screen while fetching history
-    if (uiState.isLoadingHistory) {
-        JobMatchingLoadingScreen()
-        return
-    }
-
-    // Get the latest job matching data from history
-    val historyData = uiState.historyResult?.data?.firstOrNull()
+    // Use data from POST response (jobMatchingResult) instead of history
+    val jobMatchingData = uiState.jobMatchingResult?.data
 
     // Error handling for missing or corrupted data
-    if (historyData == null) {
+    if (jobMatchingData == null) {
         ErrorResultScreen(
             title = "Data Tidak Ditemukan",
             message = "Hasil job matching tidak ditemukan. Silakan coba lagi.",
@@ -65,7 +52,7 @@ fun JobMatchingResultScreen(
     }
 
     // Validate data integrity - take only top 3 matches
-    val topMatches = historyData.matches.take(3)
+    val topMatches = jobMatchingData.matches.take(3)
     if (topMatches.isEmpty()) {
         ErrorResultScreen(
             title = "Tidak Ada Job Match",
@@ -110,10 +97,10 @@ fun JobMatchingResultScreen(
                 .padding(16.dp)
         ) {
             // Header Summary
-            if (topMatches.isNotEmpty() && historyData.dreamJob.isNotBlank()) {
+            if (topMatches.isNotEmpty() && jobMatchingData.dreamJob.isNotBlank()) {
                 SummaryCard(
                     totalMatches = topMatches.size,
-                    dreamJob = historyData.dreamJob
+                    dreamJob = jobMatchingData.dreamJob
                 )
             } else {
                 ErrorCard(message = "Error displaying summary: Invalid data")
@@ -141,8 +128,8 @@ fun JobMatchingResultScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             // AI Analysis
-            if (historyData.aiAnalysis.summary.isNotBlank()) {
-                AIAnalysisCard(aiAnalysis = historyData.aiAnalysis)
+            if (jobMatchingData.aiAnalysis.summary.isNotBlank()) {
+                AIAnalysisCard(aiAnalysis = jobMatchingData.aiAnalysis)
             } else {
                 ErrorCard(message = "AI analysis not available")
             }
@@ -169,15 +156,14 @@ fun JobMatchingResultScreen(
 
                 Button(
                     onClick = { 
-                        // Navigate to full job list or save results
-                        // For now, show a snackbar
+                        navController.navigate("job_matching_history")
                     },
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(8.dp)
                 ) {
-                    Icon(Icons.Default.Bookmark, contentDescription = null)
+                    Icon(Icons.Default.History, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Save Results")
+                    Text("View History")
                 }
             }
 

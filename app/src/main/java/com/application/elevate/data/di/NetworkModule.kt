@@ -7,9 +7,7 @@ import com.application.elevate.data.api.AuthApiService
 import com.application.elevate.data.api.CounselingApiService
 import com.application.elevate.data.api.CourseApiService
 import com.application.elevate.data.api.AssessmentApiService
-import com.application.elevate.data.datastore.DataStoreManager
 import com.application.elevate.data.repository.*
-import com.application.elevate.data.repository.DataStoreRepositoryImpl
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import dagger.Module
@@ -32,9 +30,7 @@ import com.application.elevate.data.database.dao.ProfileDao
 import com.application.elevate.data.database.dao.AssessmentDao
 import com.application.elevate.data.database.dao.CourseDao
 import com.application.elevate.data.database.dao.CategoryDao
-import com.application.elevate.api.JobMatchingApiService
-import com.application.elevate.data.repository.jobmatching.JobMatchingRepository
-import com.application.elevate.data.repository.jobmatching.JobMatchingRepositoryImpl
+import com.application.elevate.data.api.JobMatchingApiService
 import com.application.elevate.data.repository.AssessmentRepository
 import com.application.elevate.data.repository.AssessmentRepositoryInterface
 import com.application.elevate.data.repository.AssessmentOfflineRepository
@@ -200,13 +196,7 @@ object NetworkModule {
     ): CVReviewRepository =
         CVReviewRepositoryImpl(api, dao)
 
-    @Provides
-    @Singleton
-    fun provideJobMatchingRepository(
-        api: JobMatchingApiService,
-        userRepository: UserRepository
-    ): JobMatchingRepository =
-        JobMatchingRepositoryImpl(api, userRepository)
+
 
     @Provides
     @Singleton
@@ -254,6 +244,10 @@ object NetworkModule {
     @Provides
     fun provideCategoryDao(database: AppDatabase): CategoryDao =
         database.categoryDao()
+
+    @Provides
+    fun provideJobMatchingDao(database: AppDatabase): com.application.elevate.data.database.dao.JobMatchingDao =
+        database.jobMatchingDao()
         
     @Provides
     @Singleton

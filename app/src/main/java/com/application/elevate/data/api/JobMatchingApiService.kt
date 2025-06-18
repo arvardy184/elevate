@@ -1,10 +1,7 @@
-package com.application.elevate.api
+package com.application.elevate.data.api
 
-import com.application.elevate.model.CVReviewDetailResponse
-import com.application.elevate.model.CVReviewListResponse
-import com.application.elevate.model.CVReviewResponse
-import com.application.elevate.model.jobmatching.JobMatchingResponse
-import com.application.elevate.model.jobmatching.JobMatchingHistoryResponse
+import com.application.elevate.model.JobMatchingResponse
+import com.application.elevate.model.JobMatchingHistoryResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Response

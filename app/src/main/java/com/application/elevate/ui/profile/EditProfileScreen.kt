@@ -389,12 +389,6 @@ fun EditProfileContent(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp),
                 singleLine = true,
-                trailingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.MyLocation,
-                        contentDescription = "View on map"
-                    )
-                },
                 placeholder = { Text(text = user.address ?: "Enter address") }
             )
 

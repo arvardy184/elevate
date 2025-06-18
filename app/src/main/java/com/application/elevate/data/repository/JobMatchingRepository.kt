@@ -1,7 +1,7 @@
-package com.application.elevate.data.repository.jobmatching
+package com.application.elevate.data.repository
 
-import com.application.elevate.model.jobmatching.JobMatchingResponse
-import com.application.elevate.model.jobmatching.JobMatchingHistoryResponse
+import com.application.elevate.model.JobMatchingResponse
+import com.application.elevate.model.JobMatchingHistoryResponse
 import java.io.File
 
 sealed class JobMatchingResult {
@@ -23,4 +23,7 @@ interface JobMatchingRepository {
     ): JobMatchingResult
     
     suspend fun getJobMatchingHistory(): JobMatchingHistoryResult
+    
+    suspend fun syncPendingData(): List<SyncResult>
+    suspend fun getUnsyncedCount(): Int
 } 

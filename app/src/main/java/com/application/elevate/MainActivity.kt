@@ -51,6 +51,7 @@ import com.application.elevate.viewmodel.counseling.CounselingViewModel
 import com.application.elevate.viewmodel.home.HomeViewModel
 import com.application.elevate.ui.jobmatching.JobMatchingScreen
 import com.application.elevate.ui.jobmatching.JobMatchingResultScreen
+import com.application.elevate.ui.jobmatching.JobMatchingHistoryScreen
 import com.application.elevate.viewmodel.cvreview.CVReviewViewModel
 import com.application.elevate.viewmodel.jobmatching.JobMatchingViewModel
 import com.application.elevate.viewmodel.profile.ProfileViewModel
@@ -269,6 +270,11 @@ fun AppNavigation() {
             }
             val viewModel: JobMatchingViewModel = hiltViewModel(parentEntry)
             JobMatchingResultScreen(navController, viewModel)
+        }
+
+        composable("job_matching_history") {
+            val viewModel: JobMatchingViewModel = hiltViewModel()
+            com.application.elevate.ui.jobmatching.JobMatchingHistoryScreen(navController, viewModel)
         }
 
 

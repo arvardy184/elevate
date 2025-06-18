@@ -2,11 +2,13 @@ package com.application.elevate.viewmodel.jobmatching
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.application.elevate.data.repository.jobmatching.JobMatchingRepository
-import com.application.elevate.data.repository.jobmatching.JobMatchingResult
-import com.application.elevate.data.repository.jobmatching.JobMatchingHistoryResult
-import com.application.elevate.model.jobmatching.JobMatchingResponse
-import com.application.elevate.model.jobmatching.JobMatchingHistoryResponse
+import com.application.elevate.data.repository.JobMatchingRepository
+import com.application.elevate.data.repository.JobMatchingResult
+import com.application.elevate.data.repository.JobMatchingHistoryResult
+import com.application.elevate.data.repository.SyncResult
+import com.application.elevate.model.JobMatchingResponse
+import com.application.elevate.model.JobMatchingHistoryResponse
+import com.application.elevate.util.NetworkMonitor
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -34,16 +36,40 @@ data class JobMatchingUiState(
     val isUploadSuccessful: Boolean = false,
     val canRetry: Boolean = false,
     val validationErrors: Map<String, String> = emptyMap(),
-    val isLoadingHistory: Boolean = false
+    val isLoadingHistory: Boolean = false,
+    val isOffline: Boolean = false,
+    val unsyncedCount: Int = 0,
+    val isSyncing: Boolean = false,
+    val syncResults: List<SyncResult> = emptyList(),
+    val showOfflineDialog: Boolean = false,
+    val isOfflineUpload: Boolean = false
 )
 
 @HiltViewModel
 class JobMatchingViewModel @Inject constructor(
-    private val jobMatchingRepository: JobMatchingRepository
+    private val jobMatchingRepository: JobMatchingRepository,
+    private val networkMonitor: NetworkMonitor
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(JobMatchingUiState())
     val uiState: StateFlow<JobMatchingUiState> = _uiState.asStateFlow()
+
+    init {
+        // Monitor network status
+        viewModelScope.launch {
+            networkMonitor.isOnline().collect { isOnline ->
+                _uiState.value = _uiState.value.copy(isOffline = !isOnline)
+                
+                if (isOnline) {
+                    // When back online, update unsynced count
+                    updateUnsyncedCount()
+                }
+            }
+        }
+        
+        // Initial unsynced count load
+        updateUnsyncedCount()
+    }
 
     fun uploadAndMatchJobs(cvFile: File, dreamJob: String) {
         // Input validation first
@@ -68,14 +94,22 @@ class JobMatchingViewModel @Inject constructor(
 
             when (val result = jobMatchingRepository.uploadAndMatchJobs(cvFile, dreamJob)) {
                 is JobMatchingResult.Success -> {
+                    val isOfflineUpload = result.data.status == "offline"
+                    
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         jobMatchingResult = result.data,
                         isUploadSuccessful = true,
                         errorMessage = null,
                         errorType = null,
-                        canRetry = false
+                        canRetry = false,
+                        isOfflineUpload = isOfflineUpload,
+                        showOfflineDialog = isOfflineUpload
                     )
+                    
+                    if (isOfflineUpload) {
+                        updateUnsyncedCount()
+                    }
                 }
                 is JobMatchingResult.Error -> {
                     val (errorType, canRetry) = categorizeError(result.message)
@@ -225,6 +259,60 @@ class JobMatchingViewModel @Inject constructor(
                 "Ada error yang gak terduga. Coba lagi atau hubungi support."
             is JobMatchingError.CustomError -> 
                 errorType.message
+        }
+    }
+    
+    fun syncPendingData() {
+        if (_uiState.value.isOffline) {
+            _uiState.value = _uiState.value.copy(
+                errorMessage = "Tidak bisa melakukan sinkronisasi saat offline",
+                errorType = JobMatchingError.NetworkError
+            )
+            return
+        }
+        
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isSyncing = true)
+            
+            try {
+                val results = jobMatchingRepository.syncPendingData()
+                _uiState.value = _uiState.value.copy(
+                    isSyncing = false,
+                    syncResults = results
+                )
+                
+                // Update unsynced count after sync
+                updateUnsyncedCount()
+                
+                // Refresh history to show updated data
+                getJobMatchingHistory()
+                
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isSyncing = false,
+                    errorMessage = "Gagal melakukan sinkronisasi: ${e.localizedMessage}",
+                    errorType = JobMatchingError.NetworkError
+                )
+            }
+        }
+    }
+    
+    fun hideOfflineDialog() {
+        _uiState.value = _uiState.value.copy(showOfflineDialog = false)
+    }
+    
+    fun clearSyncResults() {
+        _uiState.value = _uiState.value.copy(syncResults = emptyList())
+    }
+    
+    private fun updateUnsyncedCount() {
+        viewModelScope.launch {
+            try {
+                val count = jobMatchingRepository.getUnsyncedCount()
+                _uiState.value = _uiState.value.copy(unsyncedCount = count)
+            } catch (e: Exception) {
+                // Silently handle error, don't affect UI
+            }
         }
     }
 } 
