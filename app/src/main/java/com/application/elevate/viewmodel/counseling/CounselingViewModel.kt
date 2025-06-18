@@ -2,17 +2,18 @@ package com.application.elevate.viewmodel.counseling
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import com.application.elevate.data.repository.CounselingRepository
 import com.application.elevate.data.dummy.ProfileDummyData
 import com.application.elevate.model.CounselingCategory
+import com.application.elevate.model.ConsultantResponse
 import com.application.elevate.ui.counseling.CounselingUiState
 import com.application.elevate.ui.counseling.CounselorDetailUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import java.net.ConnectException
+import java.io.IOException
 
 @HiltViewModel
 class CounselingViewModel @Inject constructor(
@@ -31,6 +32,14 @@ class CounselingViewModel @Inject constructor(
 
   init {
     loadCounselors()
+    // Cache categories on init
+    cacheCategories()
+  }
+  
+  private fun cacheCategories() {
+    viewModelScope.launch {
+      counselingRepository.cacheCategories(ProfileDummyData.categoriesCounseling)
+    }
   }
 
   fun loadCounselors(
@@ -40,7 +49,9 @@ class CounselingViewModel @Inject constructor(
     viewModelScope.launch {
       _uiState.value = _uiState.value.copy(
         isLoading = true,
-        error = null
+        error = null,
+        isOffline = false,
+        isFromCache = false
       )
 
       counselingRepository.getCounselors(
@@ -52,17 +63,69 @@ class CounselingViewModel @Inject constructor(
             consultants = response.data,
             pagination = response.pagination,
             selectedSpecialization = specialization,
-            isLoading = false
+            isLoading = false,
+            lastRefresh = System.currentTimeMillis(),
+            isFromCache = isDataFromCache(response)
           )
         },
         onFailure = { exception ->
-          _uiState.value = _uiState.value.copy(
-            error = exception.message ?: "Failed to load counselors",
-            isLoading = false
-          )
+          val isNetworkError = exception is ConnectException || exception is IOException
+          
+          if (isNetworkError) {
+            // Try to load from cache when offline
+            loadCachedConsultants(specialization)
+          } else {
+            _uiState.value = _uiState.value.copy(
+              error = exception.message ?: "Failed to load counselors",
+              isLoading = false
+            )
+          }
         }
       )
     }
+  }
+  
+  private fun loadCachedConsultants(specialization: String?) {
+    viewModelScope.launch {
+      try {
+        val cachedFlow = if (specialization != null) {
+          counselingRepository.searchConsultants(specialization)
+        } else {
+          counselingRepository.getCachedConsultants()
+        }
+        
+        cachedFlow.first().let { cachedConsultants ->
+          if (cachedConsultants.isNotEmpty()) {
+            _uiState.value = _uiState.value.copy(
+              consultants = cachedConsultants,
+              isLoading = false,
+              isOffline = true,
+              isFromCache = true,
+              error = null
+            )
+          } else {
+            _uiState.value = _uiState.value.copy(
+              error = "No internet connection and no cached data available",
+              isLoading = false,
+              isOffline = true
+            )
+          }
+        }
+      } catch (e: Exception) {
+        _uiState.value = _uiState.value.copy(
+          error = "Failed to load cached data",
+          isLoading = false,
+          isOffline = true
+        )
+      }
+    }
+  }
+  
+  private fun isDataFromCache(response: ConsultantResponse): Boolean {
+    // Simple heuristic: if pagination shows only 1 page with cached data count, likely from cache
+    return response.pagination?.let { 
+      it.totalPages == 1 && it.currentPage == 1 
+    } ?: false
   }
 
   fun onCategorySelected(category: CounselingCategory) {

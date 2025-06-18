@@ -12,12 +12,17 @@ data class CounselingUiState(
     val selectedSpecialization: String? = null,
     val isLoading: Boolean = false,
     val error: String? = null,
-    val pagination: CounselingPagination? = null
+    val pagination: CounselingPagination? = null,
+    val isOffline: Boolean = false,
+    val isFromCache: Boolean = false,
+    val lastRefresh: Long? = null
 )
 
 // State holder untuk detail counselor
 data class CounselorDetailUiState(
     val consultant: Consultant? = null,
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val isOffline: Boolean = false,
+    val isFromCache: Boolean = false
 )

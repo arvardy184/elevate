@@ -21,10 +21,11 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Qualifier
 import javax.inject.Singleton
-import androidx.room.Room
 import com.application.elevate.data.api.ProfileApiService
-import com.application.elevate.data.database.AppDatabase
 import com.application.elevate.data.database.dao.CVReviewDao
+import com.application.elevate.data.database.dao.ConsultantDao
+import com.application.elevate.data.database.dao.CounselingCategoryDao
+import com.application.elevate.data.database.dao.SearchHistoryDao
 import com.application.elevate.api.JobMatchingApiService
 import com.application.elevate.data.repository.jobmatching.JobMatchingRepository
 import com.application.elevate.data.repository.jobmatching.JobMatchingRepositoryImpl
@@ -174,8 +175,13 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideCounselingRepository(api: CounselingApiService): CounselingRepository =
-        CounselingRepositoryImpl(api)
+    fun provideCounselingRepository(
+        api: CounselingApiService,
+        consultantDao: ConsultantDao,
+        categoryDao: CounselingCategoryDao,
+        searchHistoryDao: SearchHistoryDao
+    ): CounselingRepository =
+        CounselingRepositoryImpl(api, consultantDao, categoryDao, searchHistoryDao)
 
     @Provides
     @Singleton
@@ -191,21 +197,6 @@ object NetworkModule {
     ): ProfileRepository =
         ProfileRepositoryImpl(api, userRepository, context)
 
-    @Provides
-    @Singleton
-    fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase =
-        Room.databaseBuilder(
-            context,
-            AppDatabase::class.java,
-            "elevate_database"
-        )
-        .fallbackToDestructiveMigration()
-        .build()
-
-    @Provides
-    fun provideCVReviewDao(database: AppDatabase): CVReviewDao =
-        database.cvReviewDao()
-        
     @Provides
     @Singleton
     fun provideNetworkUtil(@ApplicationContext context: Context): NetworkUtil =
