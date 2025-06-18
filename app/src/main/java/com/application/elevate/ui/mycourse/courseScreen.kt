@@ -34,6 +34,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.application.elevate.R
+import com.application.elevate.data.mapper.getLocalImageRes
 import com.application.elevate.ui.component.CategoryChip
 import com.application.elevate.ui.component.Navbar
 import com.application.elevate.ui.component.SavedCourseItem
@@ -47,8 +48,7 @@ fun CourseScreen(
     navController: NavController = rememberNavController(),
     viewModel: CourseViewModel = hiltViewModel()
 ) {
-    val selectedCategory = remember { mutableStateOf("Design") }
-    val categories = listOf("Design", "App & Web Development", "Digital Marketing", "All")
+    val selectedCategory = remember { mutableStateOf("All") }
     val isViewAll = remember { mutableStateOf(false) }
     val uiState by viewModel.uiState.collectAsState()
 
@@ -132,14 +132,23 @@ fun CourseScreen(
                             .background(Color(0xFFF8F8F8))
                             .verticalScroll(rememberScrollState())
                     ) {
+                        // Categories from API
                         LazyRow(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             modifier = Modifier.padding(start = 16.dp)
                         ) {
-                            items(categories) { category ->
+                            // Add "All" category first
+                            item {
                                 CategoryChip(
-                                    text = category,
-                                    onClick = { selectedCategory.value = category }
+                                    text = "All",
+                                    onClick = { selectedCategory.value = "All" }
+                                )
+                            }
+                            
+                            items(uiState.categories) { category ->
+                                CategoryChip(
+                                    text = category.name,
+                                    onClick = { selectedCategory.value = category.name }
                                 )
                             }
                         }
@@ -160,14 +169,17 @@ fun CourseScreen(
                                 modifier = Modifier.padding(bottom = 12.dp)
                             )
 
-                            // Jika ada course yang sedang dibuka, tampilkan di sini
-                            uiState.courses.firstOrNull()?.let { recentCourse ->
+                            // Recent Course with Progress
+                            uiState.recentOpenedCourse?.let { recentCourse ->
                                 Card(
                                     shape = RoundedCornerShape(16.dp),
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .height(180.dp)
-                                        .shadow(4.dp),
+                                        .shadow(4.dp)
+                                        .clickable { 
+                                            navController.navigate("course_detail/${recentCourse.id}")
+                                        },
                                     colors = CardDefaults.cardColors(
                                         containerColor = Color.White
                                     )
@@ -177,59 +189,83 @@ fun CourseScreen(
                                             .fillMaxWidth()
                                             .height(180.dp)
                                     ) {
-                                        AsyncImage(
-                                            model = recentCourse.thumbnail,
+                                        Image(
+                                            painter = painterResource(id = recentCourse.getLocalImageRes()),
                                             contentDescription = recentCourse.title,
                                             contentScale = ContentScale.Crop,
                                             modifier = Modifier.fillMaxSize()
                                         )
 
-                                        Column(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            horizontalAlignment = Alignment.CenterHorizontally
-                                        ) {
-                                            Row(
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .padding(top = 45.dp),
-                                                horizontalArrangement = Arrangement.SpaceBetween,
-                                                verticalAlignment = Alignment.CenterVertically
-                                            ) {
-                                                Column(
-                                                    modifier = Modifier.padding(20.dp)
-                                                ) {
-                                                    Text(
-                                                        text = recentCourse.title,
-                                                        style = MaterialTheme.typography.titleLarge.copy(
-                                                            fontWeight = FontWeight.Bold,
-                                                            color = Color.White
+                                        // Gradient overlay
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .background(
+                                                    androidx.compose.ui.graphics.Brush.verticalGradient(
+                                                        colors = listOf(
+                                                            Color.Transparent,
+                                                            Color.Black.copy(alpha = 0.6f)
                                                         )
                                                     )
-                                                    Text(
-                                                        text = recentCourse.category.name,
-                                                        style = MaterialTheme.typography.bodyMedium.copy(
-                                                            color = Color.White
-                                                        )
-                                                    )
-                                                }
+                                                )
+                                        )
 
-                                                Box(
-                                                    modifier = Modifier
-                                                        .padding(16.dp)
-                                                        .size(36.dp)
-                                                        .clip(CircleShape)
-                                                        .background(Color(0xFF635C9C))
-                                                ) {
-                                                    Icon(
-                                                        imageVector = Icons.Default.ArrowForward,
-                                                        contentDescription = "Continue",
-                                                        tint = Color.White,
-                                                        modifier = Modifier
-                                                            .align(Alignment.Center)
-                                                            .size(20.dp)
+                                        Column(
+                                            modifier = Modifier.fillMaxSize(),
+                                            verticalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Spacer(modifier = Modifier.weight(1f))
+                                            
+                                            Column(
+                                                modifier = Modifier.padding(20.dp)
+                                            ) {
+                                                Text(
+                                                    text = recentCourse.title,
+                                                    style = MaterialTheme.typography.titleLarge.copy(
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = Color.White
                                                     )
-                                                }
+                                                )
+                                                Text(
+                                                    text = recentCourse.category.name,
+                                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                                        color = Color.White.copy(alpha = 0.8f)
+                                                    ),
+                                                    modifier = Modifier.padding(bottom = 8.dp)
+                                                )
+                                                
+                                                // Progress Bar (Course progress API belum tersedia)
+                                                // Sementara gunakan progress placeholder
+                                                val progress = 45f // Static progress placeholder
+                                                LinearProgressIndicator(
+                                                    progress = progress / 100f,
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .height(4.dp)
+                                                        .clip(RoundedCornerShape(2.dp)),
+                                                    color = Color(0xFF635C9C),
+                                                    trackColor = Color.White.copy(alpha = 0.3f)
+                                                )
                                             }
+                                        }
+
+                                        // Arrow button
+                                        Box(
+                                            modifier = Modifier
+                                                .align(Alignment.TopEnd)
+                                                .padding(16.dp)
+                                                .size(36.dp)
+                                                .clip(CircleShape)
+                                                .background(Color(0xFF635C9C))
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.ArrowForward,
+                                                contentDescription = "Continue",
+                                                tint = Color.White,
+                                                modifier = Modifier
+                                                    .align(Alignment.Center)
+                                                    .size(20.dp)
+                                            )
                                         }
                                     }
                                 }
@@ -267,8 +303,8 @@ fun CourseScreen(
                                             .padding(16.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        AsyncImage(
-                                            model = course.thumbnail,
+                                        Image(
+                                            painter = painterResource(id = course.getLocalImageRes()),
                                             contentDescription = course.title,
                                             contentScale = ContentScale.Crop,
                                             modifier = Modifier
@@ -292,17 +328,22 @@ fun CourseScreen(
                                                 style = MaterialTheme.typography.bodyMedium,
                                                 color = Color.Gray
                                             )
+                                            // Tampilkan harga
                                             if (course.isPaid) {
                                                 Text(
                                                     text = "Rp ${course.price}",
-                                                    style = MaterialTheme.typography.titleMedium,
+                                                    style = MaterialTheme.typography.titleMedium.copy(
+                                                        fontWeight = FontWeight.Bold
+                                                    ),
                                                     color = MaterialTheme.colorScheme.primary
                                                 )
                                             } else {
                                                 Text(
                                                     text = "Gratis",
-                                                    style = MaterialTheme.typography.titleMedium,
-                                                    color = MaterialTheme.colorScheme.primary
+                                                    style = MaterialTheme.typography.titleMedium.copy(
+                                                        fontWeight = FontWeight.Bold
+                                                    ),
+                                                    color = Color(0xFF4CAF50)
                                                 )
                                             }
                                         }

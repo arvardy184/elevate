@@ -29,5 +29,7 @@ data class CourseItem(
     @SerializedName("createdAt")
     val createdAt: String,
     @SerializedName("category")
-    val category: Category
+    val category: Category,
+    @SerializedName("isEnrolled")
+    val isEnrolled: Boolean = false
 )

@@ -31,7 +31,9 @@ data class CourseDetailItem(
     @SerializedName("averageRating")
     val averageRating: Float,
     @SerializedName("totalReviews")
-    val totalReviews: Int
+    val totalReviews: Int,
+    @SerializedName("isEnrolled")
+    val isEnrolled: Boolean = false
 )
 
 data class CourseCategory(

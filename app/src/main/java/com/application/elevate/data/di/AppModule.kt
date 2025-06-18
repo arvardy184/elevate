@@ -3,6 +3,7 @@ package com.application.elevate.data.di
 import android.content.Context
 import com.application.elevate.data.datastore.DataStoreManager
 import com.application.elevate.data.repository.UserRepository
+import com.application.elevate.util.NotificationManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -32,5 +33,13 @@ object AppModule {
         @ApplicationContext context: Context
     ): DataStoreManager {
         return DataStoreManager(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideNotificationManager(
+        @ApplicationContext context: Context
+    ): NotificationManager {
+        return NotificationManager(context)
     }
 } 

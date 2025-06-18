@@ -15,7 +15,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import androidx.compose.ui.res.painterResource
 import com.application.elevate.viewmodel.course.CourseViewModel
+import com.application.elevate.data.mapper.getLocalImageRes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -111,8 +113,9 @@ fun CourseItem(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            AsyncImage(
-                model = course.thumbnail,
+            // Gunakan gambar lokal karena thumbnail dari API kosong
+            androidx.compose.foundation.Image(
+                painter = painterResource(id = course.getLocalImageRes()),
                 contentDescription = course.title,
                 modifier = Modifier
                     .fillMaxWidth()

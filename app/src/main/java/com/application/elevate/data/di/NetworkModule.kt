@@ -30,6 +30,8 @@ import com.application.elevate.data.database.AppDatabase
 import com.application.elevate.data.database.dao.CVReviewDao
 import com.application.elevate.data.database.dao.ProfileDao
 import com.application.elevate.data.database.dao.AssessmentDao
+import com.application.elevate.data.database.dao.CourseDao
+import com.application.elevate.data.database.dao.CategoryDao
 import com.application.elevate.api.JobMatchingApiService
 import com.application.elevate.data.repository.jobmatching.JobMatchingRepository
 import com.application.elevate.data.repository.jobmatching.JobMatchingRepositoryImpl
@@ -244,6 +246,14 @@ object NetworkModule {
     @Provides
     fun provideAssessmentDao(database: AppDatabase): AssessmentDao =
         database.assessmentDao()
+
+    @Provides
+    fun provideCourseDao(database: AppDatabase): CourseDao =
+        database.courseDao()
+
+    @Provides
+    fun provideCategoryDao(database: AppDatabase): CategoryDao =
+        database.categoryDao()
         
     @Provides
     @Singleton

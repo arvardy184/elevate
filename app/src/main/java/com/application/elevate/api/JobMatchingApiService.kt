@@ -26,40 +26,4 @@ interface JobMatchingApiService {
     ): Response<JobMatchingHistoryResponse>
 }
 
-//
-//interface CVReviewApiService {
-//    @Multipart
-//    @POST("cv-review/upload")
-//    suspend fun uploadCV(
-//        @Header("Authorization") token: String,
-//        @Part cv: MultipartBody.Part,
-//        @Part("careerField") careerField: RequestBody
-//    ): CVReviewResponse
-//
-//    @GET("cv-review/my-reviews")
-//    suspend fun getMyCVReviews(
-//        @Header("Authorization") token: String,
-//        @Query("page") page: Int = 1,
-//        @Query("limit") limit: Int = 10
-//    ): CVReviewListResponse
-//
-//    @GET("cv-review/{id}")
-//    suspend fun getCVReviewById(
-//        @Header("Authorization") token: String,
-//        @Path("id") id: String
-//    ): CVReviewDetailResponse
-//
-//    @FormUrlEncoded
-//    @PUT("cv-review/{id}")
-//    suspend fun updateCVReview(
-//        @Header("Authorization") token: String,
-//        @Path("id") id: String,
-//        @Field("careerField") careerField: String
-//    ): CVReviewResponse
-//
-//    @DELETE("cv-review/{id}")
-//    suspend fun deleteCVReview(
-//        @Header("Authorization") token: String,
-//        @Path("id") id: String
-//    ): CVReviewResponse
-//}
+

@@ -31,6 +31,9 @@ class UserRepository @Inject constructor(
     
     private var _token: String? = null
     
+    // Callback untuk clear quiz data saat logout
+    private var clearQuizDataCallback: (suspend () -> Unit)? = null
+    
     // Membuat CoroutineScope yang aman
     private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     
@@ -334,8 +337,21 @@ class UserRepository @Inject constructor(
         return user
     }
 
+    // Method untuk set callback clear quiz data
+    fun setClearQuizDataCallback(callback: suspend () -> Unit) {
+        clearQuizDataCallback = callback
+    }
+    
     suspend fun clearUser() {
         Log.d(TAG, "Membersihkan data user dan token remember me")
+        
+        // Clear quiz data for current user before clearing user data
+        try {
+            clearQuizDataCallback?.invoke()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error clearing quiz data during logout: ${e.message}")
+        }
+        
         _userFlow.value = null
         
         dataStoreManager.dataStore.edit { prefs ->

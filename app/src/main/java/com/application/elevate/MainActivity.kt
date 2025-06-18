@@ -36,31 +36,31 @@ import com.application.elevate.ui.cvreview.CVReviewScreen
 import com.application.elevate.ui.cvreview.CVReviewListScreen
 import com.application.elevate.ui.cvreview.CVReviewDetailScreen
 import com.application.elevate.ui.auth.LoginPage
+import com.application.elevate.ui.auth.SignUpPage
 import com.application.elevate.ui.mycourse.CourseDetailScreen
 import com.application.elevate.ui.profile.EditProfileScreen
 import com.application.elevate.ui.profile.ProfileScreen
 import com.application.elevate.ui.mycourse.CourseScreen
-import com.application.elevate.ui.auth.SignUpPage
 import com.application.elevate.viewmodel.cvreview.CVReviewListViewModel
 import com.application.elevate.viewmodel.cvreview.CVReviewDetailViewModel
 import com.application.elevate.ui.home.SearchScreen
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.application.elevate.ui.counseling.CounselingDetailScreen
-
 import com.application.elevate.viewmodel.assessment.AssessmentViewModel
 import com.application.elevate.viewmodel.counseling.CounselingViewModel
 import com.application.elevate.viewmodel.home.HomeViewModel
-
-import com.application.elevate.ui.auth.LoginPage
 import com.application.elevate.ui.jobmatching.JobMatchingScreen
 import com.application.elevate.ui.jobmatching.JobMatchingResultScreen
-import com.application.elevate.ui.mycourse.CourseDetailScreen
-import com.application.elevate.ui.profile.EditProfileScreen
-import com.application.elevate.ui.profile.ProfileScreen
 import com.application.elevate.viewmodel.cvreview.CVReviewViewModel
 import com.application.elevate.viewmodel.jobmatching.JobMatchingViewModel
 import com.application.elevate.viewmodel.profile.ProfileViewModel
+import com.application.elevate.viewmodel.course.CourseViewModel
 import com.application.elevate.util.SyncManager
+import com.application.elevate.worker.CourseSyncWorker
+import com.application.elevate.util.NetworkMonitor
+import com.application.elevate.util.NotificationManager
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -69,6 +69,12 @@ class MainActivity : ComponentActivity() {
     
     @Inject
     lateinit var syncManager: SyncManager
+    
+    @Inject
+    lateinit var networkMonitor: NetworkMonitor
+    
+    @Inject
+    lateinit var notificationManager: NotificationManager
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -95,6 +101,20 @@ class MainActivity : ComponentActivity() {
         // Schedule periodic sync and trigger immediate sync if online
         syncManager.schedulePeriodicSync()
         syncManager.triggerImmediateSync()
+        
+        // Schedule course sync worker
+        CourseSyncWorker.enqueue(this)
+        
+        // Monitor network changes and trigger sync when online
+        lifecycleScope.launch {
+            networkMonitor.isOnline().collect { isOnline ->
+                if (isOnline) {
+                    // Trigger immediate sync when device goes online
+                    syncManager.triggerImmediateSync()
+                    CourseSyncWorker.enqueue(this@MainActivity)
+                }
+            }
+        }
     }
 }
 
@@ -130,10 +150,13 @@ fun AppNavigation() {
         composable(
             route = "course_detail/{courseId}",
             arguments = listOf(navArgument("courseId") { type = NavType.StringType })
-        ) {
-            val courseId = it.arguments?.getString("courseId") ?: ""
-            val courseDetail = dummyCourseDetails.find { it.id == courseId }!!
-//            CourseDetailScreen( onBackClick = { navController.popBackStack() })
+        ) { backStackEntry ->
+            val courseIdString = backStackEntry.arguments?.getString("courseId") ?: "0"
+            val courseId = courseIdString.toIntOrNull() ?: 0
+            CourseDetailScreen(
+                courseId = courseId,
+                onBackClick = { navController.popBackStack() }
+            )
         }
 
         composable("login_page") {
@@ -202,7 +225,13 @@ fun AppNavigation() {
             MyAssessmentScreen(navController = navController)
         }
         
-        composable("course") { CourseScreen(navController) }
+        composable("course") { 
+            val viewModel: CourseViewModel = hiltViewModel()
+            com.application.elevate.ui.mycourse.CourseScreen(
+                navController = navController,
+                viewModel = viewModel
+            )
+        }
 
         composable("categories") {
             CategoryScreen(navController = navController)
