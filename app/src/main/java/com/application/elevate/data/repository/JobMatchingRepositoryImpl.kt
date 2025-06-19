@@ -67,6 +67,9 @@ class JobMatchingRepositoryImpl @Inject constructor(
             if (token.isNullOrEmpty()) {
                 return JobMatchingResult.Error("Token not found. Please login again.")
             }
+            
+            // Format token properly with Bearer prefix (consistent with other repositories)
+            val formattedToken = if (token.startsWith("Bearer ")) token else "Bearer $token"
 
             // Prepare multipart data
             val dreamJobBody = dreamJob.toRequestBody("text/plain".toMediaTypeOrNull())
@@ -86,7 +89,7 @@ class JobMatchingRepositoryImpl @Inject constructor(
             Log.d(TAG, "Sending request to job matching API")
             
             val response = apiService.uploadAndMatchJobs(
-                authorization = token,
+                authorization = formattedToken,
                 dreamJob = dreamJobBody,
                 cv = cvPart
             )
@@ -130,8 +133,11 @@ class JobMatchingRepositoryImpl @Inject constructor(
                 // If no token but we have local data, return local data
                 return getLocalJobMatchingHistory()
             }
+            
+            // Format token properly with Bearer prefix
+            val formattedToken = if (token.startsWith("Bearer ")) token else "Bearer $token"
 
-            val response = apiService.getJobMatchingHistory(authorization = token)
+            val response = apiService.getJobMatchingHistory(authorization = formattedToken)
 
             if (response.isSuccessful) {
                 response.body()?.let { historyResponse ->

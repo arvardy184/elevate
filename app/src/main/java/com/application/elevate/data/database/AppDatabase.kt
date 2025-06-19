@@ -45,7 +45,7 @@ import com.application.elevate.data.database.converter.JobMatchingConverter
     JobMatchEntity::class,
     AIAnalysisEntity::class
   ],
-  version = 9,
+  version = 10,
   exportSchema = false
 )
 @TypeConverters(StringListConverter::class, JobMatchingConverter::class)

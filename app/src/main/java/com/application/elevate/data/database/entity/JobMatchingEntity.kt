@@ -11,6 +11,7 @@ import com.application.elevate.model.AIJobAnalysis
 data class JobMatchingEntity(
     @PrimaryKey
     val id: String,
+    val userId: Int?, // CRITICAL: User ID untuk binding data ke user
     val dreamJob: String,
     val matches: List<JobMatch>,
     val aiAnalysis: AIJobAnalysis,

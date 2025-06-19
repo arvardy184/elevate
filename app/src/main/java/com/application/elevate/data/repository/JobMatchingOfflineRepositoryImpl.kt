@@ -8,6 +8,8 @@ import com.application.elevate.data.database.entity.AIAnalysisEntity
 import com.application.elevate.data.api.JobMatchingApiService
 import com.application.elevate.model.*
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.emitAll
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -29,8 +31,22 @@ class JobMatchingOfflineRepositoryImpl @Inject constructor(
         private const val TAG = "JobMatchingOfflineRepo"
     }
 
+    // Helper function untuk mendapatkan user ID
+    private suspend fun getCurrentUserId(): Int? {
+        return userRepository.getUser()?.id
+    }
+
     override fun getAllJobMatchingLocal(): Flow<List<JobMatchingEntity>> {
-        return jobMatchingDao.getAllJobMatching()
+        return flow {
+            val currentUserId = getCurrentUserId()
+            if (currentUserId != null) {
+                // User-specific data
+                emitAll(jobMatchingDao.getAllJobMatching(currentUserId))
+            } else {
+                // If no user logged in, return empty
+                emit(emptyList())
+            }
+        }
     }
 
     override suspend fun getJobMatchingByIdLocal(id: String): JobMatchingEntity? {
@@ -44,9 +60,13 @@ class JobMatchingOfflineRepositoryImpl @Inject constructor(
         try {
             val data = jobMatchingResponse.data
             
+            // Get current user ID
+            val currentUserId = getCurrentUserId()
+            
             // Convert to entities
             val jobMatchingEntity = JobMatchingEntity(
                 id = data.id,
+                userId = currentUserId, // CRITICAL: Bind data to current user
                 dreamJob = data.dreamJob,
                 matches = data.matches,
                 aiAnalysis = data.aiAnalysis,
@@ -99,9 +119,17 @@ class JobMatchingOfflineRepositoryImpl @Inject constructor(
 
     override suspend fun saveOfflineJobMatching(cvFile: File, dreamJob: String): String {
         try {
+            // Get current user ID - CRITICAL for user isolation
+            val currentUserId = getCurrentUserId()
+            if (currentUserId == null) {
+                throw Exception("User not logged in - cannot save offline data")
+            }
+            
             // Generate unique ID untuk offline data
             val id = "offline_${System.currentTimeMillis()}"
             val currentTime = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault()).format(Date())
+            
+            Log.d(TAG, "Saving offline job matching for user: $currentUserId")
             
             // Create dummy response untuk offline data
             val dummyMatches = listOf(
@@ -130,6 +158,7 @@ class JobMatchingOfflineRepositoryImpl @Inject constructor(
 
             val jobMatchingEntity = JobMatchingEntity(
                 id = id,
+                userId = currentUserId, // CRITICAL: Bind offline data to current user
                 dreamJob = dreamJob,
                 matches = dummyMatches,
                 aiAnalysis = dummyAIAnalysis,
@@ -183,7 +212,14 @@ class JobMatchingOfflineRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getUnsyncedJobMatching(): List<JobMatchingEntity> {
-        return jobMatchingDao.getUnsyncedJobMatching()
+        val currentUserId = getCurrentUserId()
+        return if (currentUserId != null) {
+            // Only return unsynced data for current user
+            jobMatchingDao.getUnsyncedJobMatching(currentUserId)
+        } else {
+            // If no user, return empty list
+            emptyList()
+        }
     }
 
     override suspend fun markAsSynced(id: String) {
@@ -237,21 +273,59 @@ class JobMatchingOfflineRepositoryImpl @Inject constructor(
             if (token.isNullOrEmpty()) {
                 throw Exception("Token not found")
             }
+            
+            // Format token properly with Bearer prefix (same as other repositories)
+            val formattedToken = if (token.startsWith("Bearer ")) token else "Bearer $token"
+            
+            Log.d(TAG, "Using token for sync: ${formattedToken.take(20)}...")
+
+            // Validate file exists and is readable
+            if (!cvFile.exists()) {
+                throw Exception("CV file not found: ${cvFile.absolutePath}")
+            }
+            
+            if (!cvFile.canRead()) {
+                throw Exception("CV file is not readable: ${cvFile.absolutePath}")
+            }
+            
+            if (cvFile.length() == 0L) {
+                throw Exception("CV file is empty: ${cvFile.absolutePath}")
+            }
+
+            Log.d(TAG, "Uploading offline CV file: ${cvFile.absolutePath}, size: ${cvFile.length()} bytes")
 
             // Prepare multipart data
             val dreamJobBody = entity.dreamJob.toRequestBody("text/plain".toMediaTypeOrNull())
-            val requestFile = cvFile.asRequestBody("application/pdf".toMediaTypeOrNull())
+            
+            // Rename file to cv.pdf as required by API (same as normal upload)
+            val renamedFile = if (cvFile.name != "cv.pdf") {
+                val newFile = File(cvFile.parent, "cv_sync_${System.currentTimeMillis()}.pdf")
+                cvFile.copyTo(newFile, overwrite = true)
+                newFile
+            } else {
+                cvFile
+            }
+            
+            val requestFile = renamedFile.asRequestBody("application/pdf".toMediaTypeOrNull())
             val cvPart = MultipartBody.Part.createFormData("cv", "cv.pdf", requestFile)
+
+            Log.d(TAG, "Sending sync request for offline data: ${entity.id}")
 
             // Upload to API
             val response = apiService.uploadAndMatchJobs(
-                authorization = token,
+                authorization = formattedToken,
                 dreamJob = dreamJobBody,
                 cv = cvPart
             )
 
             if (response.isSuccessful) {
                 response.body()?.let { jobMatchingResponse ->
+                    // Clean up temporary file if created
+                    if (renamedFile != cvFile && renamedFile.exists()) {
+                        renamedFile.delete()
+                        Log.d(TAG, "Cleaned up temporary file: ${renamedFile.absolutePath}")
+                    }
+                    
                     // Replace offline data with API response
                     jobMatchingDao.deleteCompleteJobMatching(entity.id)
                     saveJobMatchingLocal(jobMatchingResponse, isOfflineData = false)
@@ -260,7 +334,22 @@ class JobMatchingOfflineRepositoryImpl @Inject constructor(
                     return SyncResult.Success(entity.id)
                 } ?: throw Exception("Empty response from server")
             } else {
-                throw Exception("API error: ${response.code()} - ${response.message()}")
+                // Clean up temporary file if created
+                if (renamedFile != cvFile && renamedFile.exists()) {
+                    renamedFile.delete()
+                }
+                
+                // Get more detailed error information
+                val errorBody = try {
+                    response.errorBody()?.string() ?: "No error details"
+                } catch (e: Exception) {
+                    "Could not read error body: ${e.message}"
+                }
+                
+                Log.e(TAG, "API error ${response.code()}: ${response.message()}")
+                Log.e(TAG, "Error response body: $errorBody")
+                
+                throw Exception("API error: ${response.code()} - ${response.message()}. Details: $errorBody")
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error uploading offline data", e)

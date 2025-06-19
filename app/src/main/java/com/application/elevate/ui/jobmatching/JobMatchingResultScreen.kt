@@ -40,6 +40,9 @@ fun JobMatchingResultScreen(
     
     // Use data from POST response (jobMatchingResult) instead of history
     val jobMatchingData = uiState.jobMatchingResult?.data
+    
+    // Check if this is offline data
+    val isOfflineData = uiState.jobMatchingResult?.status == "offline" || uiState.isOfflineUpload
 
     // Error handling for missing or corrupted data
     if (jobMatchingData == null) {
@@ -97,10 +100,11 @@ fun JobMatchingResultScreen(
                 .padding(16.dp)
         ) {
             // Header Summary
-            if (topMatches.isNotEmpty() && jobMatchingData.dreamJob.isNotBlank()) {
+            if (jobMatchingData.dreamJob.isNotBlank()) {
                 SummaryCard(
-                    totalMatches = topMatches.size,
-                    dreamJob = jobMatchingData.dreamJob
+                    totalMatches = if (isOfflineData) 0 else topMatches.size,
+                    dreamJob = jobMatchingData.dreamJob,
+                    isOfflineData = isOfflineData
                 )
             } else {
                 ErrorCard(message = "Error displaying summary: Invalid data")
@@ -108,27 +112,31 @@ fun JobMatchingResultScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Job Matches List
-            Text(
-                text = "Top Job Matches",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 12.dp)
-            )
+            // Job Matches List - Only show when online
+            if (!isOfflineData) {
+                Text(
+                    text = "Top Job Matches",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
 
-            if (topMatches.isNotEmpty()) {
-                topMatches.forEach { jobMatch ->
-                    JobMatchCard(jobMatch = jobMatch)
-                    Spacer(modifier = Modifier.height(12.dp))
+                if (topMatches.isNotEmpty()) {
+                    topMatches.forEach { jobMatch ->
+                        JobMatchCard(jobMatch = jobMatch)
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
+                } else {
+                    ErrorCard(message = "No job matches available")
                 }
-            } else {
-                ErrorCard(message = "No job matches available")
+                
+                Spacer(modifier = Modifier.height(24.dp))
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-
             // AI Analysis
-            if (jobMatchingData.aiAnalysis.summary.isNotBlank()) {
+            if (isOfflineData) {
+                PendingAnalysisCard(dreamJob = jobMatchingData.dreamJob)
+            } else if (jobMatchingData.aiAnalysis.summary.isNotBlank()) {
                 AIAnalysisCard(aiAnalysis = jobMatchingData.aiAnalysis)
             } else {
                 ErrorCard(message = "AI analysis not available")
@@ -276,13 +284,18 @@ private fun ErrorCard(message: String) {
 @Composable
 private fun SummaryCard(
     totalMatches: Int,
-    dreamJob: String
+    dreamJob: String,
+    isOfflineData: Boolean = false
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
+            containerColor = if (isOfflineData) {
+                Color(0xFFFFF3E0) // Light Orange for pending
+            } else {
+                MaterialTheme.colorScheme.primaryContainer
+            }
         )
     ) {
         Column(
@@ -292,27 +305,31 @@ private fun SummaryCard(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Icon(
-                imageVector = Icons.Default.CheckCircle,
-                contentDescription = "Success",
+                imageVector = if (isOfflineData) Icons.Default.Schedule else Icons.Default.CheckCircle,
+                contentDescription = if (isOfflineData) "Pending" else "Success",
                 modifier = Modifier.size(48.dp),
-                tint = MaterialTheme.colorScheme.primary
+                tint = if (isOfflineData) Color(0xFFFF9800) else MaterialTheme.colorScheme.primary
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = "Analysis Complete!",
+                text = if (isOfflineData) "Analysis Pending" else "Analysis Complete!",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
+                color = if (isOfflineData) Color(0xFFE65100) else MaterialTheme.colorScheme.onPrimaryContainer
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Found $totalMatches job matches for $dreamJob position",
+                text = if (isOfflineData) {
+                    "Your job matching for $dreamJob position is saved and will be analyzed when you're back online"
+                } else {
+                    "Found $totalMatches job matches for $dreamJob position"
+                },
                 fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                color = if (isOfflineData) Color(0xFFBF6000) else MaterialTheme.colorScheme.onPrimaryContainer,
                 textAlign = TextAlign.Center
             )
         }
@@ -512,6 +529,86 @@ private fun ScoreItem(
             fontSize = 10.sp,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+    }
+}
+
+@Composable
+private fun PendingAnalysisCard(dreamJob: String) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFFFFF3E0) // Light Orange
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    Icons.Default.Schedule,
+                    contentDescription = "Pending Analysis",
+                    tint = Color(0xFFFF9800),
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "AI Analysis Pending",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFFE65100)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = "Analisis AI untuk posisi $dreamJob akan tersedia setelah data berhasil disinkronkan dengan server.",
+                fontSize = 14.sp,
+                color = Color(0xFFBF6000)
+            )
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            Text(
+                text = "Fitur yang akan tersedia setelah online:",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color(0xFFE65100)
+            )
+            
+            val features = listOf(
+                "Detail job matches dengan score akurasi",
+                "Rekomendasi pengembangan karir",
+                "Analisis skill gap",
+                "Saran peningkatan profil"
+            )
+            
+            features.forEach { feature ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(vertical = 2.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Circle,
+                        contentDescription = null,
+                        modifier = Modifier.size(8.dp),
+                        tint = Color(0xFFFF9800)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = feature,
+                        fontSize = 12.sp,
+                        color = Color(0xFFBF6000)
+                    )
+                }
+            }
+        }
     }
 }
 

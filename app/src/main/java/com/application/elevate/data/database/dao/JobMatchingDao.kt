@@ -10,14 +10,20 @@ import kotlinx.coroutines.flow.Flow
 interface JobMatchingDao {
     
     // Job Matching Entity
+    @Query("SELECT * FROM job_matching WHERE userId = :userId ORDER BY createdAt DESC")
+    fun getAllJobMatching(userId: Int): Flow<List<JobMatchingEntity>>
+    
     @Query("SELECT * FROM job_matching ORDER BY createdAt DESC")
-    fun getAllJobMatching(): Flow<List<JobMatchingEntity>>
+    fun getAllJobMatchingForAllUsers(): Flow<List<JobMatchingEntity>>
     
     @Query("SELECT * FROM job_matching WHERE id = :id")
     suspend fun getJobMatchingById(id: String): JobMatchingEntity?
     
+    @Query("SELECT * FROM job_matching WHERE isSynced = 0 AND userId = :userId")
+    suspend fun getUnsyncedJobMatching(userId: Int): List<JobMatchingEntity>
+    
     @Query("SELECT * FROM job_matching WHERE isSynced = 0")
-    suspend fun getUnsyncedJobMatching(): List<JobMatchingEntity>
+    suspend fun getAllUnsyncedJobMatching(): List<JobMatchingEntity>
     
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertJobMatching(jobMatching: JobMatchingEntity)
