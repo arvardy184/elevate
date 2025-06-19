@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import android.util.Log
+import com.application.elevate.viewmodel.cvreview.CVReviewViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

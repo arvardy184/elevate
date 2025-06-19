@@ -24,6 +24,7 @@ import androidx.navigation.navArgument
 import com.application.elevate.data.dummy.ProfileDummyData.dummyCourseDetails
 import com.application.elevate.ui.assessment.AssessmentCompletedScreen
 import com.application.elevate.ui.assessment.AssessmentScreen
+import com.application.elevate.ui.assessment.MyAssessmentScreen
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.application.elevate.ui.home.HomeScreen
 
@@ -35,11 +36,11 @@ import com.application.elevate.ui.cvreview.CVReviewScreen
 import com.application.elevate.ui.cvreview.CVReviewListScreen
 import com.application.elevate.ui.cvreview.CVReviewDetailScreen
 import com.application.elevate.ui.auth.LoginPage
+import com.application.elevate.ui.auth.SignUpPage
 import com.application.elevate.ui.mycourse.CourseDetailScreen
 import com.application.elevate.ui.profile.EditProfileScreen
 import com.application.elevate.ui.profile.ProfileScreen
 import com.application.elevate.ui.mycourse.CourseScreen
-import com.application.elevate.ui.auth.SignUpPage
 import com.application.elevate.viewmodel.cvreview.CVReviewListViewModel
 import com.application.elevate.viewmodel.cvreview.CVReviewDetailViewModel
 import com.application.elevate.ui.search.AdvancedSearchScreen
@@ -53,13 +54,39 @@ import com.application.elevate.ui.cvreview.CVReviewViewModel
 import com.application.elevate.ui.mycourse.CourseDetailScreen
 import com.application.elevate.ui.profile.EditProfileScreen
 import com.application.elevate.ui.profile.ProfileScreen
+import com.application.elevate.ui.jobmatching.JobMatchingScreen
+import com.application.elevate.ui.jobmatching.JobMatchingResultScreen
+import com.application.elevate.ui.jobmatching.JobMatchingHistoryScreen
+import com.application.elevate.viewmodel.cvreview.CVReviewViewModel
+import com.application.elevate.viewmodel.jobmatching.JobMatchingViewModel
 import com.application.elevate.viewmodel.profile.ProfileViewModel
+import com.application.elevate.viewmodel.course.CourseViewModel
+import com.application.elevate.util.SyncManager
+import com.application.elevate.worker.CourseSyncWorker
+import com.application.elevate.util.NetworkMonitor
+import com.application.elevate.util.NotificationManager
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    
+    @Inject
+    lateinit var syncManager: SyncManager
+    
+    @Inject
+    lateinit var networkMonitor: NetworkMonitor
+    
+    @Inject
+    lateinit var notificationManager: NotificationManager
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Initialize sync on app startup
+        initializeSync()
         
         // Hilangkan action bar
         // WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -71,6 +98,26 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     AppNavigation()
+                }
+            }
+        }
+    }
+    
+    private fun initializeSync() {
+        // Schedule periodic sync and trigger immediate sync if online
+        syncManager.schedulePeriodicSync()
+        syncManager.triggerImmediateSync()
+        
+        // Schedule course sync worker
+        CourseSyncWorker.enqueue(this)
+        
+        // Monitor network changes and trigger sync when online
+        lifecycleScope.launch {
+            networkMonitor.isOnline().collect { isOnline ->
+                if (isOnline) {
+                    // Trigger immediate sync when device goes online
+                    syncManager.triggerImmediateSync()
+                    CourseSyncWorker.enqueue(this@MainActivity)
                 }
             }
         }
@@ -113,6 +160,14 @@ fun AppNavigation() {
             val courseId = it.arguments?.getInt("courseId") ?: 1
             val courseDetail = dummyCourseDetails.find { it.id == courseId.toString() }!!
             CourseDetailScreen(courseDetail = courseDetail, onBackClick = { navController.popBackStack() })
+            arguments = listOf(navArgument("courseId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val courseIdString = backStackEntry.arguments?.getString("courseId") ?: "0"
+            val courseId = courseIdString.toIntOrNull() ?: 0
+            CourseDetailScreen(
+                courseId = courseId,
+                onBackClick = { navController.popBackStack() }
+            )
         }
 
         composable("login_page") {
@@ -197,7 +252,18 @@ fun AppNavigation() {
                 }
             )
         }
-        composable("course") { CourseScreen(navController) }
+        
+        composable("my_assessment") {
+            MyAssessmentScreen(navController = navController)
+        }
+        
+        composable("course") { 
+            val viewModel: CourseViewModel = hiltViewModel()
+            com.application.elevate.ui.mycourse.CourseScreen(
+                navController = navController,
+                viewModel = viewModel
+            )
+        }
 
         composable("categories") {
             CategoryScreen(navController = navController)
@@ -222,6 +288,24 @@ fun AppNavigation() {
             val counselorId = backStackEntry.arguments?.getInt("counselorId") ?: 0
             val viewModel: CounselingViewModel = hiltViewModel()
             CounselingDetailScreen(navController, counselorId, viewModel)
+        }
+
+        composable("job_skill_matching") {
+            val viewModel: JobMatchingViewModel = hiltViewModel()
+            JobMatchingScreen(navController, viewModel)
+        }
+        
+        composable("job_matching_result") {
+            val parentEntry = remember(it) {
+                navController.getBackStackEntry("job_skill_matching")
+            }
+            val viewModel: JobMatchingViewModel = hiltViewModel(parentEntry)
+            JobMatchingResultScreen(navController, viewModel)
+        }
+
+        composable("job_matching_history") {
+            val viewModel: JobMatchingViewModel = hiltViewModel()
+            com.application.elevate.ui.jobmatching.JobMatchingHistoryScreen(navController, viewModel)
         }
 
 

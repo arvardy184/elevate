@@ -28,6 +28,8 @@ import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Assignment
+import androidx.compose.material.icons.filled.Work
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -65,8 +67,10 @@ fun ProfileScreen(
         onProfileSettingsClick = { navController.navigate("edit_profile") },
         onYourActivityClick = { navController.navigate("your_activity") },
         onMyCVReviewClick = { navController.navigate("cv_review_list") },
+        onMyJobMatchingClick = { navController.navigate("job_matching_history") },
         onNotificationClick = { navController.navigate("notifications") },
         onHelpCenterClick = { navController.navigate("help_center") },
+        onMyAssessmentClick = { navController.navigate("my_assessment") },
         onLogoutClick = { viewModel.logout() }
     )
 }
@@ -79,8 +83,10 @@ fun ProfileScreenContent(
     onProfileSettingsClick: () -> Unit,
     onYourActivityClick: () -> Unit,
     onMyCVReviewClick: () -> Unit,
+    onMyJobMatchingClick: () -> Unit,
     onNotificationClick: () -> Unit,
     onHelpCenterClick: () -> Unit,
+    onMyAssessmentClick: () -> Unit,
     onLogoutClick: () -> Unit
 ) {
     Scaffold(
@@ -212,6 +218,20 @@ fun ProfileScreenContent(
                 ) {
                     Column {
                         ProfileMenuItem(
+                            icon = Icons.Default.Assignment,
+                            title = "My Assessment",
+                            subtitle = "View your assessment results and history",
+                            onClick = onMyAssessmentClick
+                        )
+
+                        ProfileMenuItem(
+                            icon = Icons.Default.Work,
+                            title = "My Job & Skill Matching",
+                            subtitle = "View your job matching history and results",
+                            onClick = onMyJobMatchingClick
+                        )
+
+                        ProfileMenuItem(
                             icon = Icons.Default.Notifications,
                             title = "Notification",
                             subtitle = "Manage your notification settings",
@@ -259,8 +279,10 @@ fun ProfileScreenPreview() {
             onProfileSettingsClick = {},
             onYourActivityClick = {},
             onMyCVReviewClick = {},
+            onMyJobMatchingClick = {},
             onNotificationClick = {},
             onHelpCenterClick = {},
+            onMyAssessmentClick = {},
             onLogoutClick = {}
         )
     }

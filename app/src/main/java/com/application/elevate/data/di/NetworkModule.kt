@@ -2,11 +2,12 @@ package com.application.elevate.di
 
 import android.content.Context
 import android.util.Log
-import com.application.elevate.api.CVReviewApiService
+import com.application.elevate.data.api.CVReviewApiService
 import com.application.elevate.data.api.AuthApiService
 import com.application.elevate.data.api.CounselingApiService
 import com.application.elevate.data.api.CourseApiService
 import com.application.elevate.data.datastore.DataStoreManager
+import com.application.elevate.data.api.AssessmentApiService
 import com.application.elevate.data.repository.*
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -30,6 +31,15 @@ import com.application.elevate.data.database.dao.SearchHistoryDao
 import com.application.elevate.api.JobMatchingApiService
 import com.application.elevate.data.repository.jobmatching.JobMatchingRepository
 import com.application.elevate.data.repository.jobmatching.JobMatchingRepositoryImpl
+import com.application.elevate.data.database.dao.ProfileDao
+import com.application.elevate.data.database.dao.AssessmentDao
+import com.application.elevate.data.database.dao.CourseDao
+import com.application.elevate.data.database.dao.CategoryDao
+import com.application.elevate.data.api.JobMatchingApiService
+import com.application.elevate.data.repository.AssessmentRepository
+import com.application.elevate.data.repository.AssessmentRepositoryInterface
+import com.application.elevate.data.repository.AssessmentOfflineRepository
+import com.application.elevate.data.repository.AssessmentOfflineRepositoryImpl
 import com.application.elevate.util.NetworkUtil
 import com.application.elevate.data.database.dao.CourseDao
 
@@ -161,6 +171,26 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    fun provideAssessmentApiService(@ProdRetrofit retrofit: Retrofit): AssessmentApiService =
+        retrofit.create(AssessmentApiService::class.java)
+    
+    @Provides
+    @Singleton
+    fun provideAssessmentRepository(api: AssessmentApiService): AssessmentRepositoryInterface =
+        AssessmentRepository(api)
+
+    @Provides
+    @Singleton
+    fun provideAssessmentOfflineRepository(
+        api: AssessmentApiService,
+        userRepository: UserRepository,
+        assessmentDao: AssessmentDao,
+        networkUtil: NetworkUtil
+    ): AssessmentOfflineRepository =
+        AssessmentOfflineRepositoryImpl(api, userRepository, assessmentDao, networkUtil)
+
+    @Provides
+    @Singleton
     fun provideAuthRepository(api: AuthApiService): AuthRepository =
         AuthRepositoryImpl(api)
 
@@ -172,13 +202,7 @@ object NetworkModule {
     ): CVReviewRepository =
         CVReviewRepositoryImpl(api, dao)
 
-    @Provides
-    @Singleton
-    fun provideJobMatchingRepository(
-        api: JobMatchingApiService,
-        userRepository: UserRepository
-    ): JobMatchingRepository =
-        JobMatchingRepositoryImpl(api, userRepository)
+
 
     @Provides
     @Singleton
@@ -192,18 +216,50 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideDataStoreRepository(dataStoreManager: DataStoreManager): DataStoreRepository =
-        DataStoreRepository(dataStoreManager)
-
-    @Provides
-    @Singleton
     fun provideProfileRepository(
         api: ProfileApiService,
         userRepository: UserRepository,
+        profileDao: ProfileDao,
+        networkUtil: NetworkUtil,
         @ApplicationContext context: Context
     ): ProfileRepository =
-        ProfileRepositoryImpl(api, userRepository, context)
+        ProfileRepositoryImpl(api, userRepository, profileDao, networkUtil, context)
 
+    @Provides
+    @Singleton
+    fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase =
+        Room.databaseBuilder(
+            context,
+            AppDatabase::class.java,
+            "elevate_database"
+        )
+        .fallbackToDestructiveMigration()
+        .build()
+
+    @Provides
+    fun provideCVReviewDao(database: AppDatabase): CVReviewDao =
+        database.cvReviewDao()
+        
+    @Provides
+    fun provideProfileDao(database: AppDatabase): ProfileDao =
+        database.profileDao()
+
+    @Provides
+    fun provideAssessmentDao(database: AppDatabase): AssessmentDao =
+        database.assessmentDao()
+
+    @Provides
+    fun provideCourseDao(database: AppDatabase): CourseDao =
+        database.courseDao()
+
+    @Provides
+    fun provideCategoryDao(database: AppDatabase): CategoryDao =
+        database.categoryDao()
+
+    @Provides
+    fun provideJobMatchingDao(database: AppDatabase): com.application.elevate.data.database.dao.JobMatchingDao =
+        database.jobMatchingDao()
+        
     @Provides
     @Singleton
     fun provideNetworkUtil(@ApplicationContext context: Context): NetworkUtil =
@@ -225,4 +281,14 @@ object NetworkModule {
             searchHistoryDao = searchHistoryDao,
             counselingRepository = counselingRepository
         )
+    fun provideNetworkMonitor(@ApplicationContext context: Context): com.application.elevate.util.NetworkMonitor =
+        com.application.elevate.util.NetworkMonitor(context)
+
+    @Provides
+    @Singleton
+    fun provideSyncManager(
+        @ApplicationContext context: Context,
+        networkMonitor: com.application.elevate.util.NetworkMonitor
+    ): com.application.elevate.util.SyncManager =
+        com.application.elevate.util.SyncManager(context, networkMonitor)
 } 

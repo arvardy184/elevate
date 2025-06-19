@@ -63,14 +63,16 @@ fun EditProfileScreen(
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     var cameraImageUri by remember { mutableStateOf<Uri?>(null) }
 
-    // Load user data when screen is first displayed
-    LaunchedEffect(Unit) {
-      //  viewModel.loadUserData()
+    // Load user data hanya sekali saat screen pertama kali ditampilkan
+    LaunchedEffect(key1 = true) {
+        if (uiState.user.id == 0) { // Hanya load jika user belum ada
+            viewModel.loadUserData()
+        }
     }
 
-    // Update selectedImageUri when user's photoUrl changes
+    // Update selectedImageUri ketika photoUrl berubah
     LaunchedEffect(uiState.user.photoUrl) {
-        if (uiState.user.photoUrl?.isNotEmpty() == true) {
+        if (uiState.user.photoUrl?.isNotEmpty() == true && selectedImageUri == null) {
             try {
                 selectedImageUri = Uri.parse(uiState.user.photoUrl)
             } catch (e: Exception) {
@@ -177,6 +179,16 @@ fun EditProfileContent(
     var gender by remember { mutableStateOf(user.gender ?: "") }
     var birthDate by remember { mutableStateOf(user.birthDate ?: "") }
 
+    var isGenderDropdownExpanded by remember { mutableStateOf(false) }
+    val genderOptions = listOf("Male", "Female")
+
+    // State untuk kontrol Date Picker
+    var showDatePicker by remember { mutableStateOf(false) }
+    val datePickerState = rememberDatePickerState()
+
+    // Format tanggal untuk konversi
+    val dateFormatter = remember { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()) }
+
     LaunchedEffect(user) {
         firstName = user.firstName ?: ""
         lastName = user.lastName ?: ""
@@ -184,7 +196,18 @@ fun EditProfileContent(
         address = user.address ?: ""
         phoneNumber = user.phoneNumber ?: ""
         gender = user.gender ?: ""
-        birthDate = user.birthDate ?: ""
+        // Konversi format tanggal jika ada
+        birthDate = user.birthDate?.let { date ->
+            try {
+                // Coba parse tanggal dengan format yang ada
+                val parsedDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(date)
+                // Konversi ke format baru
+                parsedDate?.let { dateFormatter.format(it) } ?: date
+            } catch (e: Exception) {
+                // Jika gagal parse, gunakan format asli
+                date
+            }
+        } ?: ""
     }
 
     Column(
@@ -366,12 +389,6 @@ fun EditProfileContent(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp),
                 singleLine = true,
-                trailingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.MyLocation,
-                        contentDescription = "View on map"
-                    )
-                },
                 placeholder = { Text(text = user.address ?: "Enter address") }
             )
 
@@ -405,21 +422,56 @@ fun EditProfileContent(
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            OutlinedTextField(
-                value = gender,
-                onValueChange = { gender = it },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp),
-                singleLine = true,
-                readOnly = true,
-                trailingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.KeyboardArrowDown,
-                        contentDescription = "Select gender"
-                    )
-                },
-                placeholder = { Text(text = user.gender ?: "Select gender") }
-            )
+//            OutlinedTextField(
+//                value = gender,
+//                onValueChange = { gender = it },
+//                modifier = Modifier.fillMaxWidth(),
+//                shape = RoundedCornerShape(8.dp),
+//                singleLine = true,
+//                readOnly = true,
+//                trailingIcon = {
+//                    Icon(
+//                        imageVector = Icons.Default.KeyboardArrowDown,
+//                        contentDescription = "Select gender"
+//                    )
+//                },
+//                placeholder = { Text(text = user.gender ?: "Select gender") }
+//            )
+
+            ExposedDropdownMenuBox(
+                expanded = isGenderDropdownExpanded,
+                onExpandedChange = { isGenderDropdownExpanded = !isGenderDropdownExpanded }
+            ) {
+                OutlinedTextField(
+                    value = gender,
+                    onValueChange = { },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor(), // Penting untuk anchor menu
+                    readOnly = true,
+                    shape = RoundedCornerShape(8.dp),
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = isGenderDropdownExpanded)
+                    },
+                    placeholder = { Text(text = "Select gender") },
+                    colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+                )
+                ExposedDropdownMenu(
+                    expanded = isGenderDropdownExpanded,
+                    onDismissRequest = { isGenderDropdownExpanded = false }
+                ) {
+                    genderOptions.forEach { option ->
+                        DropdownMenuItem(
+                            text = { Text(text = option) },
+                            onClick = {
+                                gender = option
+                                isGenderDropdownExpanded = false
+                            }
+                        )
+                    }
+                }
+            }
+
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -431,20 +483,64 @@ fun EditProfileContent(
 
             Spacer(modifier = Modifier.height(4.dp))
 
+//            OutlinedTextField(
+//                value = birthDate,
+//                onValueChange = { birthDate = it },
+//                modifier = Modifier.fillMaxWidth(),
+//                shape = RoundedCornerShape(8.dp),
+//                singleLine = true,
+//                trailingIcon = {
+//                    Icon(
+//                        imageVector = Icons.Default.CalendarToday,
+//                        contentDescription = "Select date"
+//                    )
+//                },
+//                placeholder = { Text(text = user.birthDate ?: "Select birth date") }
+//            )
+
             OutlinedTextField(
                 value = birthDate,
-                onValueChange = { birthDate = it },
+                onValueChange = { },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp),
                 singleLine = true,
+                readOnly = true,
                 trailingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.CalendarToday,
-                        contentDescription = "Select date"
-                    )
+                    IconButton(onClick = { showDatePicker = true }) {
+                        Icon(
+                            imageVector = Icons.Default.CalendarToday,
+                            contentDescription = "Select date"
+                        )
+                    }
                 },
-                placeholder = { Text(text = user.birthDate ?: "Select birth date") }
+                placeholder = { Text(text = "dd/MM/yyyy") }
             )
+
+            if (showDatePicker) {
+                DatePickerDialog(
+                    onDismissRequest = { showDatePicker = false },
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                datePickerState.selectedDateMillis?.let { millis ->
+                                    birthDate = dateFormatter.format(Date(millis))
+                                }
+                                showDatePicker = false
+                            }
+                        ) {
+                            Text("OK")
+                        }
+                    },
+                    dismissButton = {
+                        Button(onClick = { showDatePicker = false }) {
+                            Text("Cancel")
+                        }
+                    }
+                ) {
+                    DatePicker(state = datePickerState)
+                }
+            }
+
 
             Spacer(modifier = Modifier.height(32.dp))
 

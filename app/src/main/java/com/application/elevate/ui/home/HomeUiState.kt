@@ -3,6 +3,7 @@ package com.application.elevate.ui.home
 import com.application.elevate.model.User
 import com.application.elevate.model.Course
 
+// State utama untuk HomeScreen yang menampung semua state
 data class HomeUiState(
     val user: User? = null,
     val searchQuery: String = "",

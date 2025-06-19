@@ -16,13 +16,12 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-
-
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val repository: AuthRepository,
     private val userRepository: UserRepository,
-    private val profileRepository: ProfileRepository
+    private val profileRepository: ProfileRepository,
+    private val syncManager: com.application.elevate.util.SyncManager
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ProfileUiState())
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
@@ -36,6 +35,8 @@ class ProfileViewModel @Inject constructor(
         loadActivities()
         loadNotificationSettings()
         loadHelpCenterItems()
+        // Trigger sync when ProfileViewModel is initialized
+        triggerSyncIfNeeded()
     }
 
     fun loadUserData() {
@@ -48,20 +49,23 @@ class ProfileViewModel @Inject constructor(
                 // Ambil status assessment dari DataStore terlebih dahulu
                 val currentAssessmentStatus = userRepository.getAssessmentStatus()
                 Log.d(TAG, "Status assessment dari DataStore: $currentAssessmentStatus")
+                
+                // Get current user ID
+                val userId = userRepository.getUser()?.id ?: 0
 
-                profileRepository.getProfile().collect { result ->
-                    result.onSuccess { response ->
-                        val user = response.user
-                        Log.d(TAG, "Data user dari API: $user")
+                // Use offline-first approach
+                profileRepository.getProfileOfflineFirst(userId).collect { result ->
+                    result.onSuccess { user ->
+                        Log.d(TAG, "Data user dari offline-first: $user")
                         Log.d(TAG, "Nama depan: ${user.firstName}, Nama belakang: ${user.lastName}")
-
+                        
                         // Update user dengan mempertahankan status assessment dari DataStore
                         val updatedUser = user.copy(isAssessmentCompleted = currentAssessmentStatus)
                         Log.d(TAG, "User setelah update dengan status assessment: $updatedUser")
-
+                        
                         // Update user di repository lokal
                         userRepository.updateUser(updatedUser)
-
+                        
                         // Update state UI
                         _uiState.update { it.copy(
                             user = updatedUser,
@@ -107,27 +111,37 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
+    private fun triggerSyncIfNeeded() {
+        viewModelScope.launch {
+            try {
+                Log.d(TAG, "Triggering sync from ProfileViewModel")
+                syncManager.triggerImmediateSync()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error triggering sync: ${e.message}")
+            }
+        }
+    }
+
     fun updateUser(updatedUser: User) {
         viewModelScope.launch {
             var retryCount = 0
             val maxRetries = 3
-
+            
             while (retryCount < maxRetries) {
                 try {
                     _uiState.update { it.copy(isLoading = true) }
-
+                    
                     Log.d(TAG, "Mencoba update user: $updatedUser")
                     Log.d(TAG, "Nama depan: ${updatedUser.firstName}, Nama belakang: ${updatedUser.lastName}")
-
-                    profileRepository.updateProfile(updatedUser).collect { result ->
-                        result.onSuccess { response ->
-                            val user = response.user
-                            Log.d(TAG, "Response dari API: $response")
-                            Log.d(TAG, "Data user setelah update: $user")
-
+                    
+                    // Use offline-first update approach
+                    profileRepository.updateProfileOfflineFirst(updatedUser).collect { result ->
+                        result.onSuccess { user ->
+                            Log.d(TAG, "Profile updated successfully (offline-first): $user")
+                            
                             // Update user di repository lokal
                             userRepository.updateUser(user)
-
+                            
                             // Update state UI
                             _uiState.update { it.copy(
                                 user = user,
@@ -137,7 +151,7 @@ class ProfileViewModel @Inject constructor(
                             return@collect
                         }.onFailure { error ->
                             Log.e(TAG, "Error saat update profil: ${error.message}")
-                            if (error.message?.contains("Job was cancelled") == true ||
+                            if (error.message?.contains("Job was cancelled") == true || 
                                 error.message?.contains("Socket closed") == true) {
                                 retryCount++
                                 if (retryCount < maxRetries) {
@@ -227,35 +241,59 @@ class ProfileViewModel @Inject constructor(
     fun getUserData(): User {
         return _uiState.value.user
     }
+    
+    // Method untuk trigger sync manual
+    fun syncProfile() {
+        viewModelScope.launch {
+            try {
+                Log.d(TAG, "Starting manual profile sync...")
+                profileRepository.syncProfile().collect { result ->
+                    result.onSuccess { success ->
+                        if (success) {
+                            Log.d(TAG, "Profile sync completed successfully")
+                            // Reload user data after sync
+                            loadUserData()
+                        } else {
+                            Log.w(TAG, "Profile sync completed with some failures")
+                        }
+                    }.onFailure { error ->
+                        Log.e(TAG, "Profile sync failed: ${error.message}")
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error during profile sync: ${e.message}")
+            }
+        }
+    }
 
     fun logout() {
         viewModelScope.launch {
             try {
                 Log.d(TAG, "Memulai proses logout")
                 _uiState.update { it.copy(isLoading = true) }
-
+                
                 // Hapus data user dan token
                 userRepository.clearUser()
-
+                
                 Log.d(TAG, "Logout berhasil, data user dan token telah dihapus")
-                _uiState.update {
+                _uiState.update { 
                     it.copy(
                         isLoading = false,
                         isSuccess = true,
                         message = "Logout berhasil"
-                    )
+                    ) 
                 }
 
                 // Navigasi ke Login
                 _navigationEvent.value = NavigationEvent.NavigateToLogin
             } catch (e: Exception) {
                 Log.e(TAG, "Error saat logout: ${e.message}")
-                _uiState.update {
+                _uiState.update { 
                     it.copy(
                         isLoading = false,
                         isSuccess = false,
                         error = "Terjadi kesalahan saat logout: ${e.message}"
-                    )
+                    ) 
                 }
             }
         }

@@ -56,4 +56,10 @@ data class AIAnalysis(
   val strengths: List<String>,
   val weaknesses: List<String>,
   val careerFieldFit: String
+)
+
+data class CVReviewDetailResponse(
+  val status: String,
+  val message: String,
+  val data: CVReviewData
 ) 

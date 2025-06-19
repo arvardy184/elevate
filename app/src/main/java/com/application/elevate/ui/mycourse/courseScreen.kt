@@ -3,6 +3,7 @@ package com.application.elevate.ui.mycourse
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -15,9 +16,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,21 +29,32 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import coil.compose.AsyncImage
 import com.application.elevate.R
+import com.application.elevate.data.mapper.getLocalImageRes
 import com.application.elevate.ui.component.CategoryChip
 import com.application.elevate.ui.component.Navbar
 import com.application.elevate.ui.component.SavedCourseItem
 import com.application.elevate.ui.component.SectionHeader
 import com.application.elevate.data.dummy.ProfileDummyData
+import com.application.elevate.viewmodel.course.CourseViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CourseScreen(navController: NavController = rememberNavController()) {
-    val selectedCategory = remember { mutableStateOf("Design") }
-    val categories = listOf("Design", "App & Web Development", "Digital Marketing", "All")
+fun CourseScreen(
+    navController: NavController = rememberNavController(),
+    viewModel: CourseViewModel = hiltViewModel()
+) {
+    val selectedCategory = remember { mutableStateOf("All") }
     val isViewAll = remember { mutableStateOf(false) }
+    val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.fetchCourses()
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
@@ -82,151 +92,293 @@ fun CourseScreen(navController: NavController = rememberNavController()) {
                     )
                 )
             },
-            containerColor = Color.Transparent // agar tidak menutupi background
+            containerColor = Color.Transparent
         ) { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize()
-                    .background(Color(0xFFF8F8F8))
-                    .verticalScroll(rememberScrollState())
-            ) {
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(start = 16.dp)) {
-                    items(ProfileDummyData.categories) { category ->
-                        CategoryChip(text = category) {
-                            Log.d("CategoryChip", "Clicked: $category")
-                        }
+            when {
+                uiState.isLoading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
                     }
                 }
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                Column(
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                ) {
-                    Text(
-                        text = "Recently Opened",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp,
-                            color = Color.Black
-                        ),
-                        modifier = Modifier.padding(bottom = 12.dp)
-                    )
-
-                    Card(
-                        shape = RoundedCornerShape(16.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(180.dp)
-                            .shadow(4.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color.White
-                        )
+                uiState.error != null -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(180.dp)
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
                         ) {
-                            Image(
-                                painter = painterResource(id = R.drawable.banner),
-                                contentDescription = "UI/UX Design",
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier.fillMaxSize()
+                            Text(
+                                text = uiState.error ?: "Terjadi kesalahan",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.error
                             )
-
-                            Column(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(top = 45.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Column(
-                                        modifier = Modifier.padding(20.dp)
-                                    ) {
-                                        Text(
-                                            text = "UI/UX Design",
-                                            style = MaterialTheme.typography.titleLarge.copy(
-                                                fontWeight = FontWeight.Bold,
-                                                color = Color.White
-                                            )
-                                        )
-                                        Text(
-                                            text = "Part 1: Design Principle • 10 Min",
-                                            style = MaterialTheme.typography.bodyMedium.copy(
-                                                color = Color.White
-                                            )
-                                        )
-                                    }
-
-                                    Box(
-                                        modifier = Modifier
-                                            .padding(16.dp)
-                                            .size(36.dp)
-                                            .clip(CircleShape)
-                                            .background(Color(0xFF635C9C))
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.ArrowForward,
-                                            contentDescription = "Continue",
-                                            tint = Color.White,
-                                            modifier = Modifier
-                                                .align(Alignment.Center)
-                                                .size(20.dp)
-                                        )
-                                    }
-                                }
-
-                                LinearProgressIndicator(
-                                    progress = { 0.3f },
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(6.dp)
-                                        .padding(horizontal = 20.dp)
-                                        .clip(RoundedCornerShape(4.dp)),
-                                    color = Color(0xFF65558F),
-                                    trackColor = Color(0xFFEEEEEE),
-                                )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Button(onClick = { viewModel.fetchCourses() }) {
+                                Text("Coba Lagi")
                             }
                         }
                     }
                 }
+                else -> {
+                    Column(
+                        modifier = Modifier
+                            .padding(paddingValues)
+                            .fillMaxSize()
+                            .background(Color(0xFFF8F8F8))
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        // Categories from API
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.padding(start = 16.dp)
+                        ) {
+                            // Add "All" category first
+                            item {
+                                CategoryChip(
+                                    text = "All",
+                                    onClick = { selectedCategory.value = "All" }
+                                )
+                            }
+                            
+                            items(uiState.categories) { category ->
+                                CategoryChip(
+                                    text = category.name,
+                                    onClick = { selectedCategory.value = category.name }
+                                )
+                            }
+                        }
 
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 24.dp)
-                ) {
-                    SectionHeader(title = "Saved Course", onViewAllClick = {
-                        isViewAll.value = !isViewAll.value
-                    })
+                        Spacer(modifier = Modifier.height(20.dp))
 
                     val coursesToShow = if (isViewAll.value) ProfileDummyData.dummyCourses else ProfileDummyData.dummyCourses.take(3)
+                        // Recently Opened Section
+                        Column(
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        ) {
+                            Text(
+                                text = "Recently Opened",
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 16.sp,
+                                    color = Color.Black
+                                ),
+                                modifier = Modifier.padding(bottom = 12.dp)
+                            )
 
-                    coursesToShow.forEach { course ->
-                        SavedCourseItem(
-                            course = course,
-                            onClick = { navController.navigate("course_detail/${course.id}") }
-                        )
+                            // Recent Course with Progress
+                            uiState.recentOpenedCourse?.let { recentCourse ->
+                                Card(
+                                    shape = RoundedCornerShape(16.dp),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(180.dp)
+                                        .shadow(4.dp)
+                                        .clickable { 
+                                            navController.navigate("course_detail/${recentCourse.id}")
+                                        },
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = Color.White
+                                    )
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(180.dp)
+                                    ) {
+                                        Image(
+                                            painter = painterResource(id = recentCourse.getLocalImageRes()),
+                                            contentDescription = recentCourse.title,
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier.fillMaxSize()
+                                        )
+
+                                        // Gradient overlay
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .background(
+                                                    androidx.compose.ui.graphics.Brush.verticalGradient(
+                                                        colors = listOf(
+                                                            Color.Transparent,
+                                                            Color.Black.copy(alpha = 0.6f)
+                                                        )
+                                                    )
+                                                )
+                                        )
+
+                                        Column(
+                                            modifier = Modifier.fillMaxSize(),
+                                            verticalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Spacer(modifier = Modifier.weight(1f))
+                                            
+                                            Column(
+                                                modifier = Modifier.padding(20.dp)
+                                            ) {
+                                                Text(
+                                                    text = recentCourse.title,
+                                                    style = MaterialTheme.typography.titleLarge.copy(
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = Color.White
+                                                    )
+                                                )
+                                                Text(
+                                                    text = recentCourse.category.name,
+                                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                                        color = Color.White.copy(alpha = 0.8f)
+                                                    ),
+                                                    modifier = Modifier.padding(bottom = 8.dp)
+                                                )
+                                                
+                                                // Progress Bar (Course progress API belum tersedia)
+                                                // Sementara gunakan progress placeholder
+                                                val progress = 45f // Static progress placeholder
+                                                LinearProgressIndicator(
+                                                    progress = progress / 100f,
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .height(4.dp)
+                                                        .clip(RoundedCornerShape(2.dp)),
+                                                    color = Color(0xFF635C9C),
+                                                    trackColor = Color.White.copy(alpha = 0.3f)
+                                                )
+                                            }
+                                        }
+
+                                        // Arrow button
+                                        Box(
+                                            modifier = Modifier
+                                                .align(Alignment.TopEnd)
+                                                .padding(16.dp)
+                                                .size(36.dp)
+                                                .clip(CircleShape)
+                                                .background(Color(0xFF635C9C))
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.ArrowForward,
+                                                contentDescription = "Continue",
+                                                tint = Color.White,
+                                                modifier = Modifier
+                                                    .align(Alignment.Center)
+                                                    .size(20.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // Saved Courses Section
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 24.dp)
+                        ) {
+                            SectionHeader(
+                                title = "Saved Course",
+                                onViewAllClick = { isViewAll.value = !isViewAll.value }
+                            )
+
+                            val coursesToShow = if (isViewAll.value) uiState.courses else uiState.courses.take(3)
+
+                            coursesToShow.forEach { course ->
+                                Card(
+                                    shape = RoundedCornerShape(16.dp),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp)
+                                        .shadow(4.dp)
+                                        .clickable { navController.navigate("course_detail/${course.id}") },
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = Color.White
+                                    )
+                                ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(16.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Image(
+                                            painter = painterResource(id = course.getLocalImageRes()),
+                                            contentDescription = course.title,
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier
+                                                .size(68.dp)
+                                                .clip(RoundedCornerShape(12.dp))
+                                        )
+
+                                        Spacer(modifier = Modifier.width(16.dp))
+
+                                        Column(
+                                            modifier = Modifier.weight(1f)
+                                        ) {
+                                            Text(
+                                                text = course.title,
+                                                style = MaterialTheme.typography.titleMedium.copy(
+                                                    fontWeight = FontWeight.SemiBold
+                                                )
+                                            )
+                                            Text(
+                                                text = course.category.name,
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                color = Color.Gray
+                                            )
+                                            // Tampilkan harga
+                                            if (course.isPaid) {
+                                                Text(
+                                                    text = "Rp ${course.price}",
+                                                    style = MaterialTheme.typography.titleMedium.copy(
+                                                        fontWeight = FontWeight.Bold
+                                                    ),
+                                                    color = MaterialTheme.colorScheme.primary
+                                                )
+                                            } else {
+                                                Text(
+                                                    text = "Gratis",
+                                                    style = MaterialTheme.typography.titleMedium.copy(
+                                                        fontWeight = FontWeight.Bold
+                                                    ),
+                                                    color = Color(0xFF4CAF50)
+                                                )
+                                            }
+                                        }
+
+                                        Box(
+                                            modifier = Modifier
+                                                .size(36.dp)
+                                                .clip(CircleShape)
+                                                .background(MaterialTheme.colorScheme.primary)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.ArrowForward,
+                                                contentDescription = "Open Course",
+                                                tint = Color.White,
+                                                modifier = Modifier
+                                                    .align(Alignment.Center)
+                                                    .size(20.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(100.dp))
                     }
                 }
-
-                // Spacer untuk memberi ruang di bawah agar konten tidak tertutup navbar
-                Spacer(modifier = Modifier.height(100.dp))
             }
         }
 
-        // Navbar ditumpuk di bawah layar, menimpa konten
         Box(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .zIndex(1f) // pastikan di atas konten
+                .zIndex(1f)
         ) {
             Navbar(
                 navController = navController,
@@ -243,7 +395,6 @@ fun CourseScreen(navController: NavController = rememberNavController()) {
         }
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable

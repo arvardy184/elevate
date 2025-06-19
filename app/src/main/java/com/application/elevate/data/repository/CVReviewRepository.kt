@@ -3,14 +3,17 @@ package com.application.elevate.data.repository
 import com.application.elevate.model.CVReviewResponse
 import com.application.elevate.model.CVReviewListResponse
 import com.application.elevate.data.database.entity.CVReviewEntity
+import com.application.elevate.model.CVReviewDetailResponse
 import kotlinx.coroutines.flow.Flow
 import java.io.File
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 
 interface CVReviewRepository {
   suspend fun uploadCV(
     token: String,
-    cvFile: File,
-    careerField: String
+    cvFile: MultipartBody.Part,
+    careerField: RequestBody
   ): Result<CVReviewResponse>
 
   suspend fun getMyCVReviews(
@@ -21,12 +24,12 @@ interface CVReviewRepository {
 
   suspend fun getCVReviewById(
     token: String,
-    id: String
-  ): Result<CVReviewResponse>
+    reviewId: String
+  ): Result<CVReviewDetailResponse>
 
   suspend fun updateCVReview(
     token: String,
-    id: String,
+    reviewId: String,
     careerField: String
   ): Result<CVReviewResponse>
 
@@ -37,7 +40,15 @@ interface CVReviewRepository {
   
   // Offline support methods
   fun getAllCVReviewsLocal(): Flow<List<CVReviewEntity>>
-  suspend fun getCVReviewByIdLocal(id: String): CVReviewEntity?
-  suspend fun saveCVReviewLocal(entity: CVReviewEntity)
+  suspend fun getCVReviewByIdLocal(
+    reviewId: String
+  ): CVReviewEntity?
+  suspend fun saveCVReviewLocal(
+    entity: CVReviewEntity
+  )
   suspend fun deleteCVReviewLocal(id: String)
+
+  suspend fun getUserCVReviews(
+    token: String
+  ): Result<List<CVReviewResponse>>
 } 

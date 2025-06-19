@@ -147,7 +147,8 @@ fun HeaderCard(
                             tint = Color.Gray // Custom color for icon
                         )
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .onGloballyPositioned { coordinates ->
                             val position = coordinates.positionInRoot()
                             val size = coordinates.size.toSize()

@@ -3,6 +3,7 @@ package com.application.elevate.viewmodel.home
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.application.elevate.data.repository.HomeRepository
 import com.application.elevate.data.repository.UserRepository
 import com.application.elevate.data.repository.SearchRepository
 import com.application.elevate.model.User
@@ -19,6 +20,7 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val searchRepository: SearchRepository
+    private val homeRepository: HomeRepository
 ) : ViewModel() {
     private val TAG = "HomeViewModel"
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -105,6 +107,10 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
+    // Fungsi untuk mendapatkan data dari repository
+    fun getGrowthHubItems() = homeRepository.getGrowthHubItems()
+    fun getRecommendedCourses() = homeRepository.getRecommendedCourses()
+    fun getCategories() = homeRepository.getCategories()
 }
 
 // Class terpisah untuk preview

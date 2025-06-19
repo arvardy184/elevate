@@ -31,7 +31,7 @@ fun SavedCourseItem(course: Course, onClick: () -> Unit) {
             .fillMaxWidth()
             .height(120.dp)
             .padding(vertical = 8.dp)
-
+//            .align(Alignment.CenterVertically)
             .clickable { onClick() }
         .shadow(4.dp, RoundedCornerShape(16.dp)),
 
