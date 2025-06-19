@@ -5,7 +5,7 @@ import com.application.elevate.ui.home.SearchUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-class SearchViewModel : ViewModel() {
+class HomeSearchViewModel : ViewModel() {
 
     private val _uiState = MutableStateFlow(
         SearchUiState(

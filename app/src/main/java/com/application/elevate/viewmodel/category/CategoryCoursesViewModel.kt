@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-open class CategoryCoursesViewModel(private val categoryId: String) : ViewModel() {
+open class CategoryCoursesViewModel(private val categoryId: Int) : ViewModel() {
     
     protected val _uiState = MutableStateFlow(CategoryCoursesUiState())
     val uiState: StateFlow<CategoryCoursesUiState> = _uiState.asStateFlow()
@@ -19,32 +19,31 @@ open class CategoryCoursesViewModel(private val categoryId: String) : ViewModel(
         loadCoursesByCategory(categoryId)
     }
     
-    private fun loadCoursesByCategory(categoryId: String) {
+    private fun loadCoursesByCategory(categoryId: Int) {
         // Seharusnya mengambil dari API atau data source yang sudah ada
         // Sementara kita gunakan dummy data yang ada
         val courses = ProfileDummyData.dummyCourses
         
-        // Sebenarnya harus ada filter berdasarkan category
-        // Tapi di model Course belum ada field categoryId
-        // Jadi sementara tampilkan saja semua Course untuk demo
+        // Filter berdasarkan categoryId
+        val filteredCourses = courses.filter { it.categoryId == categoryId }
         
         val categoryName = when(categoryId) {
-            "1" -> "Design"
-            "2" -> "Web Development"
-            "3" -> "Digital Marketing"
-            "4" -> "Mobile Development"
-            "5" -> "Product Management"
-            "6" -> "Finance & Accounting"
-            "7" -> "HR Management"
-            "8" -> "Personal Branding"
+            1 -> "Design"
+            2 -> "Web Development"
+            3 -> "Digital Marketing"
+            4 -> "Mobile Development"
+            5 -> "Product Management"
+            6 -> "Finance & Accounting"
+            7 -> "HR Management"
+            8 -> "Personal Branding"
             else -> "All Courses"
         }
         
         _uiState.update { currentState ->
             currentState.copy(
                 categoryName = categoryName,
-                courses = courses,
-                filteredCourses = courses
+                courses = filteredCourses,
+                filteredCourses = filteredCourses
             )
         }
     }
@@ -81,7 +80,7 @@ data class CategoryCoursesUiState(
     val error: String? = null
 )
 
-class CategoryCoursesViewModelFactory(private val categoryId: String) : ViewModelProvider.Factory {
+class CategoryCoursesViewModelFactory(private val categoryId: Int) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(CategoryCoursesViewModel::class.java)) {

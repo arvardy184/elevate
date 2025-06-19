@@ -5,6 +5,7 @@ import android.util.Log
 import com.application.elevate.api.CVReviewApiService
 import com.application.elevate.data.api.AuthApiService
 import com.application.elevate.data.api.CounselingApiService
+import com.application.elevate.data.api.CourseApiService
 import com.application.elevate.data.datastore.DataStoreManager
 import com.application.elevate.data.repository.*
 import com.google.gson.Gson
@@ -30,6 +31,7 @@ import com.application.elevate.api.JobMatchingApiService
 import com.application.elevate.data.repository.jobmatching.JobMatchingRepository
 import com.application.elevate.data.repository.jobmatching.JobMatchingRepositoryImpl
 import com.application.elevate.util.NetworkUtil
+import com.application.elevate.data.database.dao.CourseDao
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
@@ -154,6 +156,11 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    fun provideCourseApiService(@ProdRetrofit retrofit: Retrofit): CourseApiService =
+        retrofit.create(CourseApiService::class.java)
+
+    @Provides
+    @Singleton
     fun provideAuthRepository(api: AuthApiService): AuthRepository =
         AuthRepositoryImpl(api)
 
@@ -201,4 +208,21 @@ object NetworkModule {
     @Singleton
     fun provideNetworkUtil(@ApplicationContext context: Context): NetworkUtil =
         NetworkUtil(context)
+
+    @Provides
+    @Singleton
+    fun provideSearchRepository(
+        courseApiService: CourseApiService,
+        courseDao: CourseDao,
+        consultantDao: ConsultantDao,
+        searchHistoryDao: SearchHistoryDao,
+        counselingRepository: CounselingRepository
+    ): SearchRepository =
+        SearchRepositoryImpl(
+            courseApiService = courseApiService,
+            courseDao = courseDao,
+            consultantDao = consultantDao,
+            searchHistoryDao = searchHistoryDao,
+            counselingRepository = counselingRepository
+        )
 } 

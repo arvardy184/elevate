@@ -20,11 +20,11 @@ import com.application.elevate.ui.theme.ReplyTheme
 import com.application.elevate.ui.theme.Purple5
 import com.application.elevate.ui.theme.Neutral10
 import com.application.elevate.ui.theme.Neutral7
-import com.application.elevate.viewmodel.home.SearchViewModel
+import com.application.elevate.viewmodel.home.HomeSearchViewModel
 
 @Composable
 fun SearchScreen(
-    viewModel: SearchViewModel = viewModel(),
+    viewModel: HomeSearchViewModel = viewModel(),
     onBackClick: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()

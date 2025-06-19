@@ -1,7 +1,6 @@
 package com.application.elevate.viewmodel.roadmap
 
 import androidx.lifecycle.ViewModel
-import com.application.elevate.data.dummy.ProfileDummyData.dummyCourses
 import com.application.elevate.model.CourseWithPosition
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,12 +12,6 @@ open class RoadmapViewModel : ViewModel() {
     val uiState: StateFlow<RoadmapUiState> = _uiState
 
     init {
-        // Dummy course list
-
-        (
-        dummyCourses
-        )
-
         val coursePositions = listOf(
             CourseWithPosition(ProfileDummyData.dummyCourses[0], 0.50f, 0.082f),
             CourseWithPosition(ProfileDummyData.dummyCourses[1], 0.63f, 0.16f),

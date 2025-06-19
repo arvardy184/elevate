@@ -4,26 +4,44 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import android.content.Context
-import com.application.elevate.data.database.dao.*
 import com.application.elevate.data.database.entity.*
+import com.application.elevate.data.database.dao.*
 
 @Database(
   entities = [
-    CVReviewEntity::class,
     ConsultantEntity::class,
     CounselingCategoryEntity::class,
-    SearchHistoryEntity::class
+    CVReviewEntity::class,
+    SearchHistoryEntity::class,
+    CourseEntity::class
   ],
-  version = 3,
+  version = 4,
   exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
-  abstract fun cvReviewDao(): CVReviewDao
+  
   abstract fun consultantDao(): ConsultantDao
   abstract fun counselingCategoryDao(): CounselingCategoryDao
+  abstract fun cvReviewDao(): CVReviewDao
   abstract fun searchHistoryDao(): SearchHistoryDao
+  abstract fun courseDao(): CourseDao
   
   companion object {
-    const val DATABASE_NAME = "elevate_database"
+    @Volatile
+    private var INSTANCE: AppDatabase? = null
+    
+    fun getDatabase(context: Context): AppDatabase {
+      return INSTANCE ?: synchronized(this) {
+        val instance = Room.databaseBuilder(
+          context.applicationContext,
+          AppDatabase::class.java,
+          "elevate_database"
+        )
+          .fallbackToDestructiveMigration()
+          .build()
+        INSTANCE = instance
+        instance
+      }
+    }
   }
 }

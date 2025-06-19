@@ -16,8 +16,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.application.elevate.data.dummy.ProfileDummyData.dummyCourses
 import com.application.elevate.model.Course
+import com.application.elevate.R
 
 
 @Composable
@@ -117,5 +117,17 @@ fun CourseCard(
 @Preview(showBackground = true)
 @Composable
 fun CourseCardPreview() {
-    CourseCard(course = dummyCourses[0])
+    CourseCard(
+        course = Course(
+            id = 1,
+            title = "AWS Cloud Practitioner",
+            description = "Learn AWS basics",
+            duration = "4 weeks",
+            lessons = 12,
+            progressPercent = 65,
+            rating = 4.8f,
+            ratingCount = 120,
+            imageRes = R.drawable.android_development
+        )
+    )
 }

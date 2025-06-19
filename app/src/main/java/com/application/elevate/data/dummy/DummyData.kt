@@ -124,13 +124,63 @@ object ProfileDummyData {
         GrowthHub("job & Skill", R.drawable.job_skill)
     )
 
+    // Temporary dummy courses for compilation - akan dihapus nanti
     val dummyCourses = listOf(
-        Course("1","UI/UX Design", "2h 45min", 9, 100,5.0f, 201, R.drawable.ui_ux, true ),
-        Course("2","Front-End Dev", "5h 10min", 10, 60, 4.5f, 140, R.drawable.front_end, true ),
-        Course("3","SEO & Content Marketing", "1h 28min", 13, 80, 4.0f, 96, R.drawable.content_marketing, false),
-        Course("4","Social Media Marketing", "2h 20min", 10, 40, 4.5f, 140, R.drawable.social_media_marketing, false),
-        Course("5","Android Development", "3h 15min", 13, 20, 5.0f, 201, R.drawable.android_development, false),
-        Course("6","Basic Accounting", "2h 4min", 11, 90, 4.0f, 96, R.drawable.basic_accounting, false)
+        Course(
+            id = 1,
+            title = "UI/UX Design",
+            description = "Learn the fundamentals of UI/UX design",
+            thumbnail = "",
+            categoryId = 1,
+            isPaid = true,
+            price = 100000,
+            category = CourseCategory(1, "Design"),
+            imageRes = R.drawable.ui_ux
+        ),
+        Course(
+            id = 2,
+            title = "Front-End Development",
+            description = "Master front-end web development",
+            thumbnail = "",
+            categoryId = 1,
+            isPaid = true,
+            price = 150000,
+            category = CourseCategory(1, "Development"),
+            imageRes = R.drawable.front_end
+        ),
+        Course(
+            id = 3,
+            title = "Digital Marketing",
+            description = "Learn digital marketing strategies",
+            thumbnail = "",
+            categoryId = 2,
+            isPaid = false,
+            price = 0,
+            category = CourseCategory(2, "Marketing"),
+            imageRes = R.drawable.content_marketing
+        ),
+        Course(
+            id = 4,
+            title = "Mobile Development",
+            description = "Build mobile applications",
+            thumbnail = "",
+            categoryId = 1,
+            isPaid = true,
+            price = 200000,
+            category = CourseCategory(1, "Development"),
+            imageRes = R.drawable.android_development
+        ),
+        Course(
+            id = 5,
+            title = "Data Science",
+            description = "Analyze data with modern tools",
+            thumbnail = "",
+            categoryId = 3,
+            isPaid = true,
+            price = 180000,
+            category = CourseCategory(3, "Data"),
+            imageRes = R.drawable.basic_accounting
+        )
     )
 
     val dummyCourseDetails = listOf(
@@ -185,10 +235,14 @@ object ProfileDummyData {
     )
 
     val categoriesCounseling = listOf(
-        CounselingCategory("1", "Design", R.drawable.ic_category_conseling_design),
-        CounselingCategory("2", "Development", R.drawable.ic_category_conseling_development),
-        CounselingCategory("3", "Finance", R.drawable.ic_category_conseling_finance),
-        CounselingCategory("4", "Programming", R.drawable.ic_category_conseling_programming)
+        CounselingCategory("1", "UI/UX Design", R.drawable.ic_category_conseling_design),
+        CounselingCategory("2", "Web Development", R.drawable.ic_category_conseling_development),
+        CounselingCategory("3", "Digital Marketing", R.drawable.ic_category_conseling_finance),
+        CounselingCategory("4", "Mobile Development", R.drawable.ic_category_conseling_programming),
+        CounselingCategory("5", "Data Science", R.drawable.ic_category_conseling_design),
+        CounselingCategory("6", "Business Strategy", R.drawable.ic_category_conseling_finance),
+        CounselingCategory("7", "Career Transition", R.drawable.ic_category_conseling_development),
+        CounselingCategory("8", "Product Management", R.drawable.ic_category_conseling_programming)
     )
 
 //    val consultants = listOf(

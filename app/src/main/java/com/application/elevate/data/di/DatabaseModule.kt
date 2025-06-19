@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.application.elevate.data.database.AppDatabase
 import com.application.elevate.data.database.dao.*
+import com.application.elevate.data.repository.*
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -17,35 +18,30 @@ object DatabaseModule {
 
   @Provides
   @Singleton
-  fun provideAppDatabase(
-    @ApplicationContext context: Context
-  ): AppDatabase {
+  fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase {
     return Room.databaseBuilder(
-      context,
+      context.applicationContext,
       AppDatabase::class.java,
-      AppDatabase.DATABASE_NAME
+      "elevate_database"
     )
-      .fallbackToDestructiveMigration() // For development only
+      .fallbackToDestructiveMigration() // For development
       .build()
   }
 
   @Provides
-  fun provideCVReviewDao(database: AppDatabase): CVReviewDao {
-    return database.cvReviewDao()
-  }
+  fun provideConsultantDao(database: AppDatabase): ConsultantDao = database.consultantDao()
 
   @Provides
-  fun provideConsultantDao(database: AppDatabase): ConsultantDao {
-    return database.consultantDao()
-  }
+  fun provideCounselingCategoryDao(database: AppDatabase): CounselingCategoryDao = database.counselingCategoryDao()
 
   @Provides
-  fun provideCounselingCategoryDao(database: AppDatabase): CounselingCategoryDao {
-    return database.counselingCategoryDao()
-  }
+  fun provideCVReviewDao(database: AppDatabase): CVReviewDao = database.cvReviewDao()
 
   @Provides
-  fun provideSearchHistoryDao(database: AppDatabase): SearchHistoryDao {
-    return database.searchHistoryDao()
-  }
+  fun provideSearchHistoryDao(database: AppDatabase): SearchHistoryDao = database.searchHistoryDao()
+
+  @Provides
+  fun provideCourseDao(database: AppDatabase): CourseDao = database.courseDao()
+
+
 } 

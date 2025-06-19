@@ -7,32 +7,57 @@ import com.application.elevate.data.database.entity.SearchHistoryEntity
 @Dao
 interface SearchHistoryDao {
 
-  @Query("SELECT * FROM search_history ORDER BY last_searched_at DESC LIMIT :limit")
+  // Basic search history operations
+  @Query("SELECT * FROM search_history ORDER BY search_timestamp DESC LIMIT :limit")
   fun getRecentSearches(limit: Int = 10): Flow<List<SearchHistoryEntity>>
   
-  @Query("SELECT * FROM search_history WHERE search_type = :type ORDER BY search_count DESC, last_searched_at DESC LIMIT :limit")
-  fun getTopSearchesByType(type: String, limit: Int = 5): Flow<List<SearchHistoryEntity>>
+  @Query("SELECT * FROM search_history WHERE search_type = :type ORDER BY search_timestamp DESC LIMIT :limit")
+  fun getRecentSearchesByType(type: String, limit: Int = 10): Flow<List<SearchHistoryEntity>>
   
-  @Insert(onConflict = OnConflictStrategy.IGNORE)
-  suspend fun insertSearch(search: SearchHistoryEntity): Long
+  @Query("SELECT DISTINCT search_query FROM search_history WHERE search_query LIKE '%' || :query || '%' ORDER BY search_timestamp DESC LIMIT :limit")
+  suspend fun getSearchSuggestions(query: String, limit: Int = 5): List<String>
   
-  @Query("UPDATE search_history SET search_count = search_count + 1, last_searched_at = :timestamp WHERE search_query = :query AND search_type = :type")
-  suspend fun updateSearchCount(query: String, type: String, timestamp: Long = System.currentTimeMillis()): Int
+  // Insert/Update operations
+  @Insert(onConflict = OnConflictStrategy.REPLACE)
+  suspend fun insertSearchHistory(searchHistory: SearchHistoryEntity)
   
-  @Transaction
-  suspend fun insertOrUpdateSearch(search: SearchHistoryEntity) {
-    val updatedRows = updateSearchCount(search.searchQuery, search.searchType)
-    if (updatedRows == 0) {
-      insertSearch(search)
-    }
-  }
+  @Query("""
+    INSERT OR REPLACE INTO search_history 
+    (search_query, search_type, category_filter, result_count, search_timestamp, search_duration_ms)
+    VALUES (:query, :type, :categoryFilter, :resultCount, :timestamp, :duration)
+  """)
+  suspend fun insertOrUpdateSearch(
+    query: String,
+    type: String,
+    categoryFilter: String? = null,
+    resultCount: Int = 0,
+    timestamp: Long = System.currentTimeMillis(),
+    duration: Long = 0
+  )
   
+  @Query("UPDATE search_history SET selected_result_id = :resultId WHERE id = :searchId")
+  suspend fun updateSelectedResult(searchId: Long, resultId: String)
+  
+  // Analytics and insights - simplified for now
+  @Query("SELECT COUNT(*) FROM search_history WHERE search_type = :type")
+  suspend fun getSearchCountByType(type: String): Int
+  
+  @Query("SELECT COUNT(*) FROM search_history WHERE search_timestamp > :since")
+  suspend fun getRecentSearchCount(since: Long): Int
+  
+  // Cleanup operations
   @Delete
-  suspend fun deleteSearch(search: SearchHistoryEntity)
+  suspend fun deleteSearchHistory(searchHistory: SearchHistoryEntity)
   
-  @Query("DELETE FROM search_history WHERE last_searched_at < :timestamp")
-  suspend fun deleteOldSearches(timestamp: Long): Int
+  @Query("DELETE FROM search_history WHERE search_query = :query AND search_type = :type")
+  suspend fun deleteSearchByQuery(query: String, type: String)
   
   @Query("DELETE FROM search_history")
   suspend fun clearAllSearchHistory()
+  
+  @Query("DELETE FROM search_history WHERE search_timestamp < :timestamp")
+  suspend fun deleteOldSearches(timestamp: Long): Int
+  
+  @Query("SELECT COUNT(*) FROM search_history")
+  suspend fun getSearchHistoryCount(): Int
 } 

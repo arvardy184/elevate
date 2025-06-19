@@ -158,7 +158,7 @@ class CounselingRepositoryImpl @Inject constructor(
       searchQuery = query,
       searchType = type
     )
-    searchHistoryDao.insertOrUpdateSearch(searchHistory)
+//    searchHistoryDao.insertOrUpdateSearch(searchHistory)
   }
 
   override fun getSearchHistory(): Flow<List<SearchHistoryEntity>> {

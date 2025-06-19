@@ -43,13 +43,12 @@ import com.application.elevate.ui.auth.SignUpPage
 import com.application.elevate.viewmodel.cvreview.CVReviewListViewModel
 import com.application.elevate.viewmodel.cvreview.CVReviewDetailViewModel
 import com.application.elevate.ui.home.SearchScreen
+import com.application.elevate.ui.search.AdvancedSearchScreen
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.application.elevate.ui.counseling.CounselingDetailScreen
-
 import com.application.elevate.viewmodel.assessment.AssessmentViewModel
 import com.application.elevate.viewmodel.counseling.CounselingViewModel
 import com.application.elevate.viewmodel.home.HomeViewModel
-
 import com.application.elevate.ui.auth.LoginPage
 import com.application.elevate.ui.cvreview.CVReviewViewModel
 import com.application.elevate.ui.mycourse.CourseDetailScreen
@@ -110,10 +109,10 @@ fun AppNavigation() {
 
         composable(
             route = "course_detail/{courseId}",
-            arguments = listOf(navArgument("courseId") { type = NavType.StringType })
+            arguments = listOf(navArgument("courseId") { type = NavType.IntType })
         ) {
-            val courseId = it.arguments?.getString("courseId") ?: ""
-            val courseDetail = dummyCourseDetails.find { it.id == courseId }!!
+            val courseId = it.arguments?.getInt("courseId") ?: 1
+            val courseDetail = dummyCourseDetails.find { it.id == courseId.toString() }!!
             CourseDetailScreen(courseDetail = courseDetail, onBackClick = { navController.popBackStack() })
         }
 
@@ -135,6 +134,17 @@ fun AppNavigation() {
             CVReviewScreen(navController, viewModel)
         }
         composable("search") { SearchScreen(onBackClick = { navController.popBackStack() }) }
+        composable("advanced_search") { 
+            AdvancedSearchScreen(
+                onBackClick = { navController.popBackStack() },
+                onCourseClick = { course -> 
+                    navController.navigate("course_detail/${course.id}")
+                },
+                onConsultantClick = { consultant ->
+                    navController.navigate("counseling_detail/${consultant.id}")
+                }
+            ) 
+        }
         composable("cv_result_review") {
             val parentEntry = remember(it) {
                 navController.getBackStackEntry("cv_review")
@@ -186,9 +196,9 @@ fun AppNavigation() {
         
         composable(
             route = "category_courses/{categoryId}",
-            arguments = listOf(navArgument("categoryId") { type = NavType.StringType })
+            arguments = listOf(navArgument("categoryId") { type = NavType.IntType })
         ) {
-            val categoryId = it.arguments?.getString("categoryId") ?: ""
+            val categoryId = it.arguments?.getInt("categoryId") ?: 1
             CategoryCoursesScreen(
                 categoryId = categoryId,
                 navController = navController

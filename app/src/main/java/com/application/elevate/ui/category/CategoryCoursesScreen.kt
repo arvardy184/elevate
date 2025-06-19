@@ -26,6 +26,7 @@ import androidx.navigation.compose.rememberNavController
 import com.application.elevate.ui.component.CourseCard
 import com.application.elevate.ui.component.Navbar
 import com.application.elevate.model.Course
+import com.application.elevate.model.CourseCategory
 import com.application.elevate.ui.theme.ReplyTheme
 import com.application.elevate.viewmodel.category.CategoryCoursesUiState
 import com.application.elevate.viewmodel.category.CategoryCoursesViewModel
@@ -34,7 +35,7 @@ import com.application.elevate.viewmodel.category.CategoryCoursesViewModelFactor
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoryCoursesScreen(
-    categoryId: String,
+    categoryId: Int,
     viewModel: CategoryCoursesViewModel = viewModel(factory = CategoryCoursesViewModelFactory(categoryId)),
     navController: NavController
 ) {
@@ -191,7 +192,7 @@ fun CategoryCoursesScreen(
 fun CategoryCoursesScreenPreview() {
     ReplyTheme {
         CategoryCoursesScreen(
-            categoryId = "1",
+            categoryId = 1,
             navController = rememberNavController()
         )
     }
@@ -202,40 +203,38 @@ fun CategoryCoursesScreenPreview() {
 fun DesignCategoryCoursesScreenPreview() {
     val courses = listOf(
         Course(
-            id = "1",
+            id = 1,
             title = "UI/UX Design",
-            duration = "2h 45min",
-            lessons = 9,
-            progressPercent = 80,
-            rating = 4.5f,
-            ratingCount = 120,
-            imageRes = com.application.elevate.R.drawable.ui_ux
+            description = "Learn UI/UX fundamentals",
+            thumbnail = "",
+            categoryId = 1,
+            isPaid = true,
+            price = 100000,
+            category = CourseCategory(1, "Design")
         ),
         Course(
-            id = "2",
+            id = 2,
             title = "Graphic Design",
-            duration = "3h 20min",
-            lessons = 12,
-            progressPercent = 0,
-            rating = 4.2f,
-            ratingCount = 98,
-            imageRes = com.application.elevate.R.drawable.front_end,
-            categoryId = "1"
+            description = "Master graphic design principles",
+            thumbnail = "",
+            categoryId = 1,
+            isPaid = true,
+            price = 120000,
+            category = CourseCategory(1, "Design")
         ),
         Course(
-            id = "3",
+            id = 3,
             title = "Motion Graphics",
-            duration = "4h 10min",
-            lessons = 15,
-            progressPercent = 25,
-            rating = 4.7f,
-            ratingCount = 135,
-            imageRes = com.application.elevate.R.drawable.android_development,
-            categoryId = "1"
+            description = "Create stunning motion graphics",
+            thumbnail = "",
+            categoryId = 1,
+            isPaid = true,
+            price = 150000,
+            category = CourseCategory(1, "Design")
         )
     )
     
-    val viewModel = CategoryCoursesViewModel("1")
+    val viewModel = CategoryCoursesViewModel(1)
     viewModel.updateUiState(
         CategoryCoursesUiState(
             categoryName = "Design",
@@ -246,7 +245,7 @@ fun DesignCategoryCoursesScreenPreview() {
     
     ReplyTheme {
         CategoryCoursesScreen(
-            categoryId = "1",
+            categoryId = 1,
             viewModel = viewModel,
             navController = rememberNavController()
         )
@@ -256,7 +255,7 @@ fun DesignCategoryCoursesScreenPreview() {
 @Preview(showBackground = true, name = "Empty State Preview", widthDp = 360, heightDp = 800)
 @Composable
 fun EmptyCategoryCoursesScreenPreview() {
-    val viewModel = CategoryCoursesViewModel("3")
+    val viewModel = CategoryCoursesViewModel(3)
     viewModel.updateUiState(
         CategoryCoursesUiState(
             categoryName = "Personal Branding",
@@ -267,7 +266,7 @@ fun EmptyCategoryCoursesScreenPreview() {
     
     ReplyTheme {
         CategoryCoursesScreen(
-            categoryId = "3",
+            categoryId = 3,
             viewModel = viewModel,
             navController = rememberNavController()
         )
@@ -279,51 +278,51 @@ fun EmptyCategoryCoursesScreenPreview() {
 fun SearchCategoryCoursesScreenPreview() {
     val allCourses = listOf(
         Course(
-            id = "1",
+            id = 1,
             title = "UI/UX Design",
-            duration = "2h 45min",
-            lessons = 9,
-            progressPercent = 80,
-            rating = 4.5f,
-            ratingCount = 120,
-            imageRes = com.application.elevate.R.drawable.ui_ux
+            description = "Learn UI/UX fundamentals",
+            thumbnail = "",
+            categoryId = 1,
+            isPaid = true,
+            price = 100000,
+            category = CourseCategory(1, "Design")
         ),
         Course(
-            id = "2",
+            id = 2,
             title = "Graphic Design",
-            duration = "3h 20min",
-            lessons = 12,
-            progressPercent = 0,
-            rating = 4.2f,
-            ratingCount = 98,
-            imageRes = com.application.elevate.R.drawable.front_end
+            description = "Master graphic design principles",
+            thumbnail = "",
+            categoryId = 1,
+            isPaid = true,
+            price = 120000,
+            category = CourseCategory(1, "Design")
         ),
         Course(
-            id = "3",
+            id = 3,
             title = "Web Design Fundamentals",
-            duration = "4h 10min",
-            lessons = 15,
-            progressPercent = 30,
-            rating = 4.7f,
-            ratingCount = 156,
-            imageRes = com.application.elevate.R.drawable.android_development
+            description = "Learn web design from scratch",
+            thumbnail = "",
+            categoryId = 1,
+            isPaid = true,
+            price = 130000,
+            category = CourseCategory(1, "Design")
         )
     )
     
     val filteredCourses = listOf(
         Course(
-            id = "1",
+            id = 1,
             title = "UI/UX Design",
-            duration = "2h 45min",
-            lessons = 9,
-            progressPercent = 80,
-            rating = 4.5f,
-            ratingCount = 120,
-            imageRes = com.application.elevate.R.drawable.ui_ux
+            description = "Learn UI/UX fundamentals",
+            thumbnail = "",
+            categoryId = 1,
+            isPaid = true,
+            price = 100000,
+            category = CourseCategory(1, "Design")
         )
     )
     
-    val viewModel = CategoryCoursesViewModel("1")
+    val viewModel = CategoryCoursesViewModel(1)
     viewModel.updateUiState(
         CategoryCoursesUiState(
             categoryName = "Design",
@@ -335,7 +334,7 @@ fun SearchCategoryCoursesScreenPreview() {
     
     ReplyTheme {
         CategoryCoursesScreen(
-            categoryId = "1",
+            categoryId = 1,
             viewModel = viewModel,
             navController = rememberNavController()
         )

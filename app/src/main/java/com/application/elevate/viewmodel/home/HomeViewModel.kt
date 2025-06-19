@@ -4,7 +4,9 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.application.elevate.data.repository.UserRepository
+import com.application.elevate.data.repository.SearchRepository
 import com.application.elevate.model.User
+import com.application.elevate.model.Course
 import com.application.elevate.ui.home.HomeUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +17,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val searchRepository: SearchRepository
 ) : ViewModel() {
     private val TAG = "HomeViewModel"
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -25,6 +28,7 @@ class HomeViewModel @Inject constructor(
         // Muat data user saat pertama kali
         loadUserData()
         checkTutorialStatus()
+        loadPopularCourses()
         
         // Memantau perubahan data user secara real-time
         viewModelScope.launch {
@@ -87,6 +91,19 @@ class HomeViewModel @Inject constructor(
 
     fun onSearchChange(query: String) {
         _uiState.value = _uiState.value.copy(searchQuery = query)
+    }
+
+    private fun loadPopularCourses() {
+        viewModelScope.launch {
+            try {
+                val popularCourses = searchRepository.getPopularCourses(6)
+                _uiState.value = _uiState.value.copy(popularCourses = popularCourses)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error saat memuat popular courses: ${e.message}")
+                // Keep empty list on error
+                _uiState.value = _uiState.value.copy(popularCourses = emptyList())
+            }
+        }
     }
 }
 

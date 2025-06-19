@@ -2,14 +2,16 @@ package com.application.elevate.viewmodel.counseling
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.application.elevate.data.dummy.ProfileDummyData
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import com.application.elevate.data.repository.CounselingRepository
-import com.application.elevate.data.dummy.ProfileDummyData
+
 import com.application.elevate.model.CounselingCategory
 import com.application.elevate.model.ConsultantResponse
 import com.application.elevate.ui.counseling.CounselingUiState
 import com.application.elevate.ui.counseling.CounselorDetailUiState
+import com.application.elevate.util.NetworkUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import java.net.ConnectException
@@ -17,7 +19,8 @@ import java.io.IOException
 
 @HiltViewModel
 class CounselingViewModel @Inject constructor(
-  private val counselingRepository: CounselingRepository
+  private val counselingRepository: CounselingRepository,
+  private val networkUtil: NetworkUtil
 ) : ViewModel() {
 
   private val _uiState = MutableStateFlow(
@@ -54,35 +57,41 @@ class CounselingViewModel @Inject constructor(
         isFromCache = false
       )
 
-      counselingRepository.getCounselors(
-        page = page,
-        specialization = specialization
-      ).fold(
-        onSuccess = { response ->
-          _uiState.value = _uiState.value.copy(
-            consultants = response.data,
-            pagination = response.pagination,
-            selectedSpecialization = specialization,
-            isLoading = false,
-            lastRefresh = System.currentTimeMillis(),
-            isFromCache = isDataFromCache(response)
-          )
-        },
-        onFailure = { exception ->
-          val isNetworkError = exception is ConnectException || exception is IOException
-          
-          if (isNetworkError) {
-            // Try to load from cache when offline
-            loadCachedConsultants(specialization)
-          } else {
-            _uiState.value = _uiState.value.copy(
-              error = exception.message ?: "Failed to load counselors",
-              isLoading = false
-            )
-          }
-        }
-      )
+      // Check network status first
+      val isOnline = networkUtil.isOnline()
+      _uiState.value = _uiState.value.copy(isOffline = !isOnline)
+
+      if (isOnline) {
+        // Online: Try API first
+        loadFromAPI(page, specialization)
+      } else {
+        // Offline: Load from cache directly
+        loadCachedConsultants(specialization)
+      }
     }
+  }
+
+  private suspend fun loadFromAPI(page: Int, specialization: String?) {
+    counselingRepository.getCounselors(
+      page = page,
+      specialization = specialization
+    ).fold(
+      onSuccess = { response ->
+        _uiState.value = _uiState.value.copy(
+          consultants = response.data,
+          pagination = response.pagination,
+          selectedSpecialization = specialization,
+          isLoading = false,
+          lastRefresh = System.currentTimeMillis(),
+          isFromCache = false,
+          isOffline = false
+        )
+      },
+      onFailure = { exception ->
+        // API failed, try cache fallback
+        loadCachedConsultants(specialization)
+      }
+    )
   }
   
   private fun loadCachedConsultants(specialization: String?) {
@@ -99,26 +108,37 @@ class CounselingViewModel @Inject constructor(
             _uiState.value = _uiState.value.copy(
               consultants = cachedConsultants,
               isLoading = false,
-              isOffline = true,
+              isOffline = !networkUtil.isOnline(),
               isFromCache = true,
               error = null
             )
           } else {
             _uiState.value = _uiState.value.copy(
-              error = "No internet connection and no cached data available",
+              error = if (networkUtil.isOnline()) 
+                "No counselors available" 
+              else "No internet connection and no cached data available",
               isLoading = false,
-              isOffline = true
+              isOffline = !networkUtil.isOnline()
             )
           }
         }
       } catch (e: Exception) {
         _uiState.value = _uiState.value.copy(
-          error = "Failed to load cached data",
+          error = "Failed to load counselors: ${e.message}",
           isLoading = false,
-          isOffline = true
+          isOffline = !networkUtil.isOnline()
         )
       }
     }
+  }
+
+  // Pull to refresh method
+  fun refreshCounselors() {
+    val currentState = _uiState.value
+    loadCounselors(
+      page = 1,
+      specialization = currentState.selectedSpecialization
+    )
   }
   
   private fun isDataFromCache(response: ConsultantResponse): Boolean {
@@ -135,10 +155,14 @@ class CounselingViewModel @Inject constructor(
     
     // Filter berdasarkan specialization yang sesuai dengan category
     val specialization = when (category.id) {
-      "1" -> "career-counseling"
-      "2" -> "clinical-psychology"
-      "3" -> "relationship-therapy"
-      "4" -> "psychiatry"
+      "1" -> "ui-ux-design"
+      "2" -> "web-development"
+      "3" -> "digital-marketing"
+      "4" -> "mobile-development"
+      "5" -> "data-science"
+      "6" -> "business-strategy"
+      "7" -> "career-transition"
+      "8" -> "product-management"
       else -> null
     }
     

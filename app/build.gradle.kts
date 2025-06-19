@@ -10,6 +10,11 @@ hilt {
     enableAggregatingTask = false
 }
 
+kapt {
+    correctErrorTypes = true
+    useBuildCache = true
+}
+
 android {
     namespace = "com.application.elevate"
     compileSdk = 35
@@ -46,7 +51,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        kotlinCompilerExtensionVersion = "1.5.8"
     }
     packaging {
         resources {
@@ -62,18 +67,13 @@ android {
     }
 }
 
-// KAPT configuration
-kapt {
-    correctErrorTypes = true
-    useBuildCache = true
-}
-
-// Fix JavaPoet version conflicts
+// Fix JavaPoet version conflicts with better resolution strategy
 configurations.all {
     resolutionStrategy {
         force("com.squareup:javapoet:1.13.0")
         force("com.google.dagger:hilt-android:2.47")
         force("com.google.dagger:hilt-compiler:2.47")
+        // Force consistent Kotlin version
     }
 }
 

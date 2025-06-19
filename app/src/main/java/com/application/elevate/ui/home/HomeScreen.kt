@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import com.application.elevate.data.dummy.ProfileDummyData.categories
-import com.application.elevate.data.dummy.ProfileDummyData.dummyCourses
+
 import com.application.elevate.data.dummy.ProfileDummyData.growthHubItems
 import com.application.elevate.model.User
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -83,7 +83,7 @@ fun HomeScreen(
                     user = user,
                     onNotificationClick = { navController.navigate("notification")},
                     onSearchClick = {Log.d("HeaderCard", "Search clicked")
-                        navController.navigate("search")  },
+                        navController.navigate("advanced_search")  },
                     onSearchBarPositioned = { position, size ->
                         searchBarPosition = position
                         searchBarSize = size
@@ -171,7 +171,7 @@ fun HomeScreen(
 
                         SectionHeader(title = "Popular Courses", onViewAllClick = {})
                         LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            items(dummyCourses) { course -> 
+                            items(uiState.popularCourses) { course -> 
                                 CourseCard(
                                     course = course,
                                     onClick = { selectedCourse ->

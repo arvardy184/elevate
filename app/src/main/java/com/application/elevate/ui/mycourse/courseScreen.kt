@@ -38,7 +38,6 @@ import com.application.elevate.ui.component.Navbar
 import com.application.elevate.ui.component.SavedCourseItem
 import com.application.elevate.ui.component.SectionHeader
 import com.application.elevate.data.dummy.ProfileDummyData
-import com.application.elevate.data.dummy.ProfileDummyData.dummyCourses
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -208,7 +207,7 @@ fun CourseScreen(navController: NavController = rememberNavController()) {
                         isViewAll.value = !isViewAll.value
                     })
 
-                    val coursesToShow = if (isViewAll.value) dummyCourses else dummyCourses.take(3)
+                    val coursesToShow = if (isViewAll.value) ProfileDummyData.dummyCourses else ProfileDummyData.dummyCourses.take(3)
 
                     coursesToShow.forEach { course ->
                         SavedCourseItem(
