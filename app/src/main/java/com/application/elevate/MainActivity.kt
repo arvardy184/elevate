@@ -42,7 +42,6 @@ import com.application.elevate.ui.mycourse.CourseScreen
 import com.application.elevate.ui.auth.SignUpPage
 import com.application.elevate.viewmodel.cvreview.CVReviewListViewModel
 import com.application.elevate.viewmodel.cvreview.CVReviewDetailViewModel
-import com.application.elevate.ui.home.SearchScreen
 import com.application.elevate.ui.search.AdvancedSearchScreen
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.application.elevate.ui.counseling.CounselingDetailScreen
@@ -133,7 +132,17 @@ fun AppNavigation() {
             val viewModel: CVReviewViewModel = hiltViewModel()
             CVReviewScreen(navController, viewModel)
         }
-        composable("search") { SearchScreen(onBackClick = { navController.popBackStack() }) }
+        composable("search") { 
+            AdvancedSearchScreen(
+                onBackClick = { navController.popBackStack() },
+                onCourseClick = { course -> 
+                    navController.navigate("course_detail/${course.id}")
+                },
+                onConsultantClick = { consultant ->
+                    navController.navigate("counseling_detail/${consultant.id}")
+                }
+            ) 
+        }
         composable("advanced_search") { 
             AdvancedSearchScreen(
                 onBackClick = { navController.popBackStack() },

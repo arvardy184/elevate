@@ -77,17 +77,16 @@ class SearchRepositoryImpl @Inject constructor(
           android.util.Log.w("SearchRepository", "No courses found in response!")
         }
         
-        // Cache search results
-        val courseEntities = response.courses.map { course ->
-          val categoryName = course.category?.name ?: "Unknown"
-          CourseMapper.toEntity(course, categoryName)
-        }
-        courseDao.insertCourses(courseEntities)
-        response.courses
+        // Skip caching for now - just return API results
+        android.util.Log.d("SearchRepository", "Returning ${response.courses.size} courses from API (no caching)")
+        return response.courses
       }
     } catch (e: Exception) {
       // Network error - fallback to local search
-      searchCoursesLocally(query)
+      android.util.Log.e("SearchRepository", "API search failed, falling back to local search", e)
+      val localResults = searchCoursesLocally(query)
+      android.util.Log.d("SearchRepository", "Local search returned ${localResults.size} courses")
+      localResults
     }
   }
 

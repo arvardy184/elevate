@@ -152,9 +152,24 @@ fun AdvancedSearchScreen(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
+        // Debug logging for UI state
+        LaunchedEffect(uiState.searchResults) {
+            android.util.Log.d("AdvancedSearchScreen", "UI State Update:")
+            android.util.Log.d("AdvancedSearchScreen", "- searchResults: ${uiState.searchResults}")
+            android.util.Log.d("AdvancedSearchScreen", "- hasSearched: ${uiState.hasSearched}")
+            android.util.Log.d("AdvancedSearchScreen", "- isLoading: ${uiState.isLoading}")
+            uiState.searchResults?.let { results ->
+                android.util.Log.d("AdvancedSearchScreen", "- totalResults: ${results.totalResults}")
+                android.util.Log.d("AdvancedSearchScreen", "- courses count: ${results.courses.size}")
+                android.util.Log.d("AdvancedSearchScreen", "- consultants count: ${results.consultants.size}")
+                android.util.Log.d("AdvancedSearchScreen", "- query: ${results.query}")
+            }
+        }
+
         // Search Results
         LazyColumn {
             uiState.searchResults?.let { results ->
+                android.util.Log.d("AdvancedSearchScreen", "Rendering search results: ${results.totalResults} total")
                 if (results.totalResults > 0) {
                     item {
                         Text(

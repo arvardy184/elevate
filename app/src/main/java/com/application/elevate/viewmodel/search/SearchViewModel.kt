@@ -87,6 +87,9 @@ class SearchViewModel @Inject constructor(
     
     searchJob?.cancel()
     searchJob = viewModelScope.launch {
+      android.util.Log.d("SearchViewModel", "Starting search for query: $query")
+      android.util.Log.d("SearchViewModel", "Selected content type: ${_uiState.value.selectedContentType}")
+      
       _uiState.value = _uiState.value.copy(
         isLoading = true,
         error = null
@@ -105,21 +108,40 @@ class SearchViewModel @Inject constructor(
           else -> searchRepository.searchConsultants(query)
         }
         
+        android.util.Log.d("SearchViewModel", "Search completed:")
+        android.util.Log.d("SearchViewModel", "- Courses found: ${courses.size}")
+        android.util.Log.d("SearchViewModel", "- Consultants found: ${consultants.size}")
+        android.util.Log.d("SearchViewModel", "- Total results: ${courses.size + consultants.size}")
+        
+        if (courses.isNotEmpty()) {
+          courses.forEach { course ->
+            android.util.Log.d("SearchViewModel", "  * Course: ${course.title} (ID: ${course.id})")
+          }
+        }
+        
+        val searchResults = SearchResults(
+          query = query,
+          courses = courses,
+          consultants = consultants,
+          totalResults = courses.size + consultants.size
+        )
+        
+        android.util.Log.d("SearchViewModel", "Updating UI state with searchResults: ${searchResults.totalResults} total")
+        
         _uiState.value = _uiState.value.copy(
-          searchResults = SearchResults(
-            query = query,
-            courses = courses,
-            consultants = consultants,
-            totalResults = courses.size + consultants.size
-          ),
+          searchResults = searchResults,
           isLoading = false,
           hasSearched = true
         )
+        
+        android.util.Log.d("SearchViewModel", "UI state updated. Current hasSearched: ${_uiState.value.hasSearched}")
+        android.util.Log.d("SearchViewModel", "Current searchResults total: ${_uiState.value.searchResults?.totalResults}")
         
         // Track search history
         searchRepository.addSearchHistory(query, _uiState.value.selectedContentType)
         
       } catch (e: Exception) {
+        android.util.Log.e("SearchViewModel", "Search failed", e)
         _uiState.value = _uiState.value.copy(
           error = "Search failed: ${e.message}",
           isLoading = false

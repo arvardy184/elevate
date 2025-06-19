@@ -18,6 +18,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.application.elevate.model.Course
 import com.application.elevate.R
+import coil.compose.AsyncImage
 
 
 @Composable
@@ -38,23 +39,64 @@ fun CourseCard(
                 .background(MaterialTheme.colorScheme.background)
         ) {
 
-            // Course Image
-            Image(
-                painter = painterResource(id = course.imageRes),
-                contentDescription = course.title,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(140.dp)
-                    .clip(
-                        RoundedCornerShape(
-                            topStart = 16.dp,
-                            topEnd = 16.dp,
-                            bottomStart = 0.dp,
-                            bottomEnd = 0.dp
+            // Course Image - Handle both URL and resource
+            if (!course.thumbnail.isNullOrBlank()) {
+                // Use URL from API
+                AsyncImage(
+                    model = course.thumbnail,
+                    contentDescription = course.title,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(140.dp)
+                        .clip(
+                            RoundedCornerShape(
+                                topStart = 16.dp,
+                                topEnd = 16.dp,
+                                bottomStart = 0.dp,
+                                bottomEnd = 0.dp
+                            )
+                        ),
+                    placeholder = painterResource(id = R.drawable.ic_loading_background),
+                    error = painterResource(id = R.drawable.ic_loading_background)
+                )
+            } else if (course.imageRes != 0) {
+                // Use local drawable resource
+                Image(
+                    painter = painterResource(id = course.imageRes),
+                    contentDescription = course.title,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(140.dp)
+                        .clip(
+                            RoundedCornerShape(
+                                topStart = 16.dp,
+                                topEnd = 16.dp,
+                                bottomStart = 0.dp,
+                                bottomEnd = 0.dp
+                            )
                         )
-                    )
-            )
+                )
+            } else {
+                // Fallback placeholder
+                Image(
+                    painter = painterResource(id = R.drawable.ic_loading_background),
+                    contentDescription = course.title,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(140.dp)
+                        .clip(
+                            RoundedCornerShape(
+                                topStart = 16.dp,
+                                topEnd = 16.dp,
+                                bottomStart = 0.dp,
+                                bottomEnd = 0.dp
+                            )
+                        )
+                )
+            }
 
             // Detail
             Column(modifier = Modifier.padding(12.dp)) {
