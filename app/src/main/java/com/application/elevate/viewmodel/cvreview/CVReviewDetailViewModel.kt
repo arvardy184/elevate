@@ -69,6 +69,7 @@ class CVReviewDetailViewModel @Inject constructor(
           loadFromLocal(reviewId)
         }
     } catch (e: Exception) {
+        if (e is kotlinx.coroutines.CancellationException) throw e
       Log.e("CVReviewDetailVM", "Error getting token", e)
       // Fallback ke local data
       loadFromLocal(reviewId)
@@ -98,6 +99,7 @@ class CVReviewDetailViewModel @Inject constructor(
         )
       }
     } catch (e: Exception) {
+        if (e is kotlinx.coroutines.CancellationException) throw e
       Log.e("CVReviewDetailVM", "Failed to load from local database", e)
       _uiState.value = _uiState.value.copy(
         isLoading = false,
@@ -145,6 +147,7 @@ class CVReviewDetailViewModel @Inject constructor(
             )
           }
       } catch (e: Exception) {
+          if (e is kotlinx.coroutines.CancellationException) throw e
         Log.e("CVReviewDetailVM", "Error updating career field", e)
         _uiState.value = _uiState.value.copy(
           isUpdating = false,
@@ -170,4 +173,4 @@ data class CVReviewDetailUiState(
   val error: String? = null,
   val successMessage: String? = null,
   val isOffline: Boolean = false
-) 
+)

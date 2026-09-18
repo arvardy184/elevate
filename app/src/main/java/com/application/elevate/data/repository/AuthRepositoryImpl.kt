@@ -20,13 +20,8 @@ class AuthRepositoryImpl @Inject constructor(
     
     override suspend fun login(request: UserRequest): Flow<Result<UserResponse>> = flow {
         try {
-            Log.d(TAG, "Login attempt with email: ${request.email}")
             val response = api.login(request)
-            Log.d(TAG, "Login success: $response")
-            if (response.user != null) {
-                Log.d(TAG, "User data from API: ${response.user}")
-                Log.d(TAG, "Assessment status from API: ${response.user.isAssessmentCompleted}")
-            } else {
+            if (response.user == null) {
                 Log.e(TAG, "User data is null in response")
             }
             emit(Result.success(response))
@@ -53,13 +48,8 @@ class AuthRepositoryImpl @Inject constructor(
 
     override suspend fun register(request: RegisterRequest): Flow<Result<UserResponse>> = flow {
         try {
-            Log.d(TAG, "Register attempt with email: ${request.email}")
             val response = api.register(request)
-            Log.d(TAG, "Register success: $response")
-            if (response.user != null) {
-                Log.d(TAG, "User data from API: ${response.user}")
-                Log.d(TAG, "User name: ${response.user.firstName} ${response.user.lastName}")
-            } else {
+            if (response.user == null) {
                 Log.e(TAG, "User data is null in response")
             }
             emit(Result.success(response))
@@ -87,14 +77,8 @@ class AuthRepositoryImpl @Inject constructor(
     override suspend fun submitAssessment(token: String, request: AssessmentRequest): Flow<Result<UserResponse>> = flow {
         try {
             val authToken = if (token.startsWith("Bearer ")) token else "Bearer $token"
-            Log.d(TAG, "Submitting assessment with token: $authToken")
-            Log.d(TAG, "Request body: $request")
             val response = api.submitAssessment(authToken, request)
-            Log.d(TAG, "Assessment response: $response")
-            if (response.user != null) {
-                Log.d(TAG, "User data after assessment: ${response.user}")
-                Log.d(TAG, "Assessment status: ${response.user.isAssessmentCompleted}")
-            } else {
+            if (response.user == null) {
                 Log.e(TAG, "User data is null in assessment response")
             }
             emit(Result.success(response))
@@ -106,7 +90,6 @@ class AuthRepositoryImpl @Inject constructor(
         when (e) {
             is HttpException -> {
                 Log.e(TAG, "HTTP error during assessment: ${e.code()}, message: ${e.message()}")
-                Log.e(TAG, "Error response body: ${e.response()?.errorBody()?.string()}")
                 emit(Result.failure(Exception("Server error: ${e.code()} - ${e.message()}")))
             }
             is IOException -> {

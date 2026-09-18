@@ -13,6 +13,19 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.application.elevate.data.repository.SampleCourseDetails
+import com.application.elevate.ui.component.UnavailableScreen
+import com.application.elevate.ui.jobmatching.JobMatchingScreen
+import com.application.elevate.ui.jobmatching.JobMatchingResultScreen
+import com.application.elevate.viewmodel.jobmatching.JobMatchingViewModel
+import com.application.elevate.ui.profile.NotificationScreen
+import com.application.elevate.ui.profile.YourActivityScreen
+import com.application.elevate.ui.profile.HelpCenterScreen
+import com.application.elevate.ui.roadmap.RoadmapScreen
+import com.application.elevate.viewmodel.roadmap.RoadmapViewModel
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -21,7 +34,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.application.elevate.ui.splashScreen.SplashScreen
 import androidx.navigation.navArgument
-import com.application.elevate.data.dummy.ProfileDummyData.dummyCourseDetails
 import com.application.elevate.ui.assessment.AssessmentCompletedScreen
 import com.application.elevate.ui.assessment.AssessmentScreen
 import com.google.accompanist.navigation.animation.AnimatedNavHost
@@ -49,11 +61,7 @@ import com.application.elevate.ui.counseling.CounselingDetailScreen
 import com.application.elevate.viewmodel.assessment.AssessmentViewModel
 import com.application.elevate.viewmodel.counseling.CounselingViewModel
 import com.application.elevate.viewmodel.home.HomeViewModel
-import com.application.elevate.ui.auth.LoginPage
 import com.application.elevate.ui.cvreview.CVReviewViewModel
-import com.application.elevate.ui.mycourse.CourseDetailScreen
-import com.application.elevate.ui.profile.EditProfileScreen
-import com.application.elevate.ui.profile.ProfileScreen
 import com.application.elevate.viewmodel.profile.ProfileViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -112,8 +120,14 @@ fun AppNavigation() {
             arguments = listOf(navArgument("courseId") { type = NavType.IntType })
         ) {
             val courseId = it.arguments?.getInt("courseId") ?: 1
-            val courseDetail = dummyCourseDetails.find { it.id == courseId.toString() }!!
-            CourseDetailScreen(courseDetail = courseDetail, onBackClick = { navController.popBackStack() })
+            val courseDetail = SampleCourseDetails.find(courseId)
+            if (courseDetail != null) {
+                CourseDetailScreen(courseDetail = courseDetail, onBackClick = { navController.popBackStack() })
+            } else {
+                UnavailableScreen("Detail kursus belum tersedia", "Silakan pilih kursus lain.") {
+                    navController.popBackStack()
+                }
+            }
         }
 
         composable("login_page") {
@@ -190,6 +204,37 @@ fun AppNavigation() {
         }
         composable("course") { CourseScreen(navController) }
 
+        composable("message") {
+            UnavailableScreen("Pesan", "Fitur pesan sedang dikembangkan.") { navController.popBackStack() }
+        }
+        composable("notification") {
+            UnavailableScreen("Notifikasi", "Pusat notifikasi belum tersedia.") { navController.popBackStack() }
+        }
+        composable("notifications") {
+            NotificationScreen(hiltViewModel<ProfileViewModel>()) { navController.popBackStack() }
+        }
+        composable("your_activity") {
+            YourActivityScreen(hiltViewModel<ProfileViewModel>()) { navController.popBackStack() }
+        }
+        composable("help_center") {
+            HelpCenterScreen(hiltViewModel<ProfileViewModel>()) { navController.popBackStack() }
+        }
+        composable("job_matching") { JobMatchingScreen(navController) }
+        composable("job_matching_result") { entry ->
+            val parentEntry = remember(entry) { navController.getBackStackEntry("job_matching") }
+            val viewModel: JobMatchingViewModel = hiltViewModel(parentEntry)
+            JobMatchingResultScreen(navController, viewModel)
+        }
+        composable("roadmap") {
+            val roadmapViewModel: RoadmapViewModel = viewModel()
+            val profileViewModel: ProfileViewModel = hiltViewModel()
+            val uiState by roadmapViewModel.uiState.collectAsStateWithLifecycle()
+            val user = profileViewModel.getUserData()
+            RoadmapScreen(uiState, user, navController) { course ->
+                navController.navigate("course_detail/${course.id}")
+            }
+        }
+
         composable("categories") {
             CategoryScreen(navController = navController)
         }
@@ -216,25 +261,6 @@ fun AppNavigation() {
         }
 
 
-//        composable("roadmap") {
-//            val viewModel: RoadmapViewModel = hiltViewModel()
-//            val profileViewModel: ProfileViewModel = hiltViewModel()
-//            val uiState by viewModel.uiState.collectAsState()
-//            val userData = profileViewModel.getUserData() ?: User(
-//                id = 0,
-//                firstName = "Guest",
-//                lastName = "User",
-//                role = "user"
-//            )
-//            RoadmapScreen(
-//                uiState = uiState,
-//                user = userData,
-//                navController = navController,
-//                onCourseClick = { course ->
-//                    navController.navigate("course_detail/${course.id}")
-//                }
-//            )
-//        }
 
     }
 }

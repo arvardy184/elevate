@@ -7,14 +7,12 @@ import com.application.elevate.data.repository.CVReviewRepository
 import com.application.elevate.data.repository.UserRepository
 import com.application.elevate.model.CVReviewData
 import com.application.elevate.util.NetworkUtil
-import com.application.elevate.data.database.entity.CVReviewEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.io.File
-import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -71,8 +69,8 @@ class CVReviewViewModel @Inject constructor(
         // Online: Upload langsung ke server
         uploadToServer(cvFile, careerField)
       } else {
-        // Offline: Save ke queue untuk upload nanti
-        saveToOfflineQueue(cvFile, careerField)
+        // Upload requires a network connection.
+        showOfflineUploadError()
       }
     }
   }
@@ -106,11 +104,10 @@ class CVReviewViewModel @Inject constructor(
         .onFailure { exception ->
           Log.e("CVReviewVM", "Upload failed", exception)
           
-          // Kalau network error, save ke offline queue
+          // No background uploader is configured; keep retry explicit.
           if (exception.message?.contains("network", true) == true || 
               exception.message?.contains("connection", true) == true) {
-            Log.d("CVReviewVM", "Network error detected, saving to offline queue...")
-            saveToOfflineQueue(cvFile, careerField)
+            showOfflineUploadError()
           } else {
             _uiState.value = _uiState.value.copy(
               isLoading = false,
@@ -119,6 +116,7 @@ class CVReviewViewModel @Inject constructor(
           }
         }
     } catch (e: Exception) {
+        if (e is kotlinx.coroutines.CancellationException) throw e
       Log.e("CVReviewVM", "Error getting token", e)
       _uiState.value = _uiState.value.copy(
         isLoading = false,
@@ -127,49 +125,13 @@ class CVReviewViewModel @Inject constructor(
     }
   }
   
-  private suspend fun saveToOfflineQueue(cvFile: File, careerField: String) {
-    try {
-      Log.d("CVReviewVM", "Saving CV to offline queue...")
-      
-      // Generate temporary ID
-      val tempId = UUID.randomUUID().toString()
-      
-      // Create entity untuk offline upload
-      val offlineEntity = CVReviewEntity(
-        id = tempId,
-        fileName = cvFile.name,
-        careerField = careerField,
-        uploadDate = System.currentTimeMillis(),
-        overallScore = 0f, // Will be filled after upload
-        technicalScore = 0f,
-        softSkillScore = 0f,
-        experienceScore = 0f,
-        aiAnalysis = "Pending upload...",
-        suggestions = "Will be available after upload",
-        status = "pending",
-        filePath = cvFile.absolutePath,
-        isOfflineUpload = true,
-        syncStatus = "pending_upload"
-      )
-      
-      // Save ke Room database
-      cvReviewRepository.saveCVReviewLocal(offlineEntity)
-      
-      Log.d("CVReviewVM", "CV saved to offline queue successfully")
-      _uiState.value = _uiState.value.copy(
-        isLoading = false,
-        isUploadSuccess = true,
-        isOffline = true,
-        offlineMessage = "CV disimpan offline. Akan diupload otomatis saat online."
-      )
-      
-    } catch (e: Exception) {
-      Log.e("CVReviewVM", "Failed to save offline", e)
-      _uiState.value = _uiState.value.copy(
-        isLoading = false,
-        error = "Gagal menyimpan CV offline: ${e.message}"
-      )
-    }
+  private fun showOfflineUploadError() {
+    _uiState.value = _uiState.value.copy(
+      isLoading = false,
+      isUploadSuccess = false,
+      isOffline = true,
+      error = "Upload CV membutuhkan koneksi internet. Silakan coba lagi saat online."
+    )
   }
 
   fun clearError() {
@@ -192,4 +154,4 @@ data class CVReviewUiState(
   val error: String? = null,
   val isOffline: Boolean = false,
   val offlineMessage: String? = null
-) 
+)

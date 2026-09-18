@@ -45,7 +45,14 @@ fun Navbar(
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-    Log.d("Navbar", "Current route: $currentRoute")
+    fun navigateTo(route: String) {
+        if (currentRoute != route) {
+            navController.navigate(route) {
+                popUpTo("home")
+                launchSingleTop = true
+            }
+        }
+    }
 
 
     val navItems = listOf(
@@ -91,17 +98,7 @@ fun Navbar(
                             .size(60.dp)
                             .padding(3.dp)
                             .clip(CircleShape)
-                            .clickable {
-                                if (currentRoute != item.route) {
-                                    navController.navigate(item.route) {
-                                        popUpTo(navController.graph.startDestinationId) {
-                                            saveState = true
-                                        }
-                                        launchSingleTop = true
-                                        restoreState = true
-                                    }
-                                }
-                            },
+                            .clickable { navigateTo(item.route) },
                         contentAlignment = Alignment.Center
                     ) {
                         Image(
@@ -121,7 +118,7 @@ fun Navbar(
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .clickable { navController.navigate(item.route) },
+                            .clickable { navigateTo(item.route) },
                         contentAlignment = Alignment.Center
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {

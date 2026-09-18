@@ -128,7 +128,7 @@ fun HomeScreen(
                                         navController.navigate("consultant")
                                     }
                                     if(item.title == "Job&skill"){
-                                        navController.navigate("jon&skill")
+                                        navController.navigate("job_matching")
                                     }
 
                                 }

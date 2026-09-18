@@ -81,6 +81,7 @@ class CVReviewListViewModel @Inject constructor(
           loadFromLocal()
         }
     } catch (e: Exception) {
+        if (e is kotlinx.coroutines.CancellationException) throw e
       Log.e("CVReviewListVM", "Error getting token", e)
       _uiState.value = _uiState.value.copy(
         isLoading = false,
@@ -109,6 +110,7 @@ class CVReviewListViewModel @Inject constructor(
         isOffline = true
       )
     } catch (e: Exception) {
+        if (e is kotlinx.coroutines.CancellationException) throw e
       Log.e("CVReviewListVM", "Failed to load from local database", e)
       _uiState.value = _uiState.value.copy(
         isLoading = false,
@@ -176,6 +178,7 @@ class CVReviewListViewModel @Inject constructor(
             )
           }
       } catch (e: Exception) {
+          if (e is kotlinx.coroutines.CancellationException) throw e
         Log.e("CVReviewListVM", "Error deleting CV review", e)
         _uiState.value = _uiState.value.copy(
           isLoading = false,
@@ -207,4 +210,4 @@ data class CVReviewListUiState(
   val error: String? = null,
   val successMessage: String? = null,
   val isOffline: Boolean = false
-) 
+)

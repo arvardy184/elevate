@@ -132,10 +132,8 @@ class AssessmentViewModel @Inject constructor(
                     mainGoal = uiState.value.goal
                 )
                 
-                Log.d(TAG, "Submitting assessment with request: $request")
                 repository.submitAssessment(token, request).collect { result ->
                     result.onSuccess { response ->
-                        Log.d(TAG, "Assessment submission successful: $response")
                         // Update status assessment di user
                         val user = userRepository.getUser()
                         user?.let { currentUser ->

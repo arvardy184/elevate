@@ -52,12 +52,9 @@ class ProfileViewModel @Inject constructor(
                 profileRepository.getProfile().collect { result ->
                     result.onSuccess { response ->
                         val user = response.user
-                        Log.d(TAG, "Data user dari API: $user")
-                        Log.d(TAG, "Nama depan: ${user.firstName}, Nama belakang: ${user.lastName}")
 
                         // Update user dengan mempertahankan status assessment dari DataStore
                         val updatedUser = user.copy(isAssessmentCompleted = currentAssessmentStatus)
-                        Log.d(TAG, "User setelah update dengan status assessment: $updatedUser")
 
                         // Update user di repository lokal
                         userRepository.updateUser(updatedUser)
@@ -116,14 +113,10 @@ class ProfileViewModel @Inject constructor(
                 try {
                     _uiState.update { it.copy(isLoading = true) }
 
-                    Log.d(TAG, "Mencoba update user: $updatedUser")
-                    Log.d(TAG, "Nama depan: ${updatedUser.firstName}, Nama belakang: ${updatedUser.lastName}")
 
                     profileRepository.updateProfile(updatedUser).collect { result ->
                         result.onSuccess { response ->
                             val user = response.user
-                            Log.d(TAG, "Response dari API: $response")
-                            Log.d(TAG, "Data user setelah update: $user")
 
                             // Update user di repository lokal
                             userRepository.updateUser(user)

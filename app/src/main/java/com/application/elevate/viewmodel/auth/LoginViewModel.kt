@@ -72,8 +72,6 @@ open class LoginViewModel @Inject constructor(
                             }
                         }
                         
-                        Log.d(TAG, "Data user setelah login: ${response.user}")
-                        Log.d(TAG, "Status assessment dari API: ${response.user.isAssessmentCompleted}")
                         
                         _uiState.update { 
                             it.copy(
@@ -147,4 +145,3 @@ open class LoginViewModel @Inject constructor(
         _navigationEvent.value = null
     }
 }
-

@@ -107,14 +107,12 @@ class ProfileRepositoryImpl @Inject constructor(
             val token = withContext(Dispatchers.IO) {
                 userRepository.getToken() ?: throw Exception("Token tidak ditemukan")
             }
-            Log.d(TAG, "Token yang digunakan: $token")
 
             val response = withTimeout(TIMEOUT_DURATION) {
                 withContext(Dispatchers.IO) {
                     api.getProfile(token)
                 }
             }
-            Log.d(TAG, "Berhasil mendapatkan data profil: $response")
             emit(Result.success(response))
         } catch (e: Exception) {
             Log.e(TAG, "Error saat mendapatkan profil: ${e.message}")
@@ -132,7 +130,6 @@ class ProfileRepositoryImpl @Inject constructor(
 
         while (retryCount < maxRetries) {
             try {
-                Log.d(TAG, "Mencoba update profil (percobaan ${retryCount + 1}): $user")
 
                 val token = userRepository.getToken() ?: throw Exception("Token tidak ditemukan")
 
@@ -151,7 +148,6 @@ class ProfileRepositoryImpl @Inject constructor(
                 val genderBody = createRequestBody(user.gender)
                 val birthDateBody = createRequestBody(user.birthDate)
 
-                Log.d(TAG, "Mengirim request dengan data: firstName=${user.firstName}, lastName=${user.lastName}, address=${user.address}, phoneNumber=${user.phoneNumber}, gender=${user.gender}, birthDate=${user.birthDate}")
 
                 val response = withContext(Dispatchers.IO) {
                     api.updateProfile(

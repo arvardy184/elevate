@@ -50,7 +50,8 @@ fun ProfileScreen(
         when (navigationEvent) {
             is NavigationEvent.NavigateToLogin -> {
                 navController.navigate("login_page") {
-                    popUpTo("profile") { inclusive = true }
+                    popUpTo(navController.graph.id) { inclusive = true }
+                    launchSingleTop = true
                 }
                 viewModel.onNavigationHandled()
             }

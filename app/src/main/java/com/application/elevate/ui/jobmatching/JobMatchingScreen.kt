@@ -48,7 +48,9 @@ fun JobMatchingScreen(
         if (uiState.isUploadSuccessful && uiState.jobMatchingResult != null) {
             navController.navigate("job_matching_result") {
                 popUpTo("job_matching") { inclusive = false }
+                launchSingleTop = true
             }
+            viewModel.consumeUploadSuccess()
         }
     }
 
@@ -93,7 +95,7 @@ fun JobMatchingScreen(
                     onDismiss = { viewModel.clearError() },
                     onLoginAgain = { 
                         viewModel.clearError()
-                        navController.navigate("auth") {
+                        navController.navigate("login_page") {
                             popUpTo(0) { inclusive = true }
                         }
                     }
@@ -433,4 +435,4 @@ private fun StandardErrorDialog(
             }
         }
     )
-} 
+}

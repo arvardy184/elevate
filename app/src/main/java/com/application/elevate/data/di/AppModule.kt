@@ -3,6 +3,8 @@ package com.application.elevate.data.di
 import android.content.Context
 import com.application.elevate.data.datastore.DataStoreManager
 import com.application.elevate.data.repository.UserRepository
+import com.application.elevate.data.repository.CVReviewCache
+import com.application.elevate.data.database.dao.CVReviewDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -22,9 +24,14 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideUserRepository(dataStoreManager: DataStoreManager): UserRepository {
-        return UserRepository(dataStoreManager)
+    fun provideUserRepository(dataStoreManager: DataStoreManager, cache: CVReviewCache): UserRepository {
+        return UserRepository(dataStoreManager, cache)
     }
+
+    @Provides
+    @Singleton
+    fun provideCVReviewCache(dao: CVReviewDao, manager: DataStoreManager): CVReviewCache =
+        CVReviewCache(dao, manager.dataStore)
 
     @Provides
     @Singleton
@@ -33,4 +40,4 @@ object AppModule {
     ): DataStoreManager {
         return DataStoreManager(context)
     }
-} 
+}

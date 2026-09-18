@@ -42,11 +42,7 @@ class AuthViewModel @Inject constructor(
                 
                 repository.login(UserRequest(email, password)).collect { result ->
                     result.onSuccess { response ->
-                        Log.d(TAG, "Login berhasil: $response")
                         if (response.user != null) {
-                            Log.d(TAG, "Data user dari API: ${response.user}")
-                            Log.d(TAG, "Nama depan: ${response.user.firstName}, Nama belakang: ${response.user.lastName}")
-                            Log.d(TAG, "Nama lengkap: ${response.user.fullName}")
                             
                             // Simpan token
                             userRepository.setToken(response.token)
@@ -125,7 +121,6 @@ class AuthViewModel @Inject constructor(
                     )
                 ).collect { result ->
                     result.onSuccess { response ->
-                        Log.d(TAG, "Registrasi berhasil: $response")
                         
                         // Bersihkan data user dan token yang mungkin tersimpan
                         userRepository.clearUser()

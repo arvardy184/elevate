@@ -1,3 +1,5 @@
+import java.net.URI
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
@@ -15,6 +17,15 @@ kapt {
     useBuildCache = true
 }
 
+val apiBaseUrl = providers.gradleProperty("ELEVATE_API_BASE_URL")
+    .orElse("https://test2.ciet.site/api/").get()
+val apiUri = URI(apiBaseUrl)
+require(apiUri.scheme == "https" && !apiUri.host.isNullOrBlank() &&
+    apiUri.rawUserInfo == null && apiUri.rawQuery == null && apiUri.rawFragment == null &&
+    apiBaseUrl.endsWith("/")) {
+    "ELEVATE_API_BASE_URL must be an HTTPS base URL ending in /, without credentials, query or fragment"
+}
+
 android {
     namespace = "com.application.elevate"
     compileSdk = 35
@@ -25,6 +36,7 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
+        buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
@@ -41,6 +53,7 @@ android {
         }
     }
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
@@ -49,6 +62,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.8"
@@ -78,6 +92,7 @@ configurations.all {
 }
 
 dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.3")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

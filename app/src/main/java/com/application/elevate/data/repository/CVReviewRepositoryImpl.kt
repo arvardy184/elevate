@@ -4,10 +4,11 @@ import android.util.Log
 import com.application.elevate.api.CVReviewApiService
 import com.application.elevate.model.CVReviewResponse
 import com.application.elevate.model.CVReviewListResponse
-import com.application.elevate.data.database.dao.CVReviewDao
 import com.application.elevate.data.database.entity.CVReviewEntity
 import com.application.elevate.data.mapper.toEntity
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.first
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -17,7 +18,7 @@ import javax.inject.Inject
 
 class CVReviewRepositoryImpl @Inject constructor(
   private val apiService: CVReviewApiService,
-  private val cvReviewDao: CVReviewDao
+  private val cache: CVReviewCache
 ) : CVReviewRepository {
 
   override suspend fun uploadCV(
@@ -27,7 +28,7 @@ class CVReviewRepositoryImpl @Inject constructor(
   ): Result<CVReviewResponse> {
     return try {
       Log.d("CVReviewRepo", "Uploading CV: ${cvFile.name}, Career Field: $careerField")
-      Log.d("CVReviewRepo", "Token format: ${token.take(20)}...") // Log first 20 chars for debugging
+      val session = cache.capture(token)
       
       // Prepare file part - pastikan nama file adalah cv.pdf dan field name adalah 'cv'
       val requestFile = cvFile.asRequestBody("application/pdf".toMediaTypeOrNull())
@@ -45,12 +46,13 @@ class CVReviewRepositoryImpl @Inject constructor(
 
       // Save to local database for offline access
       val entity = response.toEntity(cvFile.name, careerField)
-      cvReviewDao.insertCVReview(entity)
+      cache.access(session) { it.insertCVReview(entity) }
       
       Log.d("CVReviewRepo", "Upload successful: ${response.message}")
       Result.success(response)
       
     } catch (e: Exception) {
+        if (e is kotlinx.coroutines.CancellationException) throw e
       Log.e("CVReviewRepo", "Upload failed", e)
       Result.failure(e)
     }
@@ -64,19 +66,18 @@ class CVReviewRepositoryImpl @Inject constructor(
     return try {
       Log.d("CVReviewRepo", "Getting my CV reviews - page: $page, limit: $limit")
       
+      val session = cache.capture(token)
       val response = apiService.getMyCVReviews(token, page, limit)
       
       // Sync API data to Room for offline access
-      if (page == 1) { // Only clear and sync on first page
-        val entities = response.data.map { it.toEntity() }
-        cvReviewDao.insertAllCVReviews(entities)
-        Log.d("CVReviewRepo", "Synced ${entities.size} CV reviews to local database")
-      }
+      val entities = response.data.map { it.toEntity() }
+      cache.access(session) { it.insertAllCVReviews(entities) }
       
       Log.d("CVReviewRepo", "Get reviews successful: ${response.data.size} items")
       Result.success(response)
       
     } catch (e: Exception) {
+        if (e is kotlinx.coroutines.CancellationException) throw e
       Log.e("CVReviewRepo", "Get reviews failed", e)
       Result.failure(e)
     }
@@ -89,12 +90,15 @@ class CVReviewRepositoryImpl @Inject constructor(
     return try {
       Log.d("CVReviewRepo", "Getting CV review by ID: $id")
       
+      val session = cache.capture(token)
       val response = apiService.getCVReviewById(token, id)
+      cache.access(session) { /* Reject responses from a previous login. */ }
       
       Log.d("CVReviewRepo", "Get review by ID successful")
       Result.success(response)
       
     } catch (e: Exception) {
+        if (e is kotlinx.coroutines.CancellationException) throw e
       Log.e("CVReviewRepo", "Get review by ID failed", e)
       Result.failure(e)
     }
@@ -108,12 +112,17 @@ class CVReviewRepositoryImpl @Inject constructor(
     return try {
       Log.d("CVReviewRepo", "Updating CV review: $id with career field: $careerField")
       
+      val session = cache.capture(token)
       val response = apiService.updateCVReview(token, id, careerField)
+      cache.access(session) { dao ->
+        dao.getCVReviewById(id)?.let { dao.updateCVReview(it.copy(careerField = careerField)) }
+      }
       
       Log.d("CVReviewRepo", "Update successful: ${response.message}")
       Result.success(response)
       
     } catch (e: Exception) {
+        if (e is kotlinx.coroutines.CancellationException) throw e
       Log.e("CVReviewRepo", "Update failed", e)
       Result.failure(e)
     }
@@ -126,15 +135,17 @@ class CVReviewRepositoryImpl @Inject constructor(
     return try {
       Log.d("CVReviewRepo", "Deleting CV review: $id")
       
+      val session = cache.capture(token)
       val response = apiService.deleteCVReview(token, id)
       
       // Also delete from local database
-      cvReviewDao.deleteCVReviewById(id)
+      cache.access(session) { it.deleteCVReviewById(id) }
       
       Log.d("CVReviewRepo", "Delete successful: ${response.message}")
       Result.success(response)
       
     } catch (e: Exception) {
+        if (e is kotlinx.coroutines.CancellationException) throw e
       Log.e("CVReviewRepo", "Delete failed", e)
       Result.failure(e)
     }
@@ -142,18 +153,24 @@ class CVReviewRepositoryImpl @Inject constructor(
   
   // Offline support methods
   override fun getAllCVReviewsLocal(): Flow<List<CVReviewEntity>> {
-    return cvReviewDao.getAllCVReviews()
+    return flow {
+      val session = cache.capture()
+      emit(cache.access(session) { it.getAllCVReviews().first() })
+    }
   }
   
   override suspend fun getCVReviewByIdLocal(id: String): CVReviewEntity? {
-    return cvReviewDao.getCVReviewById(id)
+    val session = cache.capture()
+    return cache.access(session) { it.getCVReviewById(id) }
   }
   
   override suspend fun saveCVReviewLocal(entity: CVReviewEntity) {
-    cvReviewDao.insertCVReview(entity)
+    val session = cache.capture()
+    cache.access(session) { it.insertCVReview(entity) }
   }
   
   override suspend fun deleteCVReviewLocal(id: String) {
-    cvReviewDao.deleteCVReviewById(id)
+    val session = cache.capture()
+    cache.access(session) { it.deleteCVReviewById(id) }
   }
-} 
+}

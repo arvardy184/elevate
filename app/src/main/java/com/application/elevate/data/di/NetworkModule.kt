@@ -2,6 +2,7 @@ package com.application.elevate.di
 
 import android.content.Context
 import android.util.Log
+import com.application.elevate.BuildConfig
 import com.application.elevate.api.CVReviewApiService
 import com.application.elevate.data.api.AuthApiService
 import com.application.elevate.data.api.CounselingApiService
@@ -16,14 +17,12 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Qualifier
 import javax.inject.Singleton
 import com.application.elevate.data.api.ProfileApiService
-import com.application.elevate.data.database.dao.CVReviewDao
 import com.application.elevate.data.database.dao.ConsultantDao
 import com.application.elevate.data.database.dao.CounselingCategoryDao
 import com.application.elevate.data.database.dao.SearchHistoryDao
@@ -47,17 +46,7 @@ object NetworkModule {
     private const val TAG = "API_LOG"
     
     @Provides
-    fun provideBaseUrl() = "http://test2.ciet.site/api/"
-
-    @Provides
-    @Singleton
-    fun provideLoggingInterceptor() = HttpLoggingInterceptor { message ->
-        if (!message.contains("") && !message.contains("\\u0000")) {
-            Log.d(TAG, "API Response: $message")
-        }
-    }.apply {
-        level = HttpLoggingInterceptor.Level.HEADERS
-    }
+    fun provideBaseUrl() = BuildConfig.API_BASE_URL
 
     @Provides
     @Singleton
@@ -69,28 +58,15 @@ object NetworkModule {
     
     @Provides
     @Singleton
-    fun provideOkHttpClient(loggingInterceptor: HttpLoggingInterceptor): OkHttpClient {
+    fun provideOkHttpClient(): OkHttpClient {
         return OkHttpClient.Builder()
-            .addInterceptor(loggingInterceptor)
             .addInterceptor { chain ->
                 val request = chain.request()
-                val startTime = System.nanoTime()
-                
-                Log.d(TAG, "Sending ${request.method} request to: ${request.url}")
-                request.body?.contentType()?.let {
-                    Log.d(TAG, "Content-Type: $it")
+                val response = chain.proceed(request)
+                if (BuildConfig.DEBUG) {
+                    // Do not log URLs, headers, bodies, or backend error messages.
+                    Log.d(TAG, "HTTP ${request.method}: ${response.code}")
                 }
-                
-                val response = try {
-                    chain.proceed(request)
-                } catch (e: Exception) {
-                    Log.e(TAG, "Request failed: ${e.message}")
-                    throw e
-                }
-                
-                val duration = (System.nanoTime() - startTime) / 1_000_000 // Convert to milliseconds
-                Log.d(TAG, "Response ${response.code} received in ${duration}ms")
-                
                 response
             }
             .connectTimeout(60, TimeUnit.SECONDS)
@@ -114,7 +90,7 @@ object NetworkModule {
     @Singleton
     fun provideProdRetrofit(okHttpClient: OkHttpClient, gson: Gson): Retrofit =
         Retrofit.Builder()
-            .baseUrl("http://test2.ciet.site/api/")
+            .baseUrl(BuildConfig.API_BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
@@ -124,7 +100,7 @@ object NetworkModule {
     @Singleton
     fun provideCvReviewRetrofit(okHttpClient: OkHttpClient, gson: Gson): Retrofit =
         Retrofit.Builder()
-            .baseUrl("http://test2.ciet.site/api/")
+            .baseUrl(BuildConfig.API_BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
@@ -168,9 +144,9 @@ object NetworkModule {
     @Singleton
     fun provideCVReviewRepository(
         api: CVReviewApiService,
-        dao: CVReviewDao
+        cache: CVReviewCache
     ): CVReviewRepository =
-        CVReviewRepositoryImpl(api, dao)
+        CVReviewRepositoryImpl(api, cache)
 
     @Provides
     @Singleton
@@ -225,4 +201,4 @@ object NetworkModule {
             searchHistoryDao = searchHistoryDao,
             counselingRepository = counselingRepository
         )
-} 
+}

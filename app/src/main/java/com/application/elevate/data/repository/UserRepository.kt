@@ -22,7 +22,8 @@ import kotlinx.coroutines.delay
 
 @Singleton
 class UserRepository @Inject constructor(
-    private val dataStoreManager: DataStoreManager
+    private val dataStoreManager: DataStoreManager,
+    private val cvReviewCache: CVReviewCache
 ) {
     private val TAG = "UserRepository"
     
@@ -57,8 +58,8 @@ class UserRepository @Inject constructor(
                     isAssessmentCompleted = preferences[USER_IS_ASSESSMENT_COMPLETED_KEY] ?: false
                 )
                 _userFlow.value = user
-                Log.d(TAG, "Data user berhasil dimuat dari DataStore: $user")
             } catch (e: Exception) {
+                if (e is kotlinx.coroutines.CancellationException) throw e
                 Log.e(TAG, "Error loading user from DataStore: ${e.message}")
             }
         }
@@ -91,12 +92,15 @@ class UserRepository @Inject constructor(
             }
             
             Log.d(TAG, "Menyimpan token dan mengaktifkan remember me")
-            dataStoreManager.dataStore.edit { preferences ->
-                preferences[TOKEN_KEY] = formattedToken
-                preferences[REMEMBER_ME_KEY] = true
+            cvReviewCache.changeSession {
+                dataStoreManager.dataStore.edit { preferences ->
+                    preferences[TOKEN_KEY] = formattedToken
+                    preferences[REMEMBER_ME_KEY] = true
+                }
             }
             Log.d(TAG, "Token autentikasi berhasil disimpan untuk remember me")
         } catch (e: Exception) {
+            if (e is kotlinx.coroutines.CancellationException) throw e
             Log.e(TAG, "Gagal menyimpan token autentikasi: ${e.message}")
             throw Exception("Gagal menyimpan token: ${e.message}")
         }
@@ -110,6 +114,7 @@ class UserRepository @Inject constructor(
             }
             Log.d(TAG, "Status remember me berhasil diatur: $remember")
         } catch (e: Exception) {
+            if (e is kotlinx.coroutines.CancellationException) throw e
             Log.e(TAG, "Gagal mengatur status remember me: ${e.message}")
             throw Exception("Gagal mengatur remember me: ${e.message}")
         }
@@ -135,6 +140,7 @@ class UserRepository @Inject constructor(
                     return null
                 }
             } catch (e: Exception) {
+                if (e is kotlinx.coroutines.CancellationException) throw e
                 lastError = e
                 Log.e(TAG, "Gagal mendapatkan token autentikasi: ${e.message}")
                 
@@ -167,7 +173,6 @@ class UserRepository @Inject constructor(
             
             // Validasi format token JWT
             if (!cleanToken.matches(Regex("^[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.?[A-Za-z0-9-_.+/=]*$"))) {
-                Log.e(TAG, "Format token JWT tidak valid: $cleanToken")
                 return false
             }
 
@@ -194,6 +199,7 @@ class UserRepository @Inject constructor(
             Log.d(TAG, "Token JWT valid untuk remember me")
             true
         } catch (e: Exception) {
+            if (e is kotlinx.coroutines.CancellationException) throw e
             Log.e(TAG, "Error saat validasi token JWT: ${e.message}")
             false
         }
@@ -229,6 +235,7 @@ class UserRepository @Inject constructor(
                     }
                     return true
                 } catch (e: Exception) {
+                    if (e is kotlinx.coroutines.CancellationException) throw e
                     Log.e(TAG, "Gagal sinkronisasi data: ${e.message}")
                     return true
                 }
@@ -237,6 +244,7 @@ class UserRepository @Inject constructor(
             Log.d(TAG, "Token remember me tidak valid")
             return false
         } catch (e: Exception) {
+            if (e is kotlinx.coroutines.CancellationException) throw e
             Log.e(TAG, "Error saat mengecek status login dengan token remember me: ${e.message}")
             return false
         }
@@ -267,18 +275,17 @@ class UserRepository @Inject constructor(
                 _userFlow.value = user
                 
                 Log.d(TAG, "Data user berhasil disinkronkan dari server")
-                Log.d(TAG, "Status assessment terbaru: ${user.isAssessmentCompleted}")
             } else {
                 Log.e(TAG, "Data user tidak ditemukan di server")
             }
         } catch (e: Exception) {
+            if (e is kotlinx.coroutines.CancellationException) throw e
             Log.e(TAG, "Error saat sinkronisasi data user: ${e.message}")
             throw e
         }
     }
 
     suspend fun updateUser(user: User) {
-        Log.d(TAG, "Memperbarui data user: $user")
         Log.d(TAG, "Status assessment sebelum update: ${_userFlow.value?.isAssessmentCompleted}")
         
         // Ambil status assessment yang ada di DataStore
@@ -313,6 +320,7 @@ class UserRepository @Inject constructor(
             Log.d(TAG, "Data user berhasil disimpan ke DataStore")
             Log.d(TAG, "Status assessment setelah update di DataStore: $currentAssessmentStatus")
         } catch (e: Exception) {
+            if (e is kotlinx.coroutines.CancellationException) throw e
             Log.e(TAG, "Gagal menyimpan data user ke DataStore: ${e.message}")
         }
         
@@ -322,37 +330,32 @@ class UserRepository @Inject constructor(
     // Fungsi untuk update user secara synchronous
     fun updateUserSync(user: User) {
         _userFlow.value = user
-        Log.d(TAG, "Data user berhasil diupdate secara synchronous: $user")
     }
 
     fun getUser(): User? {
         val user = _userFlow.value
-        Log.d(TAG, "Mendapatkan data user: $user")
-        Log.d(TAG, "Nama depan: ${user?.firstName}, Nama belakang: ${user?.lastName}")
-        Log.d(TAG, "Nama lengkap: ${user?.fullName}")
-        Log.d(TAG, "Status assessment saat get user: ${user?.isAssessmentCompleted}")
         return user
     }
 
     suspend fun clearUser() {
         Log.d(TAG, "Membersihkan data user dan token remember me")
-        _userFlow.value = null
-        
-        dataStoreManager.dataStore.edit { prefs ->
-            // Hapus semua data termasuk token remember me
-            prefs.remove(TOKEN_KEY)
-            prefs.remove(REMEMBER_ME_KEY)
-            prefs.remove(USER_ID_KEY)
-            prefs.remove(USER_FIRST_NAME_KEY)
-            prefs.remove(USER_LAST_NAME_KEY)
-            prefs.remove(USER_EMAIL_KEY)
-            prefs.remove(USER_PHONE_KEY)
-            prefs.remove(USER_AVATAR_KEY)
-            prefs.remove(USER_BIRTH_DATE_KEY)
-            prefs.remove(USER_GENDER_KEY)
-            prefs.remove(USER_ADDRESS_KEY)
-            prefs.remove(USER_ROLE_KEY)
-            prefs.remove(USER_IS_ASSESSMENT_COMPLETED_KEY)
+        cvReviewCache.changeSession {
+            dataStoreManager.dataStore.edit { prefs ->
+                prefs.remove(TOKEN_KEY)
+                prefs.remove(REMEMBER_ME_KEY)
+                prefs.remove(USER_ID_KEY)
+                prefs.remove(USER_FIRST_NAME_KEY)
+                prefs.remove(USER_LAST_NAME_KEY)
+                prefs.remove(USER_EMAIL_KEY)
+                prefs.remove(USER_PHONE_KEY)
+                prefs.remove(USER_AVATAR_KEY)
+                prefs.remove(USER_BIRTH_DATE_KEY)
+                prefs.remove(USER_GENDER_KEY)
+                prefs.remove(USER_ADDRESS_KEY)
+                prefs.remove(USER_ROLE_KEY)
+                prefs.remove(USER_IS_ASSESSMENT_COMPLETED_KEY)
+            }
+            _userFlow.value = null
         }
         Log.d(TAG, "Data user dan token remember me berhasil dibersihkan")
     }
@@ -412,4 +415,4 @@ class UserRepository @Inject constructor(
         private val IS_FIRST_LAUNCH_KEY = booleanPreferencesKey("is_first_launch")
         private val SHOW_TUTORIAL_KEY = booleanPreferencesKey("show_tutorial")
     }
-} 
+}

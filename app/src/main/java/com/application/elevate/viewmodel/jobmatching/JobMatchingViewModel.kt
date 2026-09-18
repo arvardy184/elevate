@@ -112,6 +112,10 @@ class JobMatchingViewModel @Inject constructor(
         )
     }
 
+    fun consumeUploadSuccess() {
+        _uiState.value = _uiState.value.copy(isUploadSuccessful = false)
+    }
+
     fun resetState() {
         _uiState.value = JobMatchingUiState()
     }
@@ -190,4 +194,4 @@ class JobMatchingViewModel @Inject constructor(
                 errorType.message
         }
     }
-} 
+}
